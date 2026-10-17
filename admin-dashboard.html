@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Admin — Papua Future Project</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+          colors: {
+            primary: '#3770c1',
+            secondary: '#40b8fd',
+            darknavy: '#0c1527',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#f4f7fb] text-slate-800 font-sans antialiased">
+
+  <!-- TOP NAV BAR -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3">
+        <a href="admin-dashboard.html" class="flex items-center gap-2.5">
+          <img src="logo.png" alt="Papua Future Project" class="h-8 w-auto">
+          <div>
+            <span class="font-extrabold text-base text-slate-900 tracking-tight leading-none block">Papua Future Project</span>
+            <span class="text-[10px] font-bold text-[#3770c1] uppercase tracking-wider block mt-0.5">Admin Management Panel</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Center Links / Search -->
+      <div class="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold text-slate-600">
+        <button class="px-3 py-1.5 rounded-lg bg-white text-[#3770c1] shadow-sm">Ringkasan</button>
+        <button class="px-3 py-1.5 rounded-lg hover:text-slate-900">Relawan (148)</button>
+        <button class="px-3 py-1.5 rounded-lg hover:text-slate-900">Program & Modul</button>
+        <button class="px-3 py-1.5 rounded-lg hover:text-slate-900">Berita & Rilis</button>
+      </div>
+
+      <!-- User Profile & Actions -->
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-[#3770c1] hover:bg-blue-50 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></svg>
+          <span>Buka Website</span>
+        </a>
+
+        <!-- Admin Profile Pill -->
+        <div class="flex items-center gap-2 pl-3 border-l border-slate-200">
+          <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#3770c1] to-[#40b8fd] text-white flex items-center justify-center font-bold text-xs shadow-sm">
+            BJ
+          </div>
+          <div class="hidden sm:block text-left text-xs">
+            <div class="font-bold text-slate-800 leading-none">Bhrisco Jordy</div>
+            <div class="text-[10px] text-emerald-600 font-semibold mt-0.5">Super Administrator</div>
+          </div>
+          <a href="login.html" title="Keluar dari Panel Admin" class="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-colors ml-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- DASHBOARD MAIN CONTENT -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Greeting Banner -->
+    <div class="relative bg-gradient-to-r from-[#0c1527] via-[#1a2e4e] to-[#3770c1] rounded-3xl p-6 sm:p-8 text-white shadow-xl overflow-hidden">
+      <div class="absolute right-0 top-0 bottom-0 w-1/3 opacity-20 pointer-events-none">
+        <img src="herobanner.png" alt="Papua Future Project" class="w-full h-full object-cover">
+      </div>
+      <div class="relative z-10 max-w-2xl">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[#40b8fd] text-xs font-bold uppercase tracking-wider mb-3 border border-white/15">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Sistem Operasional Aktif
+        </span>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight mb-2">
+          Selamat Datang di Panel Dashboard Admin PFP
+        </h1>
+        <p class="text-white/80 text-sm leading-relaxed">
+          Pantau penyaluran bimbingan belajar, data relawan yang baru mendaftar, serta status 17 kampung binaan di Papua Barat.
+        </p>
+      </div>
+    </div>
+
+    <!-- METRICS GRID -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- Metric 1 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-blue-50 text-[#3770c1] flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div>
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Relawan Terdaftar</span>
+          <span class="text-2xl font-extrabold text-slate-900 block leading-tight">148 Orang</span>
+          <span class="text-[11px] font-semibold text-emerald-600">+12 relawan baru minggu ini</span>
+        </div>
+      </div>
+
+      <!-- Metric 2 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-cyan-50 text-[#40b8fd] flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/></svg>
+        </div>
+        <div>
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Kampung Binaan</span>
+          <span class="text-2xl font-extrabold text-slate-900 block leading-tight">17 Lokasi</span>
+          <span class="text-[11px] font-semibold text-blue-600">Mansinam, Mokwam, & Sorong</span>
+        </div>
+      </div>
+
+      <!-- Metric 3 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+        </div>
+        <div>
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Anak Penerima Manfaat</span>
+          <span class="text-2xl font-extrabold text-slate-900 block leading-tight">1.280+ Anak</span>
+          <span class="text-[11px] font-semibold text-amber-600">Literasi dasar & bimbingan belajar</span>
+        </div>
+      </div>
+
+      <!-- Metric 4 -->
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <div>
+          <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Modul Pembelajaran</span>
+          <span class="text-2xl font-extrabold text-slate-900 block leading-tight">34 Modul</span>
+          <span class="text-[11px] font-semibold text-emerald-600">Kurikulum Merdeka kontekstual</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE SECTION: PENDAFTAR RELAWAN TERBARU -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 tracking-tight">Permohonan Relawan Baru (Menunggu Seleksi)</h2>
+          <p class="text-xs text-slate-500 mt-0.5">Daftar pendaftar relawan terbaru yang masuk melalui formulir resmi.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors">Unduh Data (CSV)</button>
+          <a href="join.html" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-[#3770c1] hover:bg-[#28589c] text-white transition-colors">+ Form Publik</a>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-slate-600">
+          <thead class="bg-slate-50 text-slate-700 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200">
+            <tr>
+              <th class="py-3.5 px-6">Nama Relawan</th>
+              <th class="py-3.5 px-6">Domisili / Asal</th>
+              <th class="py-3.5 px-6">Peminatan Program</th>
+              <th class="py-3.5 px-6">Status Seleksi</th>
+              <th class="py-3.5 px-6 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50/70 transition-colors">
+              <td class="py-4 px-6 font-semibold text-slate-900 flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-xs">M</div>
+                <div>
+                  <div>Maria Rumabar</div>
+                  <div class="text-[11px] text-slate-400 font-normal">maria.rumabar@gmail.com</div>
+                </div>
+              </td>
+              <td class="py-4 px-6">Manokwari, Papua Barat</td>
+              <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold text-[11px]">Bimbingan Belajar Mansinam</span></td>
+              <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 font-semibold text-[11px] border border-amber-200">Menunggu Wawancara</span></td>
+              <td class="py-4 px-6 text-right space-x-2">
+                <button class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-semibold hover:bg-emerald-100">Setujui</button>
+                <button class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200">Detail</button>
+              </td>
+            </tr>
+
+            <tr class="hover:bg-slate-50/70 transition-colors">
+              <td class="py-4 px-6 font-semibold text-slate-900 flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center text-xs">A</div>
+                <div>
+                  <div>Andi Pratama</div>
+                  <div class="text-[11px] text-slate-400 font-normal">andi.pratama@univ.ac.id</div>
+                </div>
+              </td>
+              <td class="py-4 px-6">Jayapura, Papua</td>
+              <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-[11px]">Pojok Baca & Literasi</span></td>
+              <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-[11px] border border-emerald-200">Terverifikasi</span></td>
+              <td class="py-4 px-6 text-right space-x-2">
+                <button class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-semibold hover:bg-blue-100">Hubungi WA</button>
+                <button class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200">Detail</button>
+              </td>
+            </tr>
+
+            <tr class="hover:bg-slate-50/70 transition-colors">
+              <td class="py-4 px-6 font-semibold text-slate-900 flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-cyan-100 text-cyan-700 font-bold flex items-center justify-center text-xs">G</div>
+                <div>
+                  <div>Grace Mandowen</div>
+                  <div class="text-[11px] text-slate-400 font-normal">grace.mandowen@outlook.com</div>
+                </div>
+              </td>
+              <td class="py-4 px-6">Sorong, Papua Barat Daya</td>
+              <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full bg-cyan-50 text-cyan-700 font-semibold text-[11px]">Kesehatan & Gizi Anak</span></td>
+              <td class="py-4 px-6"><span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 font-semibold text-[11px] border border-amber-200">Menunggu Wawancara</span></td>
+              <td class="py-4 px-6 text-right space-x-2">
+                <button class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-semibold hover:bg-emerald-100">Setujui</button>
+                <button class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200">Detail</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+</body>
+</html>
