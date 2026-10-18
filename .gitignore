@@ -1,0 +1,15 @@
+.env
+/vendor/
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/applications/*
+!/storage/applications/.gitkeep
+/storage/cache/*
+!/storage/cache/.gitkeep
+/public/uploads/*
+!/public/uploads/.htaccess
+!/public/uploads/.gitkeep
+/node_modules/
+/.idea/
+/.vscode/
+*.log

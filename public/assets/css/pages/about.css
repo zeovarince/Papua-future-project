@@ -1,0 +1,278 @@
+html { scroll-behavior: smooth; }
+
+    /* ── HERO ── */
+    .hero-bg {
+      background: linear-gradient(180deg, rgba(15,23,42,0.45) 0%, rgba(15,23,42,0.85) 100%),
+                  url('/assets/img/hero/herobanner.png') center/cover no-repeat;
+    }
+    .wave-divider {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%;
+      overflow: hidden;
+      line-height: 0;
+      transform: translateY(1px);
+    }
+    .wave-divider svg { position: relative; display: block; width: calc(100% + 1.3px); height: 60px; }
+    .wave-divider .shape-fill { fill: #ffffff; }
+
+    /* ── STICKY NAVBAR ── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      z-index: 100;
+      padding: 16px 24px;
+      transition: background 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
+    }
+    .navbar.scrolled {
+      background: rgba(255,255,255,0.96);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+      padding: 10px 24px;
+    }
+    .navbar.scrolled .nav-inner {
+      background: transparent;
+      backdrop-filter: none;
+      border-color: transparent;
+      box-shadow: none;
+    }
+    .navbar.scrolled .nav-link { color: #1a1f2e; }
+    .navbar.scrolled .nav-link:hover { color: #40b8fd; }
+    .navbar.scrolled .nav-link.active { color: #3770c1; }
+    .navbar.scrolled .nav-brand { color: #1a1f2e; }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(12px);
+      padding: 10px 24px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .nav-link {
+      font-size: 14px; font-weight: 600; color: white;
+      text-decoration: none; transition: color 0.15s;
+      position: relative; padding-bottom: 2px;
+    }
+    .nav-link:hover { color: #40b8fd; }
+    .nav-link.active { color: #40b8fd; }
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0; right: 0;
+      height: 2px;
+      background: #40b8fd;
+      border-radius: 2px;
+    }
+    .navbar.scrolled .nav-link.active::after { background: #3770c1; }
+    .navbar.scrolled .nav-link.active { color: #3770c1; }
+
+    .nav-cta {
+      background: white; color: #3770c1; padding: 8px 22px; border-radius: 999px;
+      font-size: 14px; font-weight: 700; text-decoration: none;
+      transition: background 0.15s, color 0.15s; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .nav-cta:hover { background: #40b8fd; color: white; }
+    .navbar.scrolled .nav-cta { background: #3770c1; color: white; }
+    .navbar.scrolled .nav-cta:hover { background: #40b8fd; }
+
+    /* ── SHARED TOKENS ── */
+    .pfp-section        { padding: 80px 0; }
+    .pfp-section-alt    { background: #f0f7ff; }
+    .pfp-container      { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+    .pfp-tag            { display: inline-block; font-size: 12px; font-weight: 700;
+                          letter-spacing: .08em; color: #3770c1;
+                          text-transform: uppercase; margin-bottom: 12px; }
+    .pfp-divider        { width: 48px; height: 3px; background: #40b8fd;
+                          border-radius: 2px; margin: 14px 0 22px; }
+    .pfp-title          { font-size: 34px; font-weight: 800; line-height: 1.2;
+                          color: #1a1f2e; margin-bottom: 14px; }
+    .pfp-body           { font-size: 16px; color: #4b5563; line-height: 1.8; }
+
+    /* ── SECTION SEJARAH ── */
+    .history-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: start;
+      margin-bottom: 72px;
+    }
+
+    /* Timeline */
+    .timeline { position: relative; padding-left: 28px; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 5px; top: 8px; bottom: 8px;
+      width: 2px;
+      background: rgba(64,184,253,0.3);
+    }
+    .tl-item { position: relative; margin-bottom: 32px; }
+    .tl-item:last-child { margin-bottom: 0; }
+    .tl-dot {
+      position: absolute;
+      left: -28px; top: 4px;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: #40b8fd;
+      box-shadow: 0 0 0 4px rgba(64,184,253,0.2);
+    }
+    .tl-year {
+      font-size: 15px; font-weight: 700; color: #3770c1; margin-bottom: 4px;
+    }
+    .tl-text {
+      font-size: 14px; color: #6b7280; line-height: 1.6;
+    }
+
+    /* ── MASONRY FOTO ── */
+    .masonry-grid {
+      column-count: 3;
+      column-gap: 12px;
+    }
+    .masonry-item {
+      break-inside: avoid;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+    .masonry-photo {
+      display: block;
+      width: 100%;
+    }
+    .masonry-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.25s ease;
+    }
+    .masonry-overlay-icon {
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      color: white;
+    }
+    .masonry-item:hover .masonry-overlay { background: rgba(0,0,0,0.30); }
+    .masonry-item:hover .masonry-overlay-icon { opacity: 1; }
+    .masonry-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(26,34,51,0.75);
+      color: white;
+      font-size: 12px;
+      padding: 8px 12px;
+      font-weight: 500;
+    }
+
+    /* ── VISI MISI CARDS ── */
+    .visimisi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .visi-card {
+      background: #3770c1;
+      border-radius: 20px;
+      padding: 40px;
+    }
+    .misi-card {
+      background: white;
+      border: 2px solid #40b8fd;
+      border-radius: 20px;
+      padding: 40px;
+    }
+    .misi-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .misi-item:last-child { margin-bottom: 0; }
+    .misi-check {
+      width: 22px; height: 22px; flex-shrink: 0;
+      background: rgba(64,184,253,0.15);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .misi-check svg { width: 12px; height: 12px; color: #40b8fd; }
+    .misi-item p { font-size: 14px; color: #1a1f2e; line-height: 1.6; }
+
+    /* ── TIM CARDS ── */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-top: 40px;
+    }
+    .team-card {
+      background: white;
+      border: 1px solid #e2eaf6;
+      border-radius: 20px;
+      padding: 32px;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .team-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(55,112,193,0.10);
+    }
+    .team-avatar {
+      width: 112px; height: 112px;
+      border-radius: 50%;
+      border: 3px solid #40b8fd;
+      background: linear-gradient(135deg, #40b8fd, #3770c1);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      overflow: hidden;
+    }
+    .team-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+    .team-avatar-initial {
+      font-size: 22px; font-weight: 700; color: white;
+    }
+    .team-name { font-size: 16px; font-weight: 700; color: #1a1f2e; margin-bottom: 8px; }
+    .team-role {
+      display: inline-block;
+      background: #f0f7ff;
+      color: #3770c1;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 999px;
+      padding: 4px 14px;
+      margin-bottom: 12px;
+    }
+    .team-desc { font-size: 13px; color: #6b7280; line-height: 1.6; }
+
+    /* ── FOOTER WAVE ── */
+    .footer-wave {
+      position: relative;
+      overflow: hidden;
+      line-height: 0;
+      margin-bottom: -2px;
+      background: #ffffff;
+    }
+    .footer-wave svg { display: block; width: 100%; height: 120px; }
+    .shape-fill-dark { fill: #111827; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .pfp-container  { padding: 0 24px; }
+      .pfp-section    { padding: 56px 0; }
+      .history-grid   { grid-template-columns: 1fr; gap: 40px; }
+      .masonry-grid   { column-count: 2; }
+      .visimisi-grid  { grid-template-columns: 1fr; }
+      .team-grid      { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+      .pfp-title      { font-size: 26px; }
+      .masonry-grid   { column-count: 1; }
+      .team-grid      { grid-template-columns: 1fr; }
+    }

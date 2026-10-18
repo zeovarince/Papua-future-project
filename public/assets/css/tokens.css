@@ -1,0 +1,16 @@
+:root {
+  color-scheme: light;
+  --pfp-primary: #3770c1;
+  --pfp-secondary: #40b8fd;
+  --pfp-soft-blue: #f0f7ff;
+  --pfp-ink: #1a1f2e;
+  --pfp-font: 'Plus Jakarta Sans', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--pfp-font);
+}
