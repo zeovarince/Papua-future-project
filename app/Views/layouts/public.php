@@ -13,5 +13,6 @@
     <?php if (!empty($script)): ?>
         <script src="<?= asset($script) ?>" defer></script>
     <?php endif; ?>
+    <script type="module" src="<?= asset('js/motion/index.js') ?>"></script>
 </body>
 </html>

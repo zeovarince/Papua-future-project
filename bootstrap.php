@@ -24,3 +24,6 @@ if (is_file($autoload)) {
 }
 
 \App\Core\Environment::load(APP_ROOT . '/.env');
+
+$privateStoragePath = getenv('STORAGE_DIR') ?: APP_ROOT . '/storage';
+define('STORAGE_DIR', rtrim($privateStoragePath, '/\\'));

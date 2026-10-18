@@ -7,7 +7,7 @@ Panduan visual untuk panel admin Papua Future Project. Layout memakai **sidebar 
 1. **Sidebar tetap, bukan navbar.** Sidebar ada di sisi kiri pada layar lebar, dan berubah menjadi laci geser di layar sempit.
 2. **Konsisten dengan situs publik.** Font Plus Jakarta Sans, palet warna Primary `#3770c1`, Secondary `#40b8fd`, dan aksen yang sama.
 3. **Minimalis tapi informatif.** Ruang putih cukup, tipografi jelas, dan ikon hanya untuk mendampingi teks.
-4. **Responsif.** Sidebar lipat di bawah 1024 px, tabel gulung horizontal di bawah 768 px.
+4. **Responsif.** Sidebar penuh di desktop (>1024 px), ikon saja di tablet (768–1024 px), dan menjadi drawer hamburger di bawah 768 px. Tabel dapat digulir horizontal jika kolomnya melebihi lebar layar. Detail breakpoint ada di [RWD.md](RWD.md).
 5. **Toast, bukan modal, untuk umpan balik.** Kecuali konfirmasi hapus yang memakai dialog.
 
 ## 2. Palet warna admin
@@ -57,22 +57,28 @@ Panduan visual untuk panel admin Papua Future Project. Layout memakai **sidebar 
 └──────────────────────────────────────────────────────┘
 ```
 
-### 3.1 Sidebar (desktop, ≥ 1024 px)
+### 3.1 Sidebar (desktop, > 1024 px)
 
 - Lebar tetap: 260 px.
 - Latar: `--admin-sidebar` (#0c1527), teks `--admin-sidebar-text`.
 - **Atas:** logo PFP kecil + teks "Papua Future Project" + subtitle "Admin Panel".
-- **Tengah:** item menu. Tiap item berisi ikon SVG 20 px dan label. Item aktif: latar `--admin-sidebar-active`, teks putih, garis kiri 3 px `--admin-primary`. Hover: latar `--admin-sidebar-hover`.
+- **Tengah:** item menu. Tiap item berisi ikon 20 px dan label. Item aktif: latar `--admin-sidebar-active`, teks putih, garis kiri 3 px `--admin-primary`. Hover: latar `--admin-sidebar-hover`.
 - **Bawah:** pemisah garis. Profil admin: avatar inisial lingkaran 36 px (gradient primary), nama, keterangan "Administrator". Tombol "Keluar" dengan ikon.
 
-### 3.2 Sidebar (mobile, < 1024 px)
+### 3.2 Sidebar (mobile, < 768 px)
 
 - Tersembunyi di luar layar (translateX -100%).
-- Tombol hamburger (☰) 44 px di pojok kiri atas area konten.
-- Saat dibuka: overlay hitam 50%, sidebar geser masuk dari kiri, tombol silang di pojok kanan atas sidebar.
-- Klik overlay atau tombol silang menutup sidebar.
+- Tombol hamburger 44 px di pojok kiri atas area konten.
+- Saat dibuka: overlay hitam 50% dan sidebar bergeser masuk dari kiri.
+- Klik overlay, tombol X, tombol hamburger, tautan navigasi, atau tekan Escape untuk menutup sidebar.
 
-### 3.3 Daftar item sidebar
+### 3.3 Sidebar (tablet, 768–1024 px)
+
+- Sidebar tetap terlihat di kiri dengan lebar 76 px.
+- Tampilkan ikon navigasi dan avatar; sembunyikan label, label kelompok, dan nama admin.
+- Setiap ikon memiliki nama aksesibel dan tooltip agar rute tetap dapat dikenali.
+
+### 3.4 Daftar item sidebar
 
 | # | Label | Ikon | Route | Lencana |
 | --- | --- | --- | --- | --- |
@@ -93,7 +99,7 @@ Panduan visual untuk panel admin Papua Future Project. Layout memakai **sidebar 
 
 Label grup (TIM, KONTEN, DATA) ditampilkan sebagai teks kecil uppercase abu-abu, bukan item yang bisa diklik.
 
-### 3.4 Page Header
+### 3.5 Page Header
 
 - Di atas area konten, di dalam wrapper dengan padding 24 px.
 - Baris 1: Breadcrumb (contoh: Admin > Program > Ubah).

@@ -93,12 +93,12 @@ Aturan wajib untuk semua kode di proyek Papua Future Project. Berlaku untuk manu
 ### 3.5 Upload File
 
 - Periksa `UPLOAD_ERR_OK` lebih dulu.
-- Ukuran: foto 2 MB (pendaftar), 8 MB (galeri), CV 5 MB.
+- Ukuran: foto 2 MB (pendaftar), 8 MB (galeri), CV 5 MB. Foto pendaftar maksimal 16 megapiksel dan 8.000 piksel pada tiap sisi agar pemrosesan GD sesuai batas memori shared hosting.
 - Tipe diperiksa dari isi file (`finfo_file`), bukan dari ekstensi atau Content-Type browser.
 - Foto: `getimagesize()` harus berhasil. CV: awalan `%PDF-`.
-- Nama file dibuat sistem: `bin2hex(random_bytes(8))`.
+- Nama file dibuat sistem. Berkas pendaftar memakai token direktori acak dari `random_bytes(16)` dan nama file tetap di dalam direktori tersebut.
 - Gambar disimpan ulang lewat GD (menghapus EXIF, termasuk GPS).
-- File pendaftar disimpan di `storage/` (di luar `public/`).
+- File pendaftar disimpan di `STORAGE_DIR/applications/` (di luar `public/`) dan akses langsung folder ditolak oleh `.htaccess`.
 - `public/uploads/.htaccess` memblokir eksekusi PHP.
 
 ### 3.6 Rate Limiting

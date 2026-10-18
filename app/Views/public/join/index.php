@@ -8,14 +8,13 @@ declare(strict_types=1);
         Papua Future Project
       </p>
 <h1 data-inline-style="join-228">
-        Satu bulan kamu.<br/>Dampak seumur hidup mereka.
+        Satu langkah darimu.<br/>Dampak besar bagi mereka.
       </h1>
 <p data-inline-style="join-229">
-        Jadi relawan pengajar di kampung-kampung Papua Barat bersama Papua Future Project.
-        Tidak perlu latar belakang pendidikan — cukup kemauan untuk hadir dan berbagi.
+        Pilih jalur internship atau relawan yang sesuai, lalu berkontribusi bersama komunitas Papua Barat.
       </p>
 <a data-hover-enter="background:white;color:#3770c1" data-hover-leave="background:#40b8fd;color:white" data-inline-style="join-230" href="#form-daftar">
-        Daftar Sekarang
+        Lihat batch terbuka
       </a>
 </div>
 <div class="wave-divider">
@@ -29,7 +28,7 @@ declare(strict_types=1);
 <section class="pfp-section" data-inline-style="join-231">
 <div class="pfp-container">
 <div data-inline-style="join-232">
-<span class="pfp-tag">Kenapa jadi relawan PFP?</span>
+<span class="pfp-tag">Kenapa bergabung dengan PFP?</span>
 <h2 class="pfp-title">Lebih dari sekadar mengajar.</h2>
 <div class="pfp-divider" data-inline-style="join-233"></div>
 </div>
@@ -71,16 +70,15 @@ declare(strict_types=1);
 <div class="pfp-container">
 <div data-inline-style="join-235">
 <span class="pfp-tag">Proses bergabung</span>
-<h2 class="pfp-title">Dari formulir sampai lapangan, ada 4 langkah.</h2>
+<h2 class="pfp-title">Dari memilih batch sampai mulai berkontribusi, ada 4 langkah.</h2>
 <div class="pfp-divider" data-inline-style="join-236"></div>
 </div>
 <div class="timeline-wrap">
 <div class="timeline-item">
 <div class="tl-badge step-1">1</div>
 <div class="tl-content">
-<h3>Isi formulir pendaftaran</h3>
-<p>Lengkapi form di bawah halaman ini. Ceritakan sedikit tentang dirimu — latar belakang, motivasi, dan ketersediaan waktumu. Tidak ada jawaban yang salah.</p>
-<span class="tl-duration">5–10 menit</span>
+<h3>Pilih batch yang sedang terbuka</h3>
+<p>Pilih jalur internship atau relawan. Daftar batch yang tersedia bisa kamu lihat di bagian berikutnya.</p>
 </div>
 </div>
 <div class="timeline-item">
@@ -94,7 +92,7 @@ declare(strict_types=1);
 <div class="timeline-item">
 <div class="tl-badge step-3">3</div>
 <div class="tl-content">
-<h3>Pembekalan relawan</h3>
+<h3>Pembekalan sebelum berkegiatan</h3>
 <p>Sebelum berangkat, kamu akan mengikuti sesi orientasi bersama tim dan relawan batch yang sama. Kamu akan tahu apa yang perlu dibawa, apa yang akan dihadapi, dan bagaimana menanganinya.</p>
 <span class="tl-duration">1–2 hari</span>
 </div>
@@ -102,136 +100,160 @@ declare(strict_types=1);
 <div class="timeline-item">
 <div class="tl-badge step-4">4</div>
 <div class="tl-content">
-<h3>Turun ke lapangan</h3>
-<p>Saatnya hadir langsung di kampung. Kamu akan mengajar, bermain, dan menjadi bagian dari kehidupan anak-anak Papua Barat selama masa penugasan berlangsung.</p>
-<span class="tl-duration">2 minggu – 1 bulan</span>
+<h3>Mulai berkontribusi bersama tim</h3>
+<p>Saatnya menjalankan peranmu bersama komunitas dan anak-anak Papua Barat sesuai program dan batch yang kamu pilih.</p>
 </div>
 </div>
 </div>
 </div>
 </section>
-<section class="pfp-section" data-inline-style="join-237" id="form-daftar">
+<section class="pfp-section" data-inline-style="join-237" id="form-daftar" aria-labelledby="join-batches-title">
 <div class="pfp-container">
 <div data-inline-style="join-238">
-<span class="pfp-tag">Formulir pendaftaran</span>
-<h2 class="pfp-title">Isi formulir, dan kami akan segera menghubungimu.</h2>
+<span class="pfp-tag">Pendaftaran batch</span>
+<h2 class="pfp-title" id="join-batches-title">Pilih jalur kontribusi yang sedang dibuka.</h2>
 <div class="pfp-divider" data-inline-style="join-239"></div>
 </div>
-<div class="form-wrap-join" data-inline-style="join-240">
-<!-- Bagian 1: Data Diri -->
-<div class="form-section-title">Data Diri</div>
-<div data-inline-style="join-241">
-<div class="form-grid-2" data-inline-style="join-242">
-<div>
-<label class="join-form-label">Nama Lengkap *</label>
-<input class="join-form-input" placeholder="Nama sesuai KTP" type="text"/>
-</div>
-<div>
-<label class="join-form-label">Tanggal Lahir *</label>
-<input class="join-form-input" type="date"/>
-</div>
-</div>
-<div class="form-grid-2" data-inline-style="join-243">
-<div>
-<label class="join-form-label">Email Aktif *</label>
-<input class="join-form-input" placeholder="contoh@email.com" type="email"/>
-</div>
-<div>
-<label class="join-form-label">Nomor WhatsApp *</label>
-<input class="join-form-input" placeholder="08xxxxxxxxxx" type="tel"/>
-</div>
-</div>
-<div>
-<label class="join-form-label">Domisili Saat Ini *</label>
-<input class="join-form-input" placeholder="Kota, Provinsi" type="text"/>
-</div>
-<div>
-<label class="join-form-label">Pekerjaan / Status Saat Ini *</label>
-<select class="join-form-select">
-<option value="">Pilih status kamu</option>
-<option>Mahasiswa</option>
-<option>Fresh Graduate</option>
-<option>Karyawan / Profesional</option>
-<option>Wiraswasta</option>
-<option>Lainnya</option>
-</select>
-</div>
-</div>
-<!-- Bagian 2: Ketersediaan -->
-<div class="form-section-title">Ketersediaan &amp; Minat</div>
-<div data-inline-style="join-244">
-<div>
-<label class="join-form-label" data-inline-style="join-245">Durasi penugasan yang kamu bisa *</label>
-<div class="radio-group">
-<div class="radio-pill">
-<input id="d1" name="durasi" type="radio" value="2-minggu"/>
-<label for="d1">2 minggu</label>
-</div>
-<div class="radio-pill">
-<input id="d2" name="durasi" type="radio" value="1-bulan"/>
-<label for="d2">1 bulan</label>
-</div>
-<div class="radio-pill">
-<input id="d3" name="durasi" type="radio" value="fleksibel"/>
-<label for="d3">Fleksibel</label>
-</div>
-</div>
-</div>
-<div>
-<label class="join-form-label" data-inline-style="join-246">Bidang yang ingin kamu kontribusikan *</label>
-<div class="checkbox-group">
-<label class="checkbox-item">
-<input type="checkbox" value="literasi"/>
-<span>Literasi &amp; Bimbingan Belajar</span>
-</label>
-<label class="checkbox-item">
-<input type="checkbox" value="kesehatan"/>
-<span>Edukasi Kesehatan &amp; Gizi</span>
-</label>
-<label class="checkbox-item">
-<input type="checkbox" value="kreatif"/>
-<span>Kegiatan Kreatif (seni, olahraga, permainan)</span>
-</label>
-<label class="checkbox-item">
-<input type="checkbox" value="dokumentasi"/>
-<span>Dokumentasi &amp; Media</span>
-</label>
-<label class="checkbox-item">
-<input type="checkbox" value="lainnya"/>
-<span>Lainnya / Sesuai kebutuhan tim</span>
-</label>
-</div>
-</div>
-<div>
-<label class="join-form-label">Dari mana kamu tahu tentang PFP? *</label>
-<select class="join-form-select">
-<option value="">Pilih salah satu</option>
-<option>Instagram @papuafutureproject</option>
-<option>Diajak teman / kenalan</option>
-<option>Artikel atau berita online</option>
-<option>Event / seminar / pameran</option>
-<option>Lainnya</option>
-</select>
-</div>
-</div>
-<!-- Bagian 3: Motivasi -->
-<div class="form-section-title">Motivasi</div>
-<div data-inline-style="join-247">
-<div>
-<label class="join-form-label">Kenapa kamu ingin bergabung sebagai relawan PFP? *</label>
-<textarea class="join-form-textarea" data-inline-style="join-248" placeholder="Ceritakan motivasimu secara jujur — tidak ada jawaban yang benar atau salah."></textarea>
-</div>
-<div>
-<label class="join-form-label">Ada keahlian khusus yang ingin kamu bagikan? <span data-inline-style="join-249">(opsional)</span></label>
-<textarea class="join-form-textarea" data-inline-style="join-250" placeholder="Contoh: bisa gitar, bisa menggambar, pernah mengajar, dsb."></textarea>
-</div>
-</div>
-<!-- Submit -->
-<button class="join-submit-btn" type="button">Kirim Formulir Pendaftaran</button>
-<p data-inline-style="join-251">
-          Tim PFP akan menghubungi kamu melalui WhatsApp atau email dalam 3–5 hari kerja
-          setelah formulir diterima.
-        </p>
+<div class="form-wrap-join join-batches-wrap" data-inline-style="join-240">
+<?php $hasOpenBatches = $openInternBatches !== [] || $openVolunteerBatches !== []; ?>
+<?php $showApplicationForm = $hasOpenBatches || ($old !== []); ?>
+<?php if (!empty($flashError)): ?>
+  <p class="join-form-alert" role="alert"><?= e($flashError) ?></p>
+<?php endif; ?>
+<?php if (!$showApplicationForm): ?>
+  <div class="join-closed-state" role="status">
+    <span class="join-batch-status is-closed">Pendaftaran ditutup</span>
+    <h3>Saat ini belum ada batch yang membuka pendaftaran.</h3>
+    <p>Pantau kembali halaman ini untuk melihat batch internship atau relawan berikutnya.</p>
+    <p class="join-batches-contact"><a href="https://www.instagram.com/papuafutureproject/" target="_blank" rel="noopener noreferrer">Ikuti kabar terbaru di Instagram PFP</a> atau <a href="<?= url('/kontak') ?>">hubungi tim kami</a>.</p>
+  </div>
+<?php else: ?>
+  <?php $selectedBatchId = (string) ($old['batch_id'] ?? ''); ?>
+  <?php $selectedInterestAreas = is_array($old['interest_areas'] ?? null) ? $old['interest_areas'] : []; ?>
+  <?php $openBatchIds = array_map('strval', array_column(array_merge($openInternBatches, $openVolunteerBatches), 'id')); ?>
+  <?php if (!$hasOpenBatches): ?><div class="join-closed-state" role="status"><h3>Saat ini tidak ada batch yang membuka pendaftaran.</h3><p>Isian teks tetap ditampilkan. Berkas foto dan CV perlu dipilih ulang jika ada batch baru yang dibuka.</p></div><?php endif; ?>
+  <p class="join-batches-intro">Formulir hanya tersedia untuk batch yang sedang dibuka. Semua data wajib diisi kecuali yang ditandai opsional.</p>
+  <form class="application-form" action="<?= url('/bergabung') ?>" method="post" enctype="multipart/form-data">
+    <?= csrf_field() ?>
+    <div class="join-honeypot" aria-hidden="true"><label for="join-website">Kosongkan kolom ini</label><input id="join-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+
+    <div class="application-field application-field-full">
+      <label class="join-form-label" for="batch_id">Batch pendaftaran *</label>
+      <select class="join-form-select" id="batch_id" name="batch_id" required aria-describedby="batch_id_error">
+        <option value="">Pilih batch terbuka</option>
+        <?php if (filter_var($selectedBatchId, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false && !in_array($selectedBatchId, $openBatchIds, true)): ?><option value="<?= e($selectedBatchId) ?>" selected>Batch sebelumnya sudah ditutup</option><?php endif; ?>
+        <?php if ($openInternBatches !== []): ?><optgroup label="Internship">
+          <?php foreach ($openInternBatches as $batch): ?><option value="<?= (int) $batch['id'] ?>" <?= $selectedBatchId === (string) $batch['id'] ? 'selected' : '' ?>><?= e($batch['name']) ?></option><?php endforeach; ?>
+        </optgroup><?php endif; ?>
+        <?php if ($openVolunteerBatches !== []): ?><optgroup label="Volunteer / Relawan">
+          <?php foreach ($openVolunteerBatches as $batch): ?><option value="<?= (int) $batch['id'] ?>" <?= $selectedBatchId === (string) $batch['id'] ? 'selected' : '' ?>><?= e($batch['name']) ?></option><?php endforeach; ?>
+        </optgroup><?php endif; ?>
+      </select>
+      <?php if (!empty($errors['batch_id'])): ?><small class="join-field-error" id="batch_id_error"><?= e($errors['batch_id']) ?></small><?php endif; ?>
+    </div>
+
+    <div class="application-form-section application-field-full"><h3>Data diri</h3></div>
+    <div class="application-field">
+      <label class="join-form-label" for="full_name">Nama lengkap *</label>
+      <input class="join-form-input" id="full_name" name="full_name" type="text" maxlength="100" autocomplete="name" value="<?= e($old['full_name'] ?? '') ?>" required>
+      <?php if (!empty($errors['full_name'])): ?><small class="join-field-error"><?= e($errors['full_name']) ?></small><?php endif; ?>
+    </div>
+    <div class="application-field">
+      <label class="join-form-label" for="birth_date">Tanggal lahir *</label>
+      <input class="join-form-input" id="birth_date" name="birth_date" type="date" value="<?= e($old['birth_date'] ?? '') ?>" required>
+      <small>Usia minimal pendaftar 17 tahun.</small>
+      <?php if (!empty($errors['birth_date'])): ?><small class="join-field-error"><?= e($errors['birth_date']) ?></small><?php endif; ?>
+    </div>
+    <div class="application-field">
+      <label class="join-form-label" for="email">Email aktif *</label>
+      <input class="join-form-input" id="email" name="email" type="email" maxlength="190" autocomplete="email" value="<?= e($old['email'] ?? '') ?>" required>
+      <?php if (!empty($errors['email'])): ?><small class="join-field-error"><?= e($errors['email']) ?></small><?php endif; ?>
+    </div>
+    <div class="application-field">
+      <label class="join-form-label" for="whatsapp">Nomor WhatsApp *</label>
+      <input class="join-form-input" id="whatsapp" name="whatsapp" type="tel" maxlength="20" autocomplete="tel" placeholder="08xxxxxxxxxx atau +628xxxxxxxxxx" value="<?= e($old['whatsapp'] ?? '') ?>" required>
+      <?php if (!empty($errors['whatsapp'])): ?><small class="join-field-error"><?= e($errors['whatsapp']) ?></small><?php endif; ?>
+    </div>
+    <div class="application-field">
+      <label class="join-form-label" for="domicile">Domisili saat ini *</label>
+      <input class="join-form-input" id="domicile" name="domicile" type="text" maxlength="120" autocomplete="address-level2" placeholder="Kota, Provinsi" value="<?= e($old['domicile'] ?? '') ?>" required>
+      <?php if (!empty($errors['domicile'])): ?><small class="join-field-error"><?= e($errors['domicile']) ?></small><?php endif; ?>
+    </div>
+    <div class="application-field">
+      <label class="join-form-label" for="occupation_status">Pekerjaan atau status saat ini *</label>
+      <select class="join-form-select" id="occupation_status" name="occupation_status" required>
+        <option value="">Pilih status</option>
+        <?php foreach (\App\Support\Labels::occupations() as $key => $label): ?><option value="<?= e($key) ?>" <?= ($old['occupation_status'] ?? '') === $key ? 'selected' : '' ?>><?= e($label) ?></option><?php endforeach; ?>
+      </select>
+      <?php if (!empty($errors['occupation_status'])): ?><small class="join-field-error"><?= e($errors['occupation_status']) ?></small><?php endif; ?>
+    </div>
+    <div class="application-field application-field-full">
+      <label class="join-form-label" for="university">Asal universitas atau instansi</label>
+      <input class="join-form-input" id="university" name="university" type="text" maxlength="120" value="<?= e($old['university'] ?? '') ?>">
+      <small>Wajib untuk Mahasiswa dan Fresh Graduate, opsional untuk status lainnya.</small>
+      <?php if (!empty($errors['university'])): ?><small class="join-field-error"><?= e($errors['university']) ?></small><?php endif; ?>
+    </div>
+
+    <div class="application-form-section application-field-full"><h3>Ketersediaan dan minat</h3></div>
+    <div class="application-field">
+      <label class="join-form-label" for="duration">Durasi kontribusi *</label>
+      <select class="join-form-select" id="duration" name="duration" required>
+        <option value="">Pilih durasi</option>
+        <?php foreach (\App\Support\Labels::durations() as $key => $label): ?><option value="<?= e($key) ?>" <?= ($old['duration'] ?? '') === $key ? 'selected' : '' ?>><?= e($label) ?></option><?php endforeach; ?>
+      </select>
+      <?php if (!empty($errors['duration'])): ?><small class="join-field-error"><?= e($errors['duration']) ?></small><?php endif; ?>
+    </div>
+    <fieldset class="application-field application-field-full application-interest-field">
+      <legend class="join-form-label">Bidang yang ingin dikontribusikan *</legend>
+      <div class="application-interest-grid">
+        <?php foreach (\App\Support\Labels::interests() as $key => $label): ?>
+          <label class="application-check"><input type="checkbox" name="interest_areas[]" value="<?= e($key) ?>" <?= in_array($key, $selectedInterestAreas, true) ? 'checked' : '' ?>><span><?= e($label) ?></span></label>
+        <?php endforeach; ?>
+      </div>
+      <?php if (!empty($errors['interest_areas'])): ?><small class="join-field-error"><?= e($errors['interest_areas']) ?></small><?php endif; ?>
+    </fieldset>
+    <div class="application-field application-field-full">
+      <label class="join-form-label" for="referral_source">Dari mana kamu tahu tentang PFP? *</label>
+      <select class="join-form-select" id="referral_source" name="referral_source" required>
+        <option value="">Pilih sumber informasi</option>
+        <?php foreach (\App\Support\Labels::referralSources() as $key => $label): ?><option value="<?= e($key) ?>" <?= ($old['referral_source'] ?? '') === $key ? 'selected' : '' ?>><?= e($label) ?></option><?php endforeach; ?>
+      </select>
+      <?php if (!empty($errors['referral_source'])): ?><small class="join-field-error"><?= e($errors['referral_source']) ?></small><?php endif; ?>
+    </div>
+
+    <div class="application-form-section application-field-full"><h3>Motivasi</h3></div>
+    <div class="application-field application-field-full">
+      <label class="join-form-label" for="motivation">Kenapa kamu ingin bergabung dengan PFP? *</label>
+      <textarea class="join-form-textarea" id="motivation" name="motivation" minlength="50" maxlength="1000" rows="5" required><?= e($old['motivation'] ?? '') ?></textarea>
+      <small>50 sampai 1.000 karakter.</small>
+      <?php if (!empty($errors['motivation'])): ?><small class="join-field-error"><?= e($errors['motivation']) ?></small><?php endif; ?>
+    </div>
+    <div class="application-field application-field-full">
+      <label class="join-form-label" for="special_skills">Keahlian khusus (opsional)</label>
+      <textarea class="join-form-textarea" id="special_skills" name="special_skills" maxlength="500" rows="3"><?= e($old['special_skills'] ?? '') ?></textarea>
+      <small>Maksimal 500 karakter.</small>
+      <?php if (!empty($errors['special_skills'])): ?><small class="join-field-error"><?= e($errors['special_skills']) ?></small><?php endif; ?>
+    </div>
+
+    <div class="application-form-section application-field-full"><h3>Berkas pendaftaran</h3></div>
+    <div class="application-field">
+      <label class="join-form-label" for="photo">Foto pendaftar *</label>
+      <input class="join-form-input application-file-input" id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" required>
+      <small>JPG, PNG, WebP. Maksimal 2 MB.</small>
+      <?php if (!empty($errors['photo'])): ?><small class="join-field-error"><?= e($errors['photo']) ?></small><?php endif; ?>
+    </div>
+    <div class="application-field">
+      <label class="join-form-label" for="cv">CV dalam format PDF *</label>
+      <input class="join-form-input application-file-input" id="cv" name="cv" type="file" accept="application/pdf,.pdf" required>
+      <small>PDF maksimal 5 MB.</small>
+      <?php if (!empty($errors['cv'])): ?><small class="join-field-error"><?= e($errors['cv']) ?></small><?php endif; ?>
+    </div>
+    <div class="application-field application-field-full">
+      <button class="join-submit-btn" type="submit">Kirim Pendaftaran</button>
+      <p class="application-privacy-note">Foto dan CV hanya dapat dilihat oleh admin PFP.</p>
+    </div>
+  </form>
+<?php endif; ?>
 </div>
 </div>
 </section>

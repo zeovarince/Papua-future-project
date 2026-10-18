@@ -11,7 +11,13 @@
     document.querySelectorAll('.faq-item').forEach(item => {
       item.querySelector('.faq-header').addEventListener('click', () => {
         const isOpen = item.classList.contains('open');
-        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-        if (!isOpen) item.classList.add('open');
+        document.querySelectorAll('.faq-item').forEach(i => {
+          i.classList.remove('open');
+          i.querySelector('.faq-header').setAttribute('aria-expanded', 'false');
+        });
+        if (!isOpen) {
+          item.classList.add('open');
+          item.querySelector('.faq-header').setAttribute('aria-expanded', 'true');
+        }
       });
     });

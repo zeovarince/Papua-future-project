@@ -172,7 +172,7 @@ Satu form dipakai untuk dua tipe. Tipe (Intern atau Relawan) ditentukan oleh bat
 | | Dari mana tahu PFP | Ya | Pilihan: Instagram @papuafutureproject, Diajak teman atau kenalan, Artikel atau berita online, Event atau seminar atau pameran, Lainnya. |
 | Motivasi | Kenapa ingin bergabung | Ya | 50 sampai 1000 karakter. |
 | | Keahlian khusus | Tidak | Maksimal 500 karakter. |
-| Berkas | Foto | Ya | JPG, PNG, atau WebP. Maksimal 2 MB. |
+| Berkas | Foto | Ya | JPG, PNG, atau WebP. Maksimal 2 MB, 16 megapiksel, dan 8.000 piksel pada tiap sisi. |
 | | CV | Ya | PDF. Maksimal 5 MB. |
 
 Aturan bisnis:

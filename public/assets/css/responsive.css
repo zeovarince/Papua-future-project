@@ -1,0 +1,333 @@
+/* Shared responsive rules for the public website. */
+html,
+body {
+  min-width: 320px;
+}
+
+body {
+  overflow-x: clip;
+}
+
+img,
+video,
+iframe {
+  max-width: 100%;
+}
+
+.nav-brand {
+  display: inline-flex;
+  min-width: 0;
+  flex: 0 0 auto;
+  align-items: center;
+  text-decoration: none;
+}
+
+.nav-brand-logo {
+  display: block;
+  width: auto;
+  max-width: 210px;
+  height: auto;
+  max-height: 44px;
+  object-fit: contain;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.2vw, 30px);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 2vw, 26px);
+}
+
+.nav-toggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, .38);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .12);
+  color: #fff;
+  cursor: pointer;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 19px;
+  height: 2px;
+  border-radius: 2px;
+  background: currentColor;
+  transition: transform .2s ease, opacity .2s ease;
+}
+
+.nav-toggle:focus-visible {
+  outline: 3px solid #40b8fd;
+  outline-offset: 3px;
+}
+
+/* Mobile through tablet: use a dropdown below the brand row. */
+@media (max-width: 1024px) {
+  .navbar,
+  .navbar.scrolled {
+    padding: 10px 16px;
+  }
+
+  .nav-inner {
+    position: relative;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 18px;
+  }
+
+  .navbar.scrolled .nav-inner {
+    background: rgba(255, 255, 255, .96);
+    border-color: rgba(226, 232, 240, .9);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+  }
+
+  .nav-brand-logo {
+    max-width: min(210px, 55vw);
+    max-height: 42px;
+  }
+
+  .nav-toggle {
+    display: flex;
+    margin-left: auto;
+    color: #fff;
+  }
+
+  .navbar.scrolled .nav-toggle {
+    border-color: #dbe3ed;
+    background: #fff;
+    color: #1a1f2e;
+  }
+
+  .nav-menu {
+    position: absolute;
+    z-index: 2;
+    top: calc(100% + 9px);
+    right: 0;
+    left: 0;
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #e6ebf2;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 16px 36px rgba(15, 23, 42, .16);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+  }
+
+  .navbar.menu-open .nav-menu {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .nav-links {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .nav-menu .nav-link,
+  .navbar.scrolled .nav-menu .nav-link {
+    display: block;
+    padding: 11px 12px;
+    border-radius: 9px;
+    color: #263447;
+    font-size: 14px;
+  }
+
+  .nav-menu .nav-link:hover,
+  .navbar.scrolled .nav-menu .nav-link:hover {
+    background: #f1f7fd;
+    color: #3770c1;
+  }
+
+  .nav-menu .nav-link.active,
+  .navbar.scrolled .nav-menu .nav-link.active {
+    background: #edf5ff;
+    color: #28589c;
+  }
+
+  .nav-menu .nav-link::after {
+    display: none;
+  }
+
+  .nav-menu .nav-cta,
+  .navbar.scrolled .nav-menu .nav-cta {
+    display: block;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: #1f5148;
+    color: #fff;
+    text-align: center;
+    box-shadow: none;
+  }
+
+  .navbar.menu-open .nav-toggle span:first-child {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .navbar.menu-open .nav-toggle span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .navbar.menu-open .nav-toggle span:last-child {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  .pfp-container {
+    padding-right: clamp(20px, 5vw, 36px);
+    padding-left: clamp(20px, 5vw, 36px);
+  }
+
+  .pfp-section {
+    padding-top: clamp(56px, 9vw, 72px);
+    padding-bottom: clamp(56px, 9vw, 72px);
+  }
+}
+
+/* Tablet: keep the dropdown comfortable within the narrower navbar. */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .navbar,
+  .navbar.scrolled {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .nav-inner {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .nav-brand-logo {
+    max-width: 175px;
+    max-height: 40px;
+  }
+
+  .nav-menu {
+    gap: 16px;
+  }
+
+  .nav-links {
+    gap: 15px;
+  }
+
+  .nav-menu .nav-link {
+    font-size: 14px;
+  }
+
+  .nav-menu .nav-cta {
+    padding-right: 15px;
+    padding-left: 15px;
+    font-size: 14px;
+  }
+
+  .pfp-container {
+    padding-right: 32px;
+    padding-left: 32px;
+  }
+}
+
+/* Desktop: the full horizontal navigation is visible. */
+@media (min-width: 1025px) {
+  .nav-inner {
+    position: relative;
+  }
+
+  .nav-brand {
+    margin-left: 8px;
+  }
+
+  .nav-brand-logo {
+    max-height: 47px;
+  }
+
+  .nav-menu {
+    position: absolute;
+    inset: 0;
+    justify-content: center;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: none;
+    transform: none;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    justify-content: center;
+    white-space: nowrap;
+    pointer-events: auto;
+    transform: translate(-50%, -50%);
+  }
+
+  .nav-menu .nav-cta {
+    position: absolute;
+    top: 50%;
+    right: 24px;
+    pointer-events: auto;
+    transform: translateY(-50%);
+  }
+}
+
+/* Small phones. */
+@media (max-width: 479.98px) {
+  .navbar,
+  .navbar.scrolled {
+    padding: 8px 10px;
+  }
+
+  .nav-inner {
+    min-height: 56px;
+    padding: 7px 9px;
+    border-radius: 16px;
+  }
+
+  .nav-brand-logo {
+    max-width: min(180px, 54vw);
+    max-height: 38px;
+  }
+
+  .nav-toggle {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+/* Larger phones / small tablets. */
+@media (min-width: 480px) and (max-width: 767.98px) {
+  .navbar,
+  .navbar.scrolled {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+
+  .nav-inner {
+    padding: 10px 16px;
+    border-radius: 20px;
+  }
+
+  .nav-menu {
+    padding: 15px;
+  }
+}

@@ -141,17 +141,60 @@ html { scroll-behavior: smooth; }
     .submit-btn:hover { background: #40b8fd; }
 
     /* ── MITRA LOGO ── */
-    .mitra-logo {
-      display: flex; align-items: center; justify-content: center;
-      height: 56px; min-width: 120px;
-      background: #f0f7ff; border-radius: 10px; padding: 12px 24px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 700; color: #6b7280;
-      filter: grayscale(100%) opacity(0.5);
-      transition: filter 0.3s ease;
-      cursor: default;
+    .partners-section { overflow: hidden; }
+    .partners-marquee {
+      --partner-card-width: 250px;
+      overflow: hidden;
+      width: 100%;
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+      mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
     }
-    .mitra-logo:hover { filter: grayscale(0%) opacity(1); }
+    .partners-marquee-track {
+      display: flex;
+      width: max-content;
+      animation: partners-marquee-scroll 11.5s linear infinite;
+      will-change: transform;
+    }
+    .partners-marquee-group {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: stretch;
+      gap: 20px;
+      padding-right: 20px;
+    }
+    .partner-card {
+      display: flex;
+      flex: 0 0 var(--partner-card-width);
+      align-items: center;
+      gap: 16px;
+      min-height: 104px;
+      box-sizing: border-box;
+      padding: 16px 20px;
+      border: 1px solid #e8edf2;
+      border-radius: 16px;
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(26, 31, 46, 0.055);
+      color: #344054;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+    .partner-card img {
+      display: block;
+      flex: 0 0 72px;
+      width: 72px;
+      height: 56px;
+      object-fit: contain;
+    }
+    .partners-marquee:hover .partners-marquee-track,
+    .partners-marquee:focus-within .partners-marquee-track {
+      animation-play-state: paused;
+    }
+    @keyframes partners-marquee-scroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
 
     /* ── FAQ ACCORDION ── */
     .faq-item {
@@ -181,6 +224,13 @@ html { scroll-behavior: smooth; }
       font-size: 15px; color: #374151; line-height: 1.7;
     }
     .faq-item.open .faq-body { display: block; }
+    .contact-honeypot { position:absolute !important; left:-10000px !important; width:1px !important; height:1px !important; overflow:hidden !important; }
+    .contact-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .contact-fields > div:nth-child(4) { grid-column:1 / -1; }
+    .contact-field-error { display:block; margin-top:5px; color:#b91c1c; }
+    .contact-notice { margin:0 0 16px; padding:12px 15px; border-radius:10px; }
+    .contact-success { background:#ecfdf5; color:#065f46; }
+    .contact-error { background:#fef2f2; color:#991b1b; }
 
     /* ── FOOTER WAVE ── */
     .footer-wave {
@@ -191,12 +241,33 @@ html { scroll-behavior: smooth; }
     .footer-wave svg { display: block; width: 100%; height: 120px; }
 
     /* ── RESPONSIVE ── */
-    @media (max-width: 900px) {
+    @media (max-width: 1024px) {
       .pfp-container { padding: 0 24px; }
       .pfp-section   { padding: 56px 0; }
       .contact-grid  { grid-template-columns: 1fr !important; gap: 40px !important; }
     }
-    @media (max-width: 600px) {
+    @media (max-width: 767.98px) {
       .pfp-title { font-size: 26px; }
       .form-wrap { padding: 24px !important; }
+      .contact-fields { grid-template-columns:1fr; }
+      .contact-fields > div:nth-child(4) { grid-column:auto; }
+      .partners-marquee { --partner-card-width: 220px; }
+      .partners-marquee-track { animation-duration: 9.5s; }
+      .partner-card { gap: 12px; padding: 14px 16px; font-size: 13px; }
+      .partner-card img { flex-basis: 64px; width: 64px; height: 52px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .partners-marquee {
+        overflow: visible;
+        -webkit-mask-image: none;
+        mask-image: none;
+      }
+      .partners-marquee-track { width: 100%; animation: none; }
+      .partners-marquee-group[aria-hidden="true"] { display: none; }
+      .partners-marquee-group:not([aria-hidden="true"]) {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        padding-right: 0;
+      }
     }

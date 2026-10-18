@@ -14,7 +14,7 @@ Situs publik berisi Beranda, Tentang Kami, Program dan detail program, Berita & 
 2. [`docs/STEP.md`](docs/STEP.md) — urutan implementasi dan kriteria selesai tiap tahap.
 3. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — stack, struktur folder, route, MVC, dan deployment.
 4. [`docs/ERD.md`](docs/ERD.md), lalu [`docs/SCHEMA.md`](docs/SCHEMA.md) — relasi data dan DDL MySQL.
-5. [`docs/USERFLOW.md`](docs/USERFLOW.md) dan [`docs/DESIGN-ADMIN.md`](docs/DESIGN-ADMIN.md) — alur dan spesifikasi UI admin.
+5. [`docs/USERFLOW.md`](docs/USERFLOW.md), [`docs/DESIGN-ADMIN.md`](docs/DESIGN-ADMIN.md), dan [`docs/RWD.md`](docs/RWD.md) ? alur pengguna, desain admin, dan aturan responsif.
 6. [`docs/RULES.md`](docs/RULES.md) — standar kode, keamanan, aksesibilitas, dan Git.
 7. [`docs/GSAP.md`](docs/GSAP.md) — implementasi animasi pada tahap yang ditentukan.
 

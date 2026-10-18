@@ -45,13 +45,19 @@ final class Request
         return $this->path;
     }
 
-    public function query(string $key, mixed $default = null): mixed
+    public function query(?string $key = null, mixed $default = null): mixed
     {
+        if ($key === null) {
+            return $this->query;
+        }
         return $this->query[$key] ?? $default;
     }
 
-    public function post(string $key, mixed $default = null): mixed
+    public function post(?string $key = null, mixed $default = null): mixed
     {
+        if ($key === null) {
+            return $this->post;
+        }
         return $this->post[$key] ?? $default;
     }
 

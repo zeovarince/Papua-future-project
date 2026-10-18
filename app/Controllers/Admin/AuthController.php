@@ -21,7 +21,7 @@ final class AuthController
         }
 
         return View::render('admin/auth/login', [
-            'title' => 'Masuk Admin',
+            'title' => 'Masuk ke Panel Admin',
             'error' => Flash::get('error'),
             'email' => Flash::get('email', ''),
         ], 'admin-auth');

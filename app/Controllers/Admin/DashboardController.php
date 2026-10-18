@@ -8,7 +8,10 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
 use App\Core\View;
+use App\Models\Application;
 use App\Models\Batch;
+use App\Models\ContactMessage;
+use App\Models\Post;
 
 final class DashboardController
 {
@@ -22,10 +25,10 @@ final class DashboardController
             'admin' => $admin,
             'breadcrumb' => ['Admin', 'Ringkasan'],
             'metrics' => [
-                ['label' => 'Pendaftar baru', 'value' => 'Belum tersedia', 'note' => 'Modul pendaftar belum dibuat'],
-                ['label' => 'Pesan belum dibaca', 'value' => 'Belum tersedia', 'note' => 'Modul pesan belum dibuat'],
+                ['label' => 'Pendaftar baru', 'value' => (string) Application::countNew(), 'note' => 'Menunggu ditinjau'],
+                ['label' => 'Pesan belum dibaca', 'value' => (string) ContactMessage::unreadCount(), 'note' => 'Pesan dari pengunjung'],
                 ['label' => 'Batch dibuka', 'value' => (string) Batch::countOpen(), 'note' => 'Intern dan relawan'],
-                ['label' => 'Berita terbit', 'value' => 'Belum tersedia', 'note' => 'Modul berita belum dibuat'],
+                ['label' => 'Berita terbit', 'value' => (string) Post::countPublished(), 'note' => 'Termasuk kegiatan, penghargaan, dan liputan'],
             ],
         ], 'admin');
     }

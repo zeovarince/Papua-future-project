@@ -133,6 +133,8 @@ Implementasikan animasi sesuai [GSAP.md](GSAP.md) setelah markup final: muat GSA
 
 **Kriteria selesai:** setiap animasi punya fallback; tidak ada konten yang bergantung pada animasi untuk terlihat; animasi tidak menyebabkan pergeseran layout besar atau menghalangi interaksi.
 
+Implementasi saat ini memakai GSAP 3.15.0 dan ScrollTrigger lokal, modul dinamis untuk halaman publik, counter dampak di beranda, serta transisi CSS ringan untuk notifikasi admin. Pemeriksaan visual tanpa JavaScript, reduced motion, dan viewport mobile dicatat pada Step 12.
+
 ### Step 12 — Pemeriksaan penerimaan, keamanan, dan aksesibilitas
 
 1. Cocokkan kriteria penerimaan PRD pada viewport mobile dan desktop.

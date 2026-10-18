@@ -4,6 +4,7 @@
 !/storage/logs/.gitkeep
 /storage/applications/*
 !/storage/applications/.gitkeep
+!/storage/applications/.htaccess
 /storage/cache/*
 !/storage/cache/.gitkeep
 /storage/sessions/*
@@ -16,3 +17,5 @@
 /.vscode/
 *.log
 /docs
+!/docs/
+!/docs/RWD.md

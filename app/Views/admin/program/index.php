@@ -1,0 +1,6 @@
+<?php declare(strict_types=1); ?>
+<div class="admin-toolbar"><p>Kelola program publikasi, status, dan foto dokumentasi.</p><a class="button-primary" href="<?= url('/admin/program/tambah') ?>">Tambah program</a></div>
+<?php if ($programs === []): ?><div class="admin-card"><p>Belum ada program.</p></div><?php else: ?>
+<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Program</th><th>Status</th><th>Unggulan</th><th>Foto</th><th>Aksi</th></tr></thead><tbody>
+<?php foreach ($programs as $program): ?><tr><td><strong><?= e($program['title']) ?></strong><br><small>/program/<?= e($program['slug']) ?></small></td><td><?= (int)$program['is_published'] === 1 ? 'Terbit' : 'Draf' ?></td><td><?= (int)$program['is_featured'] === 1 ? 'Ya' : 'Tidak' ?></td><td><?= (int)$program['photo_count'] ?></td><td class="table-actions"><a class="button-secondary" href="<?= url('/admin/program/'.$program['id'].'/ubah') ?>">Ubah</a><form method="post" action="<?= url('/admin/program/'.$program['id'].'/hapus') ?>" data-confirm="Hapus program dan semua dokumentasinya?"><?= csrf_field() ?><button class="button-danger" type="submit">Hapus</button></form></td></tr><?php endforeach; ?>
+</tbody></table></div><?php endif; ?>

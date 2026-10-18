@@ -49,6 +49,15 @@ final class Batch
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function openByType(string $type): array
+    {
+        $statement = Database::connection()->prepare(
+            'SELECT * FROM batches WHERE batch_type = :batch_type AND is_open = 1 ORDER BY id ASC'
+        );
+        $statement->execute(['batch_type' => $type]);
+        return $statement->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public static function find(int $id): ?array
     {
         $statement = Database::connection()->prepare(

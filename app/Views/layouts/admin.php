@@ -14,7 +14,7 @@
     <div class="admin-main">
         <header class="admin-page-header">
             <button class="sidebar-toggle" type="button" aria-label="Buka menu" aria-expanded="false" aria-controls="admin-sidebar" data-sidebar-toggle>
-                <span aria-hidden="true">☰</span>
+                <span class="admin-menu-lines" aria-hidden="true"><i></i><i></i><i></i></span>
             </button>
             <div class="page-heading">
                 <p class="breadcrumb"><?= e(implode(' / ', $breadcrumb ?? ['Admin'])) ?></p>
@@ -33,5 +33,6 @@
     </div>
     <div class="sidebar-overlay" data-sidebar-overlay hidden></div>
     <script src="<?= asset('js/admin/admin-ui.js') ?>" defer></script>
+    <script src="<?= asset('js/motion/admin.js') ?>" defer></script>
 </body>
 </html>

@@ -245,6 +245,7 @@ pfp/
 │  │  │  ├─ base.css                 reset dan gaya elemen dasar
 │  │  │  ├─ layout.css               container, header, footer, grid
 │  │  │  ├─ components.css           tombol, pill, card, akordeon, form, breadcrumb
+│  │  │  ├─ responsive.css             breakpoint publik dan menu mobile
 │  │  │  ├─ pages/
 │  │  │  │  ├─ home.css
 │  │  │  │  ├─ about.css
@@ -307,6 +308,7 @@ pfp/
 │  ├─ SCHEMA.md
 │  ├─ USERFLOW.md
 │  ├─ DESIGN-ADMIN.md
+│  ├─ RWD.md
 │  ├─ GSAP.md
 │  ├─ RULES.md
 │  └─ STEP.md

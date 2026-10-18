@@ -7,6 +7,8 @@ namespace App\Controllers\Public;
 use App\Core\Response;
 use App\Core\View;
 use App\Models\TeamMember;
+use App\Models\Program;
+use App\Models\Post;
 
 final class HomeController
 {
@@ -18,6 +20,8 @@ final class HomeController
             'stylesheet' => 'css/pages/home.css',
             'script' => 'js/pages/home.js',
             'founder' => TeamMember::founder(),
+            'programs' => Program::featured(3),
+            'recentPosts' => Post::featured(3),
         ]);
     }
 }

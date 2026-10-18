@@ -16,3 +16,4 @@
 <?php if (!empty($stylesheet)): ?>
     <link rel="stylesheet" href="<?= asset($stylesheet) ?>">
 <?php endif; ?>
+<link rel="stylesheet" href="<?= asset('css/responsive.css') ?>">

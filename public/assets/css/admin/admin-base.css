@@ -106,7 +106,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .back-home { display: inline-block; margin-top: 24px; color: var(--admin-muted); font-size: 13px; text-decoration: none; }
 .back-home:hover { color: var(--admin-primary); }
 
-@media (max-width: 480px) {
+@media (max-width: 479.98px) {
   .login-card { padding: 28px 22px; border-radius: 18px; }
   .login-intro { margin-top: 30px; }
   .login-intro h1 { font-size: 24px; }

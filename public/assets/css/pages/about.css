@@ -268,7 +268,7 @@ html { scroll-behavior: smooth; }
     .shape-fill-dark { fill: #111827; }
 
     /* ── RESPONSIVE ── */
-    @media (max-width: 900px) {
+    @media (max-width: 1024px) {
       .pfp-container  { padding: 0 24px; }
       .pfp-section    { padding: 56px 0; }
       .history-grid   { grid-template-columns: 1fr; gap: 40px; }
@@ -276,7 +276,7 @@ html { scroll-behavior: smooth; }
       .visimisi-grid  { grid-template-columns: 1fr; }
       .team-grid      { grid-template-columns: repeat(2, 1fr); }
     }
-    @media (max-width: 480px) {
+    @media (max-width: 479.98px) {
       .pfp-title      { font-size: 26px; }
       .masonry-grid   { column-count: 1; }
       .team-grid      { grid-template-columns: 1fr; }

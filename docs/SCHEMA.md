@@ -26,6 +26,8 @@ Satu file SQL per berkas di `database/migrations/`. Urutan mengikuti urutan peng
 | `0006_create_posts_and_photos.sql` | `posts`, `post_photos` | 6 |
 | `0007_create_faqs_and_contact_messages.sql` | `faqs`, `contact_messages` | 7 |
 | `0008_create_applications.sql` | `applications` | 9 |
+| `0009_seed_initial_programs.sql` | Lima data awal program untuk instalasi migrasi | 5 |
+| `0010_seed_news_and_faqs.sql` | Konten awal berita, penghargaan, liputan media, dan FAQ | 6 dan 7 |
 
 ## 3. Tabel infrastruktur migrasi
 
@@ -370,7 +372,7 @@ Nama file di semua jalur dibuat sistem (acak). Nama file asli dari pengguna tida
 
 ## 8. Akun admin awal dan konten
 
-Akun admin awal dibuat secara eksplisit lewat `php bin/create-admin.php <email> <nama>`. Password dibaca hanya dari variabel lingkungan `PFP_ADMIN_PASSWORD`, harus minimal 12 karakter, lalu disimpan menggunakan `password_hash()`. Tidak ada password default atau akun admin seed. Migrasi 0003 dan 0004 serta `database/pfp.sql` mengisi konten Tentang Kami dan empat profil Tim Penggerak awal; konten lainnya ditambahkan melalui CRUD terkait.
+Akun admin awal dibuat secara eksplisit lewat `php bin/create-admin.php <email> <nama>`. Password dibaca hanya dari variabel lingkungan `PFP_ADMIN_PASSWORD`, harus minimal 12 karakter, lalu disimpan menggunakan `password_hash()`. Tidak ada password default atau akun admin seed. Migrasi 0003 dan 0004 serta `database/pfp.sql` mengisi konten Tentang Kami dan empat profil Tim Penggerak awal; migrasi 0009 serta `database/pfp.sql` menambahkan lima contoh awal program yang dapat diperbarui atau dihapus lewat dashboard.
 
 | Seed konten yang direncanakan | Isi |
 | --- | --- |
@@ -381,4 +383,4 @@ Akun admin awal dibuat secara eksplisit lewat `php bin/create-admin.php <email> 
 | `posts.php` | Enam berita dari halaman Berita, tiga berita Penghargaan (SATU Indonesia Awards 2022, Mitra NGO Potensial UNICEF, Kolaborasi Kemenkes RI), dan dua Liputan Media tambahan (Young On Top 2024, IndoRelawan 2023) dengan tautan sumbernya. |
 | `faqs.php` | Delapan FAQ dari halaman Kontak. |
 
-Daftar seed konten di atas adalah rencana isi awal untuk tahap CRUD terkait; file seed belum tersedia. Batch, pendaftar, pesan kontak, dan foto dokumentasi dibuat melalui fitur aplikasi.
+Migrasi 0009 menambahkan lima data awal program. Migrasi 0010 menambahkan berita, penghargaan, liputan media, dan delapan FAQ dari konten awal situs. Baris seed ini dapat dikelola atau dihapus melalui panel admin. Batch, pendaftar, pesan kontak, dan foto dokumentasi dibuat melalui fitur aplikasi.

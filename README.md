@@ -4,7 +4,7 @@ Website Papua Future Project (PFP) untuk memperkenalkan program pendidikan dan k
 
 ## Status proyek
 
-UI publik sudah dipindahkan ke **PHP native MVC** dengan PHP **8.4+**. Struktur target memakai **MySQL/MariaDB melalui PDO** dan **shared hosting cPanel**. Fase 1 mencakup konversi route publik dan pemisahan stylesheet/script. Step 3 dan pengelolaan Tentang Kami, Tim Penggerak, Internship, Volunteer, serta batch pada Step 4 sudah tersedia. Tidak dibutuhkan VPS atau proses Node.js yang selalu berjalan.
+UI publik sudah dipindahkan ke **PHP native MVC** dengan PHP **8.4+**. Struktur target memakai **MySQL/MariaDB melalui PDO** dan **shared hosting cPanel**. Step 3–10 tersedia: dashboard, pengelolaan konten, pendaftaran batch intern/relawan dengan unggahan privat, tinjauan pendaftar, dan ekspor CSV/XLSX/PDF. Tidak dibutuhkan VPS atau proses Node.js yang selalu berjalan.
 
 Pertahankan UI publik yang sudah ada sebagai referensi saat mengikuti tahapan migrasi. Foto dokumentasi ditampilkan di detail program dan berita/kegiatan; proyek tidak memakai halaman Galeri terpisah.
 
@@ -29,6 +29,7 @@ Mulai dari [`AGENT.md`](AGENT.md) untuk konteks agent, kemudian ikuti [`docs/STE
 | [SCHEMA](docs/SCHEMA.md) | DDL dan urutan migrasi MySQL. |
 | [USERFLOW](docs/USERFLOW.md) | Alur pengguna publik dan admin. |
 | [DESIGN-ADMIN](docs/DESIGN-ADMIN.md) | Rancangan dashboard dengan sidebar dan halaman admin. |
+| [RWD](docs/RWD.md) | Breakpoint serta perilaku responsif halaman publik dan panel admin. |
 | [GSAP](docs/GSAP.md) | Panduan animasi publik dan admin. |
 | [RULES](docs/RULES.md) | Konvensi kode, MVC, keamanan, aksesibilitas, dan Git. |
 
@@ -53,6 +54,8 @@ Mulai dari [`AGENT.md`](AGENT.md) untuk konteks agent, kemudian ikuti [`docs/STE
 composer install
 php bin/migrate.php
 ```
+
+Paket ekspor XLSX/PDF memerlukan ekstensi PHP `zip`, `fileinfo`, serta GD dengan dukungan WebP. Aktifkan ekstensi `zip` pada PHP CLI dan Apache Laragon sebelum menjalankan `composer install`. Di shared hosting, pastikan ekstensi yang sama tersedia pada versi PHP yang dipilih, `upload_max_filesize` minimal 5 MB, dan `post_max_size` minimal 8 MB. Penyimpanan pendaftar memakai `STORAGE_DIR` dari `.env`; secara default lokasinya `storage/` di root proyek, di luar `public/`. Untuk deployment, arahkan `STORAGE_DIR` ke direktori privat di luar document root bila susunan hosting memungkinkan dan pastikan PHP dapat menulis ke sana.
 
 Migrasi awal akan dilewati karena tabel dan catatan migrasinya sudah ada dari file SQL. Migrasi baru di masa depan tetap bisa berjalan lewat CLI.
 
