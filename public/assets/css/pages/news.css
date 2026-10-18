@@ -3,7 +3,7 @@ html { scroll-behavior: smooth; }
     /* ── HERO ── */
     .hero-bg {
       background: linear-gradient(180deg, rgba(15,23,42,0.45) 0%, rgba(15,23,42,0.85) 100%),
-                  url('/assets/img/hero/herobanner.png') center/cover no-repeat;
+                  url('../../img/hero/herobanner.png') center/cover no-repeat;
     }
     .wave-divider {
       position: absolute; bottom: 0; left: 0;

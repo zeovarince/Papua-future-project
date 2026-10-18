@@ -9,7 +9,9 @@ CREATE TABLE batches (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_batches_type_name (batch_type, name),
-  KEY idx_batches_type_open (batch_type, is_open)
+  KEY idx_batches_type_open (batch_type, is_open),
+  KEY idx_batches_type_id (batch_type, id),
+  KEY idx_batches_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE team_members (
@@ -28,7 +30,7 @@ CREATE TABLE team_members (
   created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  KEY idx_team_group_sort (member_group, sort_order),
+  KEY idx_team_public_order (member_group, is_published, batch_id, sort_order, name),
   KEY idx_team_batch (batch_id),
   CONSTRAINT fk_team_members_batch
     FOREIGN KEY (batch_id) REFERENCES batches (id) ON DELETE RESTRICT

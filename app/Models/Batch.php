@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
+use App\Core\Cache;
 use PDO;
 
 final class Batch
@@ -44,18 +45,22 @@ final class Batch
 
     public static function publicByType(string $type): array
     {
-        $statement = Database::connection()->prepare('SELECT * FROM batches WHERE batch_type = :batch_type ORDER BY id ASC');
-        $statement->execute(['batch_type' => $type]);
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
+        return Cache::remember('batches:public:' . $type, 60, static function () use ($type): array {
+            $statement = Database::connection()->prepare('SELECT * FROM batches WHERE batch_type = :batch_type ORDER BY id ASC');
+            $statement->execute(['batch_type' => $type]);
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        });
     }
 
     public static function openByType(string $type): array
     {
-        $statement = Database::connection()->prepare(
-            'SELECT * FROM batches WHERE batch_type = :batch_type AND is_open = 1 ORDER BY id ASC'
-        );
-        $statement->execute(['batch_type' => $type]);
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
+        return Cache::remember('batches:open:' . $type, 60, static function () use ($type): array {
+            $statement = Database::connection()->prepare(
+                'SELECT * FROM batches WHERE batch_type = :batch_type AND is_open = 1 ORDER BY id ASC'
+            );
+            $statement->execute(['batch_type' => $type]);
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        });
     }
 
     public static function find(int $id): ?array
@@ -75,11 +80,13 @@ final class Batch
         if ($id === null) {
             $statement = Database::connection()->prepare('INSERT INTO batches (batch_type, name) VALUES (:batch_type, :name)');
             $statement->execute(['batch_type' => $type, 'name' => $name]);
+            Cache::clearPublic();
             return;
         }
 
         $statement = Database::connection()->prepare('UPDATE batches SET batch_type = :batch_type, name = :name WHERE id = :id');
         $statement->execute(['batch_type' => $type, 'name' => $name, 'id' => $id]);
+        Cache::clearPublic();
     }
 
     public static function toggle(int $id): bool
@@ -89,12 +96,17 @@ final class Batch
             . 'closed_at = IF(is_open = 1, CURRENT_TIMESTAMP, NULL), is_open = 1 - is_open WHERE id = :id'
         );
         $statement->execute(['id' => $id]);
-        return $statement->rowCount() > 0;
+        $updated = $statement->rowCount() > 0;
+        if ($updated) {
+            Cache::clearPublic();
+        }
+        return $updated;
     }
 
     public static function delete(int $id): void
     {
         $statement = Database::connection()->prepare('DELETE FROM batches WHERE id = :id');
         $statement->execute(['id' => $id]);
+        Cache::clearPublic();
     }
 }

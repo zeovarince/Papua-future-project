@@ -5,29 +5,35 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
+use App\Core\Cache;
 use PDO;
 
 final class TeamMember
 {
     public static function founder(): ?array
     {
-        $statement = Database::connection()->query(
-            "SELECT * FROM team_members WHERE member_group = 'CORE' AND is_founder = 1 AND is_published = 1 LIMIT 1"
-        );
-        $member = $statement->fetch(PDO::FETCH_ASSOC);
-        return is_array($member) ? $member : null;
+        return Cache::remember('team:founder', 60, static function (): ?array {
+            $statement = Database::connection()->query(
+                "SELECT * FROM team_members WHERE member_group = 'CORE' AND is_founder = 1 AND is_published = 1 LIMIT 1"
+            );
+            $member = $statement->fetch(PDO::FETCH_ASSOC);
+            return is_array($member) ? $member : null;
+        });
     }
 
     public static function allByGroup(string $group): array
     {
-        $statement = Database::connection()->prepare(
-            'SELECT tm.*, b.name AS batch_name, b.batch_type, b.is_open '
-            . 'FROM team_members tm LEFT JOIN batches b ON b.id = tm.batch_id '
-            . 'WHERE tm.member_group = :member_group AND tm.is_published = 1 '
-            . 'ORDER BY COALESCE(b.id, 0) ASC, tm.sort_order ASC, tm.name ASC'
-        );
-        $statement->execute(['member_group' => $group]);
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
+        return Cache::remember('team:group:' . $group, 60, static function () use ($group): array {
+            $statement = Database::connection()->prepare(
+                'SELECT tm.id, tm.member_group, tm.batch_id, tm.name, tm.role, tm.university, tm.bio, '
+                . 'tm.photo_path, tm.is_founder, tm.sort_order, b.name AS batch_name, b.batch_type, b.is_open '
+                . 'FROM team_members tm LEFT JOIN batches b ON b.id = tm.batch_id '
+                . 'WHERE tm.member_group = :member_group AND tm.is_published = 1 '
+                . 'ORDER BY tm.batch_id ASC, tm.sort_order ASC, tm.name ASC'
+            );
+            $statement->execute(['member_group' => $group]);
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        });
     }
 
     public static function adminList(string $group): array
@@ -91,6 +97,7 @@ final class TeamMember
             $statement->execute($params);
             $savedId = $id ?? (int) $pdo->lastInsertId();
             $pdo->commit();
+            Cache::clearPublic();
             return $savedId;
         } catch (\Throwable $exception) {
             if ($pdo->inTransaction()) {
@@ -104,5 +111,6 @@ final class TeamMember
     {
         $statement = Database::connection()->prepare('DELETE FROM team_members WHERE id = :id');
         $statement->execute(['id' => $id]);
+        Cache::clearPublic();
     }
 }

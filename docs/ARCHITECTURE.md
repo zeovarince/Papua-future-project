@@ -96,6 +96,7 @@ pfp/
 │  │  ├─ Response.php
 │  │  ├─ View.php                    render View dengan layout
 │  │  ├─ Database.php                koneksi PDO
+│  │  ├─ Cache.php                   cache data publik via APCu atau file
 │  │  ├─ Session.php
 │  │  ├─ Flash.php                   pesan dan isian lama antar redirect
 │  │  ├─ Csrf.php
@@ -511,9 +512,11 @@ Fase migrasi UI mempertahankan Tailwind Play CDN dari HTML lama untuk menjaga ut
 
 ## 11. Data segar dan cache
 
-Versi 1 tidak memakai cache halaman. Halaman publik dirender per permintaan dari database, sehingga perubahan admin langsung tampil. Query halaman publik ringan dan sudah berindeks.
+Model menggunakan cache data publik selama 60 detik. APCu dipakai bila tersedia; bila tidak, cache memakai file di `storage/cache/`, sehingga tetap bekerja pada shared hosting tanpa Redis atau ekstensi tambahan. Cache hanya mencakup konten publik (Tentang Kami, tim yang dipublikasikan, batch publik, program, berita, foto dokumentasi, dan FAQ). Data login, pendaftar, pesan kontak, dan seluruh halaman admin tidak disimpan dalam cache.
 
-Aset statis (CSS, JS, gambar) diberi versi lewat `?v=` dari waktu ubah file (fungsi `asset()`) dan disajikan dengan `Cache-Control` panjang. Gambar memakai `loading="lazy"`, kecuali foto hero.
+Perubahan konten melalui panel admin membersihkan cache publik setelah berhasil disimpan. Perubahan langsung di phpMyAdmin akan terlihat setelah cache berakhir, paling lama 60 detik. `storage/.htaccess` menutup akses web ke file cache.
+
+Aset statis (CSS, JS, gambar) diberi versi lewat `?v=` dari waktu ubah file (fungsi `asset()`) dan disajikan dengan `Cache-Control` panjang. Query publik memakai indeks untuk kolom filter dan pengurutan; query daftar program dan berita hanya mengambil kolom kartu, bukan kolom isi `MEDIUMTEXT`. Gambar memakai `loading="lazy"`, kecuali foto hero.
 
 ## 12. Variabel lingkungan
 
@@ -713,5 +716,5 @@ php -S localhost:8000 -t public public/index.php
 | Konten statis di `config/site.php` dan View | Tidak ada di daftar fitur admin yang disepakati. | Mengubah teks hero atau angka impact butuh perubahan kode. Bisa dibuatkan halaman admin di fase lanjut. |
 | File pendaftar di luar `public/`, foto galeri di `public/uploads/` | Data pendaftar bersifat pribadi, foto galeri memang untuk publik. | Dua lokasi yang dicadangkan. |
 | `file_token` acak untuk folder file pendaftar | Jalur tidak bisa ditebak dan tidak bergantung pada `id` yang baru ada setelah `INSERT`. | Satu folder acak per pendaftar. |
-| Tanpa cache halaman di v1 | Skala kecil, perubahan admin harus langsung terlihat. | Perlu dievaluasi bila trafik naik. |
+| Cache data publik 60 detik dengan APCu atau file | Mengurangi pembacaan database di halaman publik tanpa memerlukan Redis. | Perubahan dari admin menghapus cache; perubahan manual di database menunggu TTL paling lama 60 detik. |
 | Layout server terpisah (`public_html` dan `pfp-app`) | Hosting cPanel umumnya mengunci document root. | `index.php` mencari akar aplikasi di dua tempat. |

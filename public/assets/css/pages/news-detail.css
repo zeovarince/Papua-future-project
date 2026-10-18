@@ -80,7 +80,7 @@ html { scroll-behavior: smooth; }
     .hero-mini {
       min-height: 50vh;
       background: linear-gradient(180deg, rgba(15,23,42,0.45) 0%, rgba(15,23,42,0.85) 100%),
-                  url('/assets/img/hero/herobanner.png') center/cover no-repeat;
+                  url('../../img/hero/herobanner.png') center/cover no-repeat;
       display: flex;
       flex-direction: column;
       justify-content: center;

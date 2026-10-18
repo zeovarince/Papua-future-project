@@ -3,7 +3,7 @@ html { scroll-behavior: smooth; }
     /* ── HERO — sama persis dengan index.html ── */
     .hero-bg {
       background: linear-gradient(180deg, rgba(15,23,42,0.45) 0%, rgba(15,23,42,0.85) 100%),
-                  url('/assets/img/hero/herobanner.png');
+                  url('../../img/hero/herobanner.png');
       background-size: cover;
       background-position: center;
     }

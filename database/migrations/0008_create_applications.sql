@@ -22,8 +22,9 @@ CREATE TABLE applications (
   PRIMARY KEY (id),
   UNIQUE KEY uq_applications_file_token (file_token),
   UNIQUE KEY uq_applications_batch_email (batch_id, email),
-  KEY idx_applications_batch_status (batch_id, status),
+  KEY idx_applications_batch_status_created (batch_id, status, created_at),
   KEY idx_applications_created (created_at),
+  KEY idx_applications_status_created (status, created_at),
   CONSTRAINT fk_applications_batch
     FOREIGN KEY (batch_id) REFERENCES batches (id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -24,6 +24,13 @@ final class Request
         $path = '/' . trim(rawurldecode($path), '/');
         $path = $path === '/' ? '/' : rtrim($path, '/');
 
+        $scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? '/index.php'));
+        $basePath = str_replace('\\', '/', dirname($scriptName));
+        $basePath = ($basePath === '/' || $basePath === '.') ? '' : rtrim($basePath, '/');
+        if ($basePath !== '' && ($path === $basePath || str_starts_with($path, $basePath . '/'))) {
+            $path = substr($path, strlen($basePath)) ?: '/';
+        }
+
         return new self(
             strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')),
             $path,

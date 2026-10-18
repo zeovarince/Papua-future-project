@@ -58,7 +58,9 @@ CREATE TABLE batches (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_batches_type_name (batch_type, name),
-  KEY idx_batches_type_open (batch_type, is_open)
+  KEY idx_batches_type_open (batch_type, is_open),
+  KEY idx_batches_type_id (batch_type, id),
+  KEY idx_batches_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE team_members (
@@ -77,7 +79,7 @@ CREATE TABLE team_members (
   created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  KEY idx_team_group_sort (member_group, sort_order),
+  KEY idx_team_public_order (member_group, is_published, batch_id, sort_order, name),
   KEY idx_team_batch (batch_id),
   CONSTRAINT fk_team_members_batch
     FOREIGN KEY (batch_id) REFERENCES batches (id) ON DELETE RESTRICT
@@ -106,8 +108,8 @@ CREATE TABLE programs (
   updated_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_programs_slug (slug),
-  KEY idx_programs_published_sort (is_published, sort_order),
-  KEY idx_programs_featured (is_featured)
+  KEY idx_programs_public_order (is_published, sort_order, title),
+  KEY idx_programs_featured_order (is_published, is_featured, sort_order, title)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE program_photos (
@@ -119,7 +121,6 @@ CREATE TABLE program_photos (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_program_photos_program (program_id, sort_order),
-  KEY idx_program_photos_created (created_at),
   CONSTRAINT fk_program_photos_program
     FOREIGN KEY (program_id) REFERENCES programs (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -207,8 +208,9 @@ CREATE TABLE applications (
   PRIMARY KEY (id),
   UNIQUE KEY uq_applications_file_token (file_token),
   UNIQUE KEY uq_applications_batch_email (batch_id, email),
-  KEY idx_applications_batch_status (batch_id, status),
+  KEY idx_applications_batch_status_created (batch_id, status, created_at),
   KEY idx_applications_created (created_at),
+  KEY idx_applications_status_created (status, created_at),
   CONSTRAINT fk_applications_batch
     FOREIGN KEY (batch_id) REFERENCES batches (id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

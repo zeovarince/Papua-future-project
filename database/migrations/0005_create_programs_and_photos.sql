@@ -21,8 +21,8 @@ CREATE TABLE programs (
   updated_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_programs_slug (slug),
-  KEY idx_programs_published_sort (is_published, sort_order),
-  KEY idx_programs_featured (is_featured)
+  KEY idx_programs_public_order (is_published, sort_order, title),
+  KEY idx_programs_featured_order (is_published, is_featured, sort_order, title)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE program_photos (
@@ -34,7 +34,6 @@ CREATE TABLE program_photos (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_program_photos_program (program_id, sort_order),
-  KEY idx_program_photos_created (created_at),
   CONSTRAINT fk_program_photos_program
     FOREIGN KEY (program_id) REFERENCES programs (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

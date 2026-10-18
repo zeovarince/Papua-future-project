@@ -48,7 +48,8 @@ Mulai dari [`AGENT.md`](AGENT.md) untuk konteks agent, kemudian ikuti [`docs/STE
 1. Buat database kosong di phpMyAdmin dengan nama yang kamu pilih dan collation `utf8mb4_unicode_ci`.
 2. Pilih database itu, buka tab **Import**, lalu impor [`database/pfp.sql`](database/pfp.sql). File ini membuat seluruh tabel dari ERD/SCHEMA sekaligus dan menandai skema awal sebagai sudah diterapkan.
 3. Isi nama database dan kredensial MySQL yang sama di `.env` (`DB_NAME`, `DB_USER`, `DB_PASS`, `DB_HOST`, `DB_PORT`). Jangan commit `.env`.
-4. Dari PowerShell Laragon di root proyek, jalankan:
+4. Jika database sudah pernah dibuat dari versi skema sebelumnya, pilih database tersebut di phpMyAdmin lalu jalankan sekali file [`database/optimize_existing.sql`](database/optimize_existing.sql). Untuk database baru, indeks optimal sudah termasuk di `pfp.sql`.
+5. Dari PowerShell Laragon di root proyek, jalankan:
 
 ```powershell
 composer install

@@ -9,6 +9,9 @@ html { scroll-behavior: smooth; }
                        text-transform: uppercase; margin-bottom: 12px; }
     .pfp-divider     { width: 48px; height: 3px; background: #40b8fd;
                        border-radius: 2px; margin: 14px 0 22px; }
+    [data-inline-style="join-232"] .pfp-divider,
+    [data-inline-style="join-235"] .pfp-divider,
+    [data-inline-style="join-238"] .pfp-divider { margin-left: auto; margin-right: auto; }
     .pfp-title       { font-size: 34px; font-weight: 800; line-height: 1.2;
                        color: #1a1f2e; margin-bottom: 14px; }
     .pfp-body        { font-size: 16px; color: #4b5563; line-height: 1.8; }
@@ -65,7 +68,7 @@ html { scroll-behavior: smooth; }
     /* ── HERO ── */
     .hero-bg {
       background: linear-gradient(180deg, rgba(15,23,42,0.45) 0%, rgba(15,23,42,0.85) 100%),
-                  url('/assets/img/hero/herobanner.png') center/cover no-repeat;
+                  url('../../img/hero/herobanner.png') center/cover no-repeat;
     }
     .wave-divider { position: absolute; bottom: 0; left: 0; width: 100%;
                     overflow: hidden; line-height: 0; transform: translateY(1px); }

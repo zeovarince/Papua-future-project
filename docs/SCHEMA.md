@@ -104,7 +104,9 @@ CREATE TABLE batches (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_batches_type_name (batch_type, name),
-  KEY idx_batches_type_open (batch_type, is_open)
+  KEY idx_batches_type_open (batch_type, is_open),
+  KEY idx_batches_type_id (batch_type, id),
+  KEY idx_batches_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE team_members (
@@ -123,7 +125,7 @@ CREATE TABLE team_members (
   created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  KEY idx_team_group_sort (member_group, sort_order),
+  KEY idx_team_public_order (member_group, is_published, batch_id, sort_order, name),
   KEY idx_team_batch (batch_id),
   CONSTRAINT fk_team_members_batch
     FOREIGN KEY (batch_id) REFERENCES batches (id) ON DELETE RESTRICT
@@ -164,8 +166,8 @@ CREATE TABLE programs (
   updated_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_programs_slug (slug),
-  KEY idx_programs_published_sort (is_published, sort_order),
-  KEY idx_programs_featured (is_featured)
+  KEY idx_programs_public_order (is_published, sort_order, title),
+  KEY idx_programs_featured_order (is_published, is_featured, sort_order, title)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE program_photos (
@@ -177,7 +179,6 @@ CREATE TABLE program_photos (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_program_photos_program (program_id, sort_order),
-  KEY idx_program_photos_created (created_at),
   CONSTRAINT fk_program_photos_program
     FOREIGN KEY (program_id) REFERENCES programs (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -308,8 +309,9 @@ CREATE TABLE applications (
   PRIMARY KEY (id),
   UNIQUE KEY uq_applications_file_token (file_token),
   UNIQUE KEY uq_applications_batch_email (batch_id, email),
-  KEY idx_applications_batch_status (batch_id, status),
+  KEY idx_applications_batch_status_created (batch_id, status, created_at),
   KEY idx_applications_created (created_at),
+  KEY idx_applications_status_created (status, created_at),
   CONSTRAINT fk_applications_batch
     FOREIGN KEY (batch_id) REFERENCES batches (id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -323,7 +325,25 @@ Catatan kolom `applications`:
 - `interest_areas`: larik JSON berisi satu atau lebih dari `LITERACY`, `HEALTH`, `CREATIVE`, `MEDIA`, `OTHER`.
 - Tipe pendaftar (Intern atau Relawan) tidak disimpan di sini. Tipe diambil dari `batches.batch_type`.
 
-## 4. Pemetaan nilai enum ke label antarmuka
+## 5. Strategi indeks untuk query
+
+Indeks disusun dari kolom yang dipakai untuk filter, join, dan pengurutan oleh Model. Kolom paling kiri pada indeks gabungan mengikuti kolom `WHERE` yang paling umum.
+
+| Indeks | Query yang dibantu |
+| --- | --- |
+| `batches(batch_type, is_open)` | Batch terbuka per jenis, seperti pendaftaran Internship atau Relawan. |
+| `batches(batch_type, id)` dan `batches(created_at)` | Daftar batch per jenis dan daftar admin terbaru. |
+| `team_members(member_group, is_published, batch_id, sort_order, name)` | Anggota publik per kelompok, diurutkan per batch dan urutan tampil. |
+| `programs(is_published, sort_order, title)` | Daftar program publik. |
+| `programs(is_published, is_featured, sort_order, title)` | Preview program unggulan di Beranda. |
+| `posts(is_published, published_at)` | Daftar berita terbaru, berita terbit, dan jumlah berita terbit. |
+| `posts(category, is_published, published_at)` | Berita terkait dan filter daftar per kategori. |
+| `applications(batch_id, status, created_at)` dan `applications(status, created_at)` | Filter daftar pendaftar, pengurutan terbaru, dan hitung pendaftar baru. |
+| `program_photos(program_id, sort_order)` dan `post_photos(post_id, sort_order)` | Foto dokumentasi per konten sesuai urutan. |
+
+Kolom isi panjang `MEDIUMTEXT` tidak ikut diambil pada query kartu program/berita dan daftar admin. Pencarian nama pendaftar memakai `LIKE '%kata%'`, sehingga indeks B-tree tidak dapat mempercepat pencarian parsial tersebut.
+
+## 6. Pemetaan nilai enum ke label antarmuka
 
 | Kolom | Nilai dan label |
 | --- | --- |
@@ -337,7 +357,7 @@ Catatan kolom `applications`:
 
 Pemetaan ini ditulis sekali sebagai konstanta di kelas `App\Support\Labels` dan dipakai oleh View, Validator, dan ekspor.
 
-## 5. Aturan integritas data
+## 7. Aturan integritas data
 
 Beberapa aturan tidak bisa dijaga MySQL sendiri, jadi dijaga di Validator, Model, dan Service. Jangan menghapus pemeriksaan ini dengan alasan "sudah ada di database".
 
@@ -354,13 +374,13 @@ Beberapa aturan tidak bisa dijaga MySQL sendiri, jadi dijaga di Validator, Model
 11. `info_rows` di `programs` divalidasi sebagai larik berisi maksimal 6 objek dengan `label` dan `value` tidak kosong.
 12. Baris `rate_limits` yang lebih tua dari satu hari dihapus oleh `bin/cleanup-rate-limits.php` yang dijalankan lewat cron.
 
-## 6. Migrasi
+## 8. Migrasi
 
 1. `bin/migrate.php` menjalankan file di `database/migrations/` yang belum tercatat, urut nomor, lalu mencatatnya di tabel `schema_migrations` (`migration` sebagai kunci utama, `applied_at`). Tabel ini dibuat oleh skrip itu sendiri.
 2. Migrasi yang sudah dijalankan tidak boleh diedit. Perubahan baru ditulis sebagai file bernomor berikutnya.
 3. Tulis migrasi kecil dengan satu tujuan per file. Perhatikan bahwa `CREATE TABLE` di MySQL melakukan commit otomatis, jadi transaksi tidak bisa membatalkannya.
 
-## 7. Penyimpanan file
+## 9. Penyimpanan file
 
 | Jenis | Lokasi | Akses |
 | --- | --- | --- |
@@ -370,7 +390,7 @@ Beberapa aturan tidak bisa dijaga MySQL sendiri, jadi dijaga di Validator, Model
 
 Nama file di semua jalur dibuat sistem (acak). Nama file asli dari pengguna tidak dipakai. Eksekusi PHP di `public/uploads/` diblokir (lihat [ARCHITECTURE.md](ARCHITECTURE.md)).
 
-## 8. Akun admin awal dan konten
+## 10. Akun admin awal dan konten
 
 Akun admin awal dibuat secara eksplisit lewat `php bin/create-admin.php <email> <nama>`. Password dibaca hanya dari variabel lingkungan `PFP_ADMIN_PASSWORD`, harus minimal 12 karakter, lalu disimpan menggunakan `password_hash()`. Tidak ada password default atau akun admin seed. Migrasi 0003 dan 0004 serta `database/pfp.sql` mengisi konten Tentang Kami dan empat profil Tim Penggerak awal; migrasi 0009 serta `database/pfp.sql` menambahkan lima contoh awal program yang dapat diperbarui atau dihapus lewat dashboard.
 
