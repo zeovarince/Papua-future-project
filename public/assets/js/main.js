@@ -44,10 +44,19 @@ document.addEventListener('keydown', (event) => {
 const desktopNavigation = window.matchMedia('(min-width: 1025px)');
 desktopNavigation.addEventListener('change', () => setPublicNavigation(false));
 
-const currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+const normalizePath = (path) => path.replace(/\/$/, '') || '/';
+const currentPath = normalizePath(window.location.pathname);
+const homeLink = document.querySelector('.nav-brand');
+const homePath = normalizePath(new URL(homeLink?.href || '/', window.location.origin).pathname);
+
 document.querySelectorAll('.nav-link').forEach((link) => {
-  const linkPath = new URL(link.href, window.location.origin).pathname.replace(/\/$/, '') || '/';
-  const isActive = linkPath === currentPath || (linkPath !== '/' && currentPath.startsWith(`${linkPath}/`));
+  const linkPath = normalizePath(new URL(link.href, window.location.origin).pathname);
+  // The home URL can be a directory prefix (for example /PFP/public).
+  // Match it exactly so it never stays active on child pages.
+  const isHomeLink = linkPath === homePath;
+  const isActive = isHomeLink
+    ? currentPath === homePath
+    : linkPath === currentPath || (linkPath !== '/' && currentPath.startsWith(`${linkPath}/`));
   link.classList.toggle('active', isActive);
 });
 

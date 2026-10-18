@@ -230,6 +230,17 @@ VALUES
   ('CORE', 'Koordinator Relawan', 'Koordinator Relawan', 'Mengelola rekrutmen dan penugasan relawan dari seluruh Indonesia.', NULL, NULL, 0, 3, 1),
   ('CORE', 'Koordinator Kesehatan', 'Koordinator Kesehatan', 'Mengkoordinasikan program kesehatan dan imunisasi bersama mitra.', NULL, NULL, 0, 4, 1);
 
+-- Batch internship pertama. Foto sengaja NULL agar dapat diunggah lewat panel admin.
+INSERT INTO batches (batch_type, name, is_open) VALUES ('INTERN', 'Batch 1', 0);
+SET @intern_batch_1_id := LAST_INSERT_ID();
+INSERT INTO team_members
+  (member_group, batch_id, name, role, university, photo_path, is_founder, sort_order, is_published)
+VALUES
+  ('INTERN', @intern_batch_1_id, 'A. Choiril Anwar EL-A.R', 'Divisi Web Development', 'Universitas Trunodjoyo Madura', NULL, 0, 1, 1),
+  ('INTERN', @intern_batch_1_id, 'Rayhani Dilha', 'Divisi Digital Communication', 'Universitas Diponegoro', NULL, 0, 2, 1),
+  ('INTERN', @intern_batch_1_id, 'Suckeyla Rivella', 'Divisi Program Development', 'Universitas Brawijaya', NULL, 0, 3, 1),
+  ('INTERN', @intern_batch_1_id, 'Kayla Fitri Fathiyach', 'Divisi Program Development', 'Universitas Indonesia', NULL, 0, 4, 1);
+
 INSERT INTO programs (slug, category_label, title, summary, tagline, body, activities, partners, info_rows, stat1_value, stat1_label, stat2_value, stat2_label, sort_order, is_featured, is_published) VALUES
 ('bimbel-literasi', 'Pendidikan', 'Bimbingan Belajar & Literasi', 'Mendampingi anak-anak mengembangkan kemampuan membaca, menulis, dan berhitung melalui kegiatan belajar di kampung binaan.', 'Belajar bersama untuk membuka lebih banyak kesempatan.', 'Program bimbingan belajar mendukung literasi dasar anak-anak melalui kegiatan yang disesuaikan dengan kebutuhan dan kondisi komunitas setempat. Relawan mendampingi proses belajar secara rutin dan mendorong lingkungan yang aman serta menyenangkan bagi anak.', 'Bimbingan membaca, menulis, dan berhitung\nKegiatan belajar kelompok\nPojok baca dan donasi buku', NULL, JSON_ARRAY(JSON_OBJECT('label','Wilayah dampingan','value','Papua Barat')), '700+', 'Anak terdampak', '13', 'Kampung binaan', 1, 1, 1),
 ('literasi-digital', 'Pendidikan', 'Literasi Digital', 'Mendampingi anak dan pemuda mengenal teknologi digital serta menggunakannya dengan aman dan bermanfaat.', 'Membuka akses belajar di dunia digital.', 'Kegiatan literasi digital mengenalkan perangkat, internet, dan keterampilan dasar teknologi secara bertahap. Materi mempertimbangkan ketersediaan perangkat dan konektivitas di lokasi kegiatan.', 'Pengenalan komputer dan perangkat digital\nKeterampilan dasar internet\nPendampingan penggunaan teknologi yang aman', NULL, NULL, NULL, NULL, NULL, NULL, 2, 1, 1),

@@ -1,0 +1,17 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Keep the project root usable in local subdirectory installs such as /PFP.
+    RewriteRule ^$ %{REQUEST_URI}public/ [R=302,L]
+
+    # The project root is not the web document root. Only the public directory may be served.
+    RewriteRule ^(?!public(?:/|$)) - [F,L,NC]
+</IfModule>
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "^(?:\.env(?:\..*)?|\.gitignore|\.gitattributes|bootstrap\.php|composer\.(?:json|lock))$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
