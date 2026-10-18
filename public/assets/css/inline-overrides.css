@@ -319,3 +319,7 @@
 [data-inline-style="contact-300"] { border:2px solid rgba(255,255,255,0.5);color:white;padding:14px 32px;
                   border-radius:999px;font-size:15px;font-weight:700;text-decoration:none;
                   transition:border-color 0.2s ease; }
+
+#lightbox.is-open { display: flex; }
+body.lightbox-open { overflow: hidden; }
+[data-inline-style="news-detail-199"].is-visible { opacity: 1; }

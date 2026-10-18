@@ -46,6 +46,7 @@ Ini struktur target. Step 1 di [STEP.md](STEP.md) membuat seluruh folder dan fil
 ```
 pfp/
 ├─ AGENT.md                          panduan untuk AI agent
+├─ bootstrap.php                     autoload dan konfigurasi lingkungan
 ├─ README.md                         cara menjalankan di lokal
 ├─ composer.json                     autoload PSR-4 App\ ke app/, dependensi
 ├─ composer.lock
@@ -58,17 +59,18 @@ pfp/
 │
 ├─ bin/                              skrip CLI
 │  ├─ migrate.php                    menjalankan file migrasi
-│  ├─ seed.php                       mengisi data awal
-│  └─ cleanup.php                    membersihkan rate_limits lama (cron)
+│  ├─ create-database.php             membuat DB lokal (opsional, CLI)
+│  ├─ create-admin.php                membuat akun admin awal secara aman
+│  └─ cleanup-rate-limits.php         membersihkan rate_limits lama (cron)
 │
 ├─ config/
 │  ├─ app.php                        nama aplikasi, URL, zona waktu, sesi
-│  ├─ database.php                   kredensial dan opsi PDO
 │  ├─ routes.php                     tabel route (bagian 6)
 │  └─ site.php                       data statis: kontak, sosial media, angka impact,
 │                                    peta, wilayah, logo mitra, navigasi
 │
 ├─ database/
+│  ├─ pfp.sql                        skema lengkap untuk impor phpMyAdmin
 │  ├─ migrations/
 │  │  ├─ 0001_create_admin_users.sql
 │  │  ├─ 0002_create_rate_limits.sql
@@ -98,7 +100,7 @@ pfp/
 │  │  ├─ Flash.php                   pesan dan isian lama antar redirect
 │  │  ├─ Csrf.php
 │  │  ├─ Validator.php               mesin aturan validasi
-│  │  ├─ Env.php
+│  │  ├─ Environment.php              pembaca .env
 │  │  ├─ Logger.php
 │  │  └─ helpers.php                 e(), url(), asset(), old(), error(), csrf_field(), active()
 │  │
@@ -166,7 +168,7 @@ pfp/
 │  │
 │  ├─ Validators/
 │  │  ├─ LoginValidator.php
-│  │  ├─ AboutValidator.php
+│  │  ├─ AboutContentValidator.php
 │  │  ├─ TeamMemberValidator.php
 │  │  ├─ BatchValidator.php
 │  │  ├─ ProgramValidator.php
@@ -181,7 +183,7 @@ pfp/
 │     ├─ layouts/
 │     │  ├─ public.php               header, main, footer, skrip publik
 │     │  ├─ admin.php                sidebar saja, tanpa navbar atas
-│     │  └─ auth.php                 layout halaman login
+│     │  └─ admin-auth.php              layout halaman login
 │     ├─ partials/
 │     │  ├─ public/
 │     │  │  ├─ head.php              meta, OG, CSS
@@ -257,7 +259,7 @@ pfp/
 │  │  │     ├─ admin-base.css
 │  │  │     ├─ admin-layout.css      sidebar, area konten
 │  │  │     ├─ admin-components.css  tabel, form, dialog, toast, pill
-│  │  │     └─ admin-pages.css
+│  │  │     └─ admin-components.css
 │  │  ├─ js/
 │  │  │  ├─ js-flag.js               menambah kelas js pada html (dimuat di head)
 │  │  │  ├─ main.js                  menu HP, header saat gulir, salin tautan
@@ -576,7 +578,7 @@ require APP_ROOT . '/vendor/autoload.php';
 4. Buka **Git Version Control**, pilih **Create**, isi URL repositori (untuk repositori privat, pasang deploy key SSH), dan pilih jalur `repositories/pfp`.
 5. Buat folder `/home/USERNAME/pfp-app` dan `.env` di dalamnya lewat File Manager, isi sesuai bagian 12 dengan `STORAGE_DIR=/home/USERNAME/pfp-app/storage` dan `APP_ENV=production`.
 6. Pastikan AutoSSL aktif untuk domain.
-7. Tambahkan cron di **Cron Jobs**: `0 3 * * * /usr/local/bin/ea-php84 /home/USERNAME/pfp-app/bin/cleanup.php`. Jalur PHP CLI berbeda antar hosting. Cek dengan `which ea-php84` atau tanyakan ke penyedia hosting; cron hanya diperlukan untuk cleanup terjadwal dan bukan proses yang harus terus hidup.
+7. Tambahkan cron di **Cron Jobs**: `0 3 * * * /usr/local/bin/ea-php84 /home/USERNAME/pfp-app/bin/cleanup-rate-limits.php`. Jalur PHP CLI berbeda antar hosting. Cek dengan `which ea-php84` atau tanyakan ke penyedia hosting; cron hanya diperlukan untuk cleanup terjadwal dan bukan proses yang harus terus hidup.
 
 ### 13.3 `.cpanel.yml`
 
@@ -588,7 +590,7 @@ deployment:
   tasks:
     - export APP_DIR=/home/USERNAME/pfp-app
     - export WEB_DIR=/home/USERNAME/public_html
-    - /bin/mkdir -p $APP_DIR/storage/logs $APP_DIR/storage/applications $APP_DIR/storage/cache
+    - /bin/mkdir -p $APP_DIR/storage/logs $APP_DIR/storage/applications $APP_DIR/storage/sessions $APP_DIR/storage/cache
     - /usr/bin/rsync -a --delete app/ $APP_DIR/app/
     - /usr/bin/rsync -a --delete config/ $APP_DIR/config/
     - /usr/bin/rsync -a --delete database/ $APP_DIR/database/
@@ -693,9 +695,10 @@ server {
 
 ```
 composer install
-cp .env.example .env          # isi koneksi database lokal
+Copy-Item .env.example .env   # isi koneksi database lokal
+php bin/create-database.php   # opsional, buat database lokal
 php bin/migrate.php
-php bin/seed.php
+php bin/create-admin.php admin@example.com "Admin PFP" # password lewat PFP_ADMIN_PASSWORD
 php -S localhost:8000 -t public public/index.php
 ```
 

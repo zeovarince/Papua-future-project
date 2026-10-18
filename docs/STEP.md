@@ -48,13 +48,13 @@ Panduan urutan kerja AI agent dan developer dari UI statis sampai situs dinamis 
 ### Step 3 — Fondasi database, autentikasi, dan dashboard admin
 
 1. Pasang Composer/autoload PSR-4 dan konfigurasi `.env` tanpa memasukkan rahasia ke Git.
-2. Terapkan skema serta migrasi menurut urutan di [SCHEMA.md](SCHEMA.md). Siapkan koneksi PDO, logger, sesi, Flash, CSRF, validasi, dan penanganan error.
-3. Buat akun admin awal melalui seed/skrip CLI yang aman; simpan password hanya sebagai hash.
+2. Terapkan migrasi yang tersedia menurut urutan di [SCHEMA.md](SCHEMA.md) (Step 3 membuat tabel admin dan rate limit). Siapkan koneksi PDO, logger, sesi, Flash, CSRF, dan penanganan error.
+3. Buat akun admin awal lewat `php bin/create-admin.php` dengan password dari environment; skrip hanya menyimpan hash dan menolak email duplikat.
 4. Implementasikan login, logout, middleware autentikasi, rate limit login, regenerasi sesi, dan route admin terlindungi.
 5. Bangun kerangka dashboard sesuai [DESIGN-ADMIN.md](DESIGN-ADMIN.md): sidebar di kiri, tanpa navbar atas, layout responsif, breadcrumb, area konten, dan halaman ringkasan sederhana.
 6. Tambahkan status kosong yang jujur jika metrik belum tersedia; jangan menampilkan angka palsu.
 
-**Kriteria selesai:** pengunjung tanpa sesi tidak dapat membuka admin; admin dapat login/logout; sesi dan token CSRF bekerja; dashboard dan sidebar berfungsi di desktop dan mobile.
+**Kriteria selesai:** pengunjung tanpa sesi tidak dapat membuka admin; admin dapat login/logout; sesi dan token CSRF bekerja; dashboard dan sidebar berfungsi di desktop dan mobile. Kode fondasi sudah tersedia; sebelum pemakaian, isi `.env`, jalankan migrasi, lalu buat akun admin dengan skrip CLI.
 
 ### Step 4 — Tentang Kami dan pengelolaan tim/batch
 
@@ -148,7 +148,7 @@ Implementasikan animasi sesuai [GSAP.md](GSAP.md) setelah markup final: muat GSA
 1. Pastikan paket provider menyediakan PHP 8.4+, ekstensi wajib, MySQL/MariaDB, HTTPS, dan batas resource/unggah memadai. Verifikasi di paket akun yang benar karena fasilitas dapat berbeda antar paket.
 2. Buat database, user, folder aplikasi privat, `.env` production, dan direktori penyimpanan; set permission minimum yang diperlukan.
 3. Konfigurasikan document root atau layout `public_html` sesuai [ARCHITECTURE.md bagian 13](ARCHITECTURE.md#13-deployment-di-cpanel-dengan-git).
-4. Pasang dependency production, jalankan migrasi dan seed awal melalui CLI yang tersedia, lalu pastikan password seed diganti.
+4. Pasang dependency production, jalankan migrasi melalui CLI yang tersedia, lalu buat akun admin eksplisit dengan `bin/create-admin.php` dan password kuat dari environment. Seed konten hanya ditambahkan bila tahap terkait memerlukannya.
 5. Jalankan deployment dari Git/cPanel. Pastikan berkas upload dan penyimpanan privat tidak tersentuh oleh sinkronisasi kode.
 6. Periksa HTTPS, beranda, route detail, login, satu alur form, unggahan, ekspor, log, backup, dan cron cleanup.
 

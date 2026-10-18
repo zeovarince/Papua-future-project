@@ -5,20 +5,21 @@ declare(strict_types=1);
 namespace App\Core;
 
 use Closure;
+use App\Middleware\Middleware;
 
 final class Router
 {
-    /** @var list<array{method: string, pattern: string, handler: Closure}> */
+    /** @var list<array{method: string, pattern: string, handler: Closure, middleware: list<Middleware>}> */
     private array $routes = [];
 
-    public function get(string $path, Closure $handler): void
+    public function get(string $path, Closure $handler, array $middleware = []): void
     {
-        $this->add('GET', $path, $handler);
+        $this->add('GET', $path, $handler, $middleware);
     }
 
-    public function post(string $path, Closure $handler): void
+    public function post(string $path, Closure $handler, array $middleware = []): void
     {
-        $this->add('POST', $path, $handler);
+        $this->add('POST', $path, $handler, $middleware);
     }
 
     public function dispatch(Request $request): Response
@@ -33,7 +34,16 @@ final class Router
             }
 
             $parameters = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
-            return ($route['handler'])($request, ...array_values($parameters));
+            $arguments = array_values($parameters);
+            $next = static fn (Request $currentRequest, mixed ...$args): Response => ($route['handler'])($currentRequest, ...$args);
+            foreach (array_reverse($route['middleware']) as $middleware) {
+                $downstream = $next;
+                $next = static fn (Request $currentRequest, mixed ...$args): Response => $middleware->handle(
+                    $currentRequest,
+                    static fn (): Response => $downstream($currentRequest, ...$args),
+                );
+            }
+            return $next($request, ...$arguments);
         }
 
         return View::render('public/errors/404', [
@@ -42,7 +52,7 @@ final class Router
         ], 'public', 404);
     }
 
-    private function add(string $method, string $path, Closure $handler): void
+    private function add(string $method, string $path, Closure $handler, array $middleware): void
     {
         $quoted = preg_quote($path, '~');
         $pattern = preg_replace('/\\\{([a-zA-Z][a-zA-Z0-9_]*)\\\}/', '(?P<$1>[^/]+)', $quoted);
@@ -50,6 +60,7 @@ final class Router
             'method' => $method,
             'pattern' => '~^' . $pattern . '$~',
             'handler' => $handler,
+            'middleware' => $middleware,
         ];
     }
 }

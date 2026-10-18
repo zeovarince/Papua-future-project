@@ -15,7 +15,7 @@ final class ContactController
             'title' => 'Kontak — Papua Future Project',
             'page' => 'contact',
             'stylesheet' => 'css/pages/contact.css',
-            'script' => 'pages/contact.js',
+            'script' => 'js/pages/contact.js',
         ]);
     }
 }

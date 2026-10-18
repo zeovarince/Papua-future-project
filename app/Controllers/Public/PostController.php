@@ -31,7 +31,7 @@ final class PostController
             'title' => '500 Buku Baru Tiba di Pulau Mansinam — Papua Future Project',
             'page' => 'news-detail',
             'stylesheet' => 'css/pages/news-detail.css',
-            'script' => 'pages/news-detail.js',
+            'script' => 'js/pages/news-detail.js',
             'slug' => $slug,
         ]);
     }

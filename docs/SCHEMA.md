@@ -1,6 +1,6 @@
 # SCHEMA: DDL MySQL
 
-DDL lengkap semua tabel, siap dijalankan di MySQL 8 atau MariaDB 10.6 ke atas. Diagram dan penjelasan relasi ada di [ERD.md](ERD.md). Kebutuhan produk ada di [PRD.md](PRD.md).
+DDL lengkap semua tabel, siap dijalankan di MySQL 8 atau MariaDB 10.6 ke atas. Untuk impor sekaligus lewat phpMyAdmin, gunakan [`../database/pfp.sql`](../database/pfp.sql) setelah membuat dan memilih database kosong. Diagram dan penjelasan relasi ada di [ERD.md](ERD.md). Kebutuhan produk ada di [PRD.md](PRD.md).
 
 ## 1. Aturan penamaan
 
@@ -27,7 +27,19 @@ Satu file SQL per berkas di `database/migrations/`. Urutan mengikuti urutan peng
 | `0007_create_faqs_and_contact_messages.sql` | `faqs`, `contact_messages` | 7 |
 | `0008_create_applications.sql` | `applications` | 9 |
 
-## 3. DDL
+## 3. Tabel infrastruktur migrasi
+
+`bin/migrate.php` membuat tabel pencatatan berikut sebelum menjalankan migrasi. Tabel ini dikelola skrip migrasi dan bukan tabel domain di ERD.
+
+```sql
+CREATE TABLE schema_migrations (
+  migration VARCHAR(190) NOT NULL,
+  applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (migration)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+## 4. DDL
 
 ### 0001_create_admin_users.sql
 
@@ -338,11 +350,11 @@ Beberapa aturan tidak bisa dijaga MySQL sendiri, jadi dijaga di Validator, Model
 9. Satu `programs` atau `posts` maksimal punya 30 foto. Dijaga di `GalleryService` sebelum `INSERT`.
 10. `slug` dibuat dari judul dengan huruf kecil dan tanda hubung. Bila bentrok, tambahkan angka di belakangnya. Slug tidak berubah saat judul diubah, supaya tautan lama tetap berlaku.
 11. `info_rows` di `programs` divalidasi sebagai larik berisi maksimal 6 objek dengan `label` dan `value` tidak kosong.
-12. Baris `rate_limits` yang lebih tua dari satu hari dihapus oleh `bin/cleanup.php` yang dijalankan lewat cron.
+12. Baris `rate_limits` yang lebih tua dari satu hari dihapus oleh `bin/cleanup-rate-limits.php` yang dijalankan lewat cron.
 
 ## 6. Migrasi
 
-1. `bin/migrate.php` menjalankan file di `database/migrations/` yang belum tercatat, urut nomor, lalu mencatatnya di tabel `schema_migrations` (`filename` sebagai kunci utama, `applied_at`). Tabel ini dibuat oleh skrip itu sendiri.
+1. `bin/migrate.php` menjalankan file di `database/migrations/` yang belum tercatat, urut nomor, lalu mencatatnya di tabel `schema_migrations` (`migration` sebagai kunci utama, `applied_at`). Tabel ini dibuat oleh skrip itu sendiri.
 2. Migrasi yang sudah dijalankan tidak boleh diedit. Perubahan baru ditulis sebagai file bernomor berikutnya.
 3. Tulis migrasi kecil dengan satu tujuan per file. Perhatikan bahwa `CREATE TABLE` di MySQL melakukan commit otomatis, jadi transaksi tidak bisa membatalkannya.
 
@@ -356,11 +368,11 @@ Beberapa aturan tidak bisa dijaga MySQL sendiri, jadi dijaga di Validator, Model
 
 Nama file di semua jalur dibuat sistem (acak). Nama file asli dari pengguna tidak dipakai. Eksekusi PHP di `public/uploads/` diblokir (lihat [ARCHITECTURE.md](ARCHITECTURE.md)).
 
-## 8. Data awal (seed)
+## 8. Akun admin awal dan konten
 
-Dijalankan lewat `php bin/seed.php`. Skrip ini aman dijalankan ulang: tidak menimpa data yang sudah ada. Isi seed berasal dari teks yang sudah ada di UI statis. Jangan mengarang teks baru. Data seed ditulis sebagai larik PHP di `database/seeds/`.
+Akun admin awal dibuat secara eksplisit lewat `php bin/create-admin.php <email> <nama>`. Password dibaca hanya dari variabel lingkungan `PFP_ADMIN_PASSWORD`, harus minimal 12 karakter, lalu disimpan menggunakan `password_hash()`. Tidak ada password default atau akun admin seed. Migrasi 0003 dan 0004 serta `database/pfp.sql` mengisi konten Tentang Kami dan empat profil Tim Penggerak awal; konten lainnya ditambahkan melalui CRUD terkait.
 
-| Berkas seed | Isi |
+| Seed konten yang direncanakan | Isi |
 | --- | --- |
 | `admin.php` | Satu akun admin dari `SEED_ADMIN_EMAIL` dan `SEED_ADMIN_PASSWORD`, disimpan dengan `password_hash()`. |
 | `about.php` | Satu baris `about_content`: cerita dari halaman Tentang Kami, visi, dan empat butir misi. |
@@ -369,4 +381,4 @@ Dijalankan lewat `php bin/seed.php`. Skrip ini aman dijalankan ulang: tidak meni
 | `posts.php` | Enam berita dari halaman Berita, tiga berita Penghargaan (SATU Indonesia Awards 2022, Mitra NGO Potensial UNICEF, Kolaborasi Kemenkes RI), dan dua Liputan Media tambahan (Young On Top 2024, IndoRelawan 2023) dengan tautan sumbernya. |
 | `faqs.php` | Delapan FAQ dari halaman Kontak. |
 
-Batch, pendaftar, pesan kontak, dan foto galeri tidak di-seed. Semuanya dibuat lewat antarmuka.
+Daftar seed konten di atas adalah rencana isi awal untuk tahap CRUD terkait; file seed belum tersedia. Batch, pendaftar, pesan kontak, dan foto dokumentasi dibuat melalui fitur aplikasi.

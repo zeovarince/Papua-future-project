@@ -6,6 +6,7 @@ namespace App\Controllers\Public;
 
 use App\Core\Response;
 use App\Core\View;
+use App\Models\TeamMember;
 
 final class HomeController
 {
@@ -15,7 +16,8 @@ final class HomeController
             'title' => 'Papua Future Project — Every Child Matters',
             'page' => 'home',
             'stylesheet' => 'css/pages/home.css',
-            'script' => 'pages/home.js',
+            'script' => 'js/pages/home.js',
+            'founder' => TeamMember::founder(),
         ]);
     }
 }

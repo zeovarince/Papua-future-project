@@ -20,6 +20,6 @@ document.querySelector('[data-action=\"copy-link\"]')?.addEventListener('click',
 
     function showCopyToast() {
       const toast = document.getElementById('copy-toast');
-      toast.style.opacity = '1';
-      setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+      toast.classList.add('is-visible');
+      setTimeout(() => { toast.classList.remove('is-visible'); }, 2000);
     }

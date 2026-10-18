@@ -12,8 +12,17 @@ if (!function_exists('e')) {
 if (!function_exists('url')) {
     function url(string $path = '/'): string
     {
-        $base = rtrim((string) (getenv('APP_URL') ?: ''), '/');
+        $base = getenv('APP_ENV') === 'production'
+            ? rtrim((string) (getenv('APP_URL') ?: ''), '/')
+            : '';
         return $base . '/' . ltrim($path, '/');
+    }
+}
+
+if (!function_exists('csrf_field')) {
+    function csrf_field(): string
+    {
+        return '<input type="hidden" name="_csrf" value="' . e(\App\Core\Csrf::token()) . '">';
     }
 }
 

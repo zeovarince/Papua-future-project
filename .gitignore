@@ -6,6 +6,8 @@
 !/storage/applications/.gitkeep
 /storage/cache/*
 !/storage/cache/.gitkeep
+/storage/sessions/*
+!/storage/sessions/.gitkeep
 /public/uploads/*
 !/public/uploads/.htaccess
 !/public/uploads/.gitkeep
@@ -13,3 +15,4 @@
 /.idea/
 /.vscode/
 *.log
+/docs

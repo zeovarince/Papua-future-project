@@ -18,6 +18,9 @@ final class View
             throw new RuntimeException('View tidak ditemukan.');
         }
 
+        if ($layout === 'admin') {
+            $data['admin'] ??= Session::get('admin', []);
+        }
         extract($data, EXTR_SKIP);
         ob_start();
         require $viewFile;

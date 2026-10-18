@@ -17,13 +17,13 @@
       lbImg.alt         = item.dataset.caption;
       lbCaption.textContent = item.dataset.caption;
       lbCounter.textContent = (current + 1) + ' / ' + items.length;
-      lightbox.style.display = 'flex';
-      document.body.style.overflow = 'hidden';
+      lightbox.classList.add('is-open');
+      document.body.classList.add('lightbox-open');
     }
 
     function closeLightbox() {
-      lightbox.style.display = 'none';
-      document.body.style.overflow = '';
+      lightbox.classList.remove('is-open');
+      document.body.classList.remove('lightbox-open');
     }
 
     function showPrev() {
@@ -52,14 +52,9 @@
 
     // Keyboard: Esc tutup, ← → navigasi
     document.addEventListener('keydown', (e) => {
-      if (lightbox.style.display !== 'flex') return;
+      if (!lightbox.classList.contains('is-open')) return;
       if (e.key === 'Escape')     closeLightbox();
       if (e.key === 'ArrowLeft')  showPrev();
       if (e.key === 'ArrowRight') showNext();
     });
 
-    // Hover button lightbox
-    [lbClose, lbPrev, lbNext].forEach(btn => {
-      btn.addEventListener('mouseenter', () => btn.style.background = 'rgba(255,255,255,0.25)');
-      btn.addEventListener('mouseleave', () => btn.style.background = 'rgba(255,255,255,0.12)');
-    });

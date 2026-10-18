@@ -11,6 +11,9 @@ final class Request
         private readonly string $path,
         private readonly array $query,
         private readonly array $post,
+        private readonly array $files,
+        private readonly string $ipAddress,
+        private readonly bool $secureConnection,
     ) {
     }
 
@@ -26,6 +29,9 @@ final class Request
             $path,
             $_GET,
             $_POST,
+            $_FILES,
+            (string) ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0'),
+            (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
         );
     }
 
@@ -47,5 +53,21 @@ final class Request
     public function post(string $key, mixed $default = null): mixed
     {
         return $this->post[$key] ?? $default;
+    }
+
+    public function file(string $key): ?array
+    {
+        $file = $this->files[$key] ?? null;
+        return is_array($file) ? $file : null;
+    }
+
+    public function ipAddress(): string
+    {
+        return $this->ipAddress;
+    }
+
+    public function isSecure(): bool
+    {
+        return $this->secureConnection;
     }
 }

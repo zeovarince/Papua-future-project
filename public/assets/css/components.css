@@ -7,3 +7,37 @@ button,
 a {
   -webkit-tap-highlight-color: transparent;
 }
+
+[data-hover-leave="background:white"]:not(:hover) { background: white; }
+[data-hover-enter="background:#f0f7ff"]:hover { background: #f0f7ff; }
+
+[data-hover-leave="background:#40b8fd;color:white"]:not(:hover) {
+  background: #40b8fd;
+  color: white;
+}
+[data-hover-enter="background:white;color:#3770c1"]:hover {
+  background: white;
+  color: #3770c1;
+}
+
+[data-hover-leave="borderColor:rgba(255,255,255,0.5)"] { border-color: rgba(255,255,255,0.5); }
+[data-hover-enter="borderColor:white"]:hover { border-color: white; }
+
+[data-hover-leave="color:#6b7280;background:#f0f7ff"]:not(:hover) {
+  color: #6b7280;
+  background: #f0f7ff;
+}
+[data-hover-enter="color:#3770c1;background:#e0edff"]:hover {
+  color: #3770c1;
+  background: #e0edff;
+}
+
+[data-hover-leave="color:#3770c1"]:not(:hover) { color: #3770c1; }
+[data-hover-enter="color:#40b8fd"]:hover { color: #40b8fd; }
+
+[data-hover-leave="color:rgba(255,255,255,0.60)"]:not(:hover) { color: rgba(255,255,255,0.60); }
+[data-hover-enter="color:white"]:hover { color: white; }
+
+#lb-close:hover,
+#lb-prev:hover,
+#lb-next:hover { background: rgba(255,255,255,0.25); }

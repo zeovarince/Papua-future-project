@@ -13,6 +13,11 @@ final class Response
     ) {
     }
 
+    public static function redirect(string $location, int $status = 303): self
+    {
+        return new self('', $status, ['Location' => $location, 'Cache-Control' => 'no-store']);
+    }
+
     public function send(): void
     {
         http_response_code($this->status);

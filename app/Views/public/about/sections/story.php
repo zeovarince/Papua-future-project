@@ -7,15 +7,9 @@
 <span class="pfp-tag">Sejarah &amp; Latar Belakang</span>
 <h2 class="pfp-title">Dari satu tenda belajar di Mansinam, semua ini dimulai.</h2>
 <div class="pfp-divider"></div>
-<p class="pfp-body">
-            Pada 2020, seorang pemuda bernama Bhrisco Jordy Dudi Padatu memutuskan untuk turun langsung ke Pulau Mansinam. Ia melihat anak-anak yang haus belajar tapi tidak punya akses — tidak ada buku yang cukup, tidak ada guru tetap, tidak ada layanan kesehatan yang menjangkau kampung mereka.
-          </p>
-<p class="pfp-body" data-inline-style="about-14">
-            Dari kepedulian itu, Papua Future Project lahir bukan sebagai lembaga besar, tapi sebagai gerakan kecil yang dimulai dari satu tenda belajar dan sekelompok relawan yang percaya bahwa setiap anak itu penting.
-          </p>
-<p class="pfp-body" data-inline-style="about-15">
-            Lima tahun kemudian, gerakan itu sudah menjangkau 700+ anak di 13 kampung, dengan 250+ relawan dari seluruh Indonesia yang bergantian hadir memberikan dampak nyata.
-          </p>
+<?php foreach (preg_split('/\R\s*\R/', trim((string) ($about['story'] ?? ''))) ?: [] as $paragraph): ?>
+<?php if (trim($paragraph) !== ''): ?><p class="pfp-body"><?= nl2br(e(trim($paragraph))) ?></p><?php endif; ?>
+<?php endforeach; ?>
 </div>
 <!-- Kolom Kanan: Timeline -->
 <div>
