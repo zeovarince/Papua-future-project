@@ -33,7 +33,11 @@ final class Batch
 
     public static function countOpen(): int
     {
-        return (int) Database::connection()->query('SELECT COUNT(*) FROM batches WHERE is_open = 1')->fetchColumn();
+        return (int) Database::connection()->query(
+            'SELECT COUNT(*) FROM batches b '
+            . 'INNER JOIN application_form_settings s ON s.application_type = b.batch_type AND s.is_active = 1 '
+            . 'WHERE b.is_open = 1'
+        )->fetchColumn();
     }
 
     public static function byType(string $type): array
@@ -56,7 +60,9 @@ final class Batch
     {
         return Cache::remember('batches:open:' . $type, 60, static function () use ($type): array {
             $statement = Database::connection()->prepare(
-                'SELECT * FROM batches WHERE batch_type = :batch_type AND is_open = 1 ORDER BY id ASC'
+                'SELECT b.* FROM batches b '
+                . 'INNER JOIN application_form_settings s ON s.application_type = b.batch_type AND s.is_active = 1 '
+                . 'WHERE b.batch_type = :batch_type AND b.is_open = 1 ORDER BY b.id ASC'
             );
             $statement->execute(['batch_type' => $type]);
             return $statement->fetchAll(PDO::FETCH_ASSOC);

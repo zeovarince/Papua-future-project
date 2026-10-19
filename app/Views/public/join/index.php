@@ -131,6 +131,7 @@ declare(strict_types=1);
   <?php $selectedBatchId = (string) ($old['batch_id'] ?? ''); ?>
   <?php $selectedInterestAreas = is_array($old['interest_areas'] ?? null) ? $old['interest_areas'] : []; ?>
   <?php $openBatchIds = array_map('strval', array_column(array_merge($openInternBatches, $openVolunteerBatches), 'id')); ?>
+  <?php $selectedBatchType = $oldBatchType; foreach (array_merge($openInternBatches, $openVolunteerBatches) as $openBatch) { if ((string) $openBatch['id'] === $selectedBatchId) { $selectedBatchType = $openBatch['batch_type']; break; } } ?>
   <?php if (!$hasOpenBatches): ?><div class="join-closed-state" role="status"><h3>Saat ini tidak ada batch yang membuka pendaftaran.</h3><p>Isian teks tetap ditampilkan. Berkas foto dan CV perlu dipilih ulang jika ada batch baru yang dibuka.</p></div><?php endif; ?>
   <p class="join-batches-intro">Formulir hanya tersedia untuk batch yang sedang dibuka. Semua data wajib diisi kecuali yang ditandai opsional.</p>
   <form class="application-form" action="<?= url('/bergabung') ?>" method="post" enctype="multipart/form-data">
@@ -141,12 +142,12 @@ declare(strict_types=1);
       <label class="join-form-label" for="batch_id">Batch pendaftaran *</label>
       <select class="join-form-select" id="batch_id" name="batch_id" required aria-describedby="batch_id_error">
         <option value="">Pilih batch terbuka</option>
-        <?php if (filter_var($selectedBatchId, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false && !in_array($selectedBatchId, $openBatchIds, true)): ?><option value="<?= e($selectedBatchId) ?>" selected>Batch sebelumnya sudah ditutup</option><?php endif; ?>
+        <?php if (filter_var($selectedBatchId, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false && !in_array($selectedBatchId, $openBatchIds, true)): ?><option value="<?= e($selectedBatchId) ?>" data-batch-type="<?= e($selectedBatchType ?? '') ?>" selected>Batch sebelumnya sudah ditutup</option><?php endif; ?>
         <?php if ($openInternBatches !== []): ?><optgroup label="Internship">
-          <?php foreach ($openInternBatches as $batch): ?><option value="<?= (int) $batch['id'] ?>" <?= $selectedBatchId === (string) $batch['id'] ? 'selected' : '' ?>><?= e($batch['name']) ?></option><?php endforeach; ?>
+          <?php foreach ($openInternBatches as $batch): ?><option value="<?= (int) $batch['id'] ?>" data-batch-type="INTERN" <?= $selectedBatchId === (string) $batch['id'] ? 'selected' : '' ?>><?= e($batch['name']) ?></option><?php endforeach; ?>
         </optgroup><?php endif; ?>
         <?php if ($openVolunteerBatches !== []): ?><optgroup label="Volunteer / Relawan">
-          <?php foreach ($openVolunteerBatches as $batch): ?><option value="<?= (int) $batch['id'] ?>" <?= $selectedBatchId === (string) $batch['id'] ? 'selected' : '' ?>><?= e($batch['name']) ?></option><?php endforeach; ?>
+          <?php foreach ($openVolunteerBatches as $batch): ?><option value="<?= (int) $batch['id'] ?>" data-batch-type="VOLUNTEER" <?= $selectedBatchId === (string) $batch['id'] ? 'selected' : '' ?>><?= e($batch['name']) ?></option><?php endforeach; ?>
         </optgroup><?php endif; ?>
       </select>
       <?php if (!empty($errors['batch_id'])): ?><small class="join-field-error" id="batch_id_error"><?= e($errors['batch_id']) ?></small><?php endif; ?>
@@ -234,6 +235,27 @@ declare(strict_types=1);
       <small>Maksimal 500 karakter.</small>
       <?php if (!empty($errors['special_skills'])): ?><small class="join-field-error"><?= e($errors['special_skills']) ?></small><?php endif; ?>
     </div>
+
+    <?php foreach (['INTERN' => 'Internship', 'VOLUNTEER' => 'Relawan'] as $type => $typeLabel): ?>
+      <?php $typeQuestions = $questionsByType[$type] ?? []; ?>
+      <?php if ($typeQuestions !== []): ?>
+        <section class="application-form-section application-field-full application-custom-questions" data-custom-questions data-application-type="<?= e($type) ?>" <?= $selectedBatchType === $type ? '' : 'hidden' ?>>
+          <h3>Pertanyaan khusus <?= e($typeLabel) ?></h3>
+          <?php foreach ($typeQuestions as $question): ?>
+            <?php $questionId = (int) $question['id']; $answerValue = is_array($old['custom_answers'] ?? null) ? (string) ($old['custom_answers'][$questionId] ?? '') : ''; ?>
+            <div class="application-field application-field-full">
+              <label class="join-form-label" for="custom_answer_<?= $questionId ?>"><?= e($question['question']) ?><?= (int) $question['is_required'] === 1 ? ' *' : '' ?></label>
+              <?php if ($question['field_type'] === 'TEXT'): ?>
+                <input class="join-form-input" id="custom_answer_<?= $questionId ?>" name="custom_answers[<?= $questionId ?>]" type="text" maxlength="200" value="<?= e($answerValue) ?>" <?= (int) $question['is_required'] === 1 ? 'required' : '' ?> <?= $selectedBatchType === $type ? '' : 'disabled' ?>>
+              <?php else: ?>
+                <textarea class="join-form-textarea" id="custom_answer_<?= $questionId ?>" name="custom_answers[<?= $questionId ?>]" maxlength="2000" rows="4" <?= (int) $question['is_required'] === 1 ? 'required' : '' ?> <?= $selectedBatchType === $type ? '' : 'disabled' ?>><?= e($answerValue) ?></textarea>
+              <?php endif; ?>
+              <?php if (!empty($errors['custom_answers_' . $questionId])): ?><small class="join-field-error"><?= e($errors['custom_answers_' . $questionId]) ?></small><?php endif; ?>
+            </div>
+          <?php endforeach; ?>
+        </section>
+      <?php endif; ?>
+    <?php endforeach; ?>
 
     <div class="application-form-section application-field-full"><h3>Berkas pendaftaran</h3></div>
     <div class="application-field">

@@ -6,6 +6,103 @@
   color: #fff;
 }
 
+.application-form-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.application-form-setting-card {
+  padding: 24px;
+}
+
+.application-form-setting-heading,
+.application-form-setting-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.application-form-setting-heading h2 {
+  margin: 11px 0 0;
+  color: var(--admin-text);
+  font-size: 21px;
+}
+
+.application-form-setting-icon {
+  font-size: 28px;
+}
+
+.application-form-setting-card>p,
+.application-form-admin-note {
+  color: var(--admin-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.application-form-setting-actions {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  margin-top: 19px;
+}
+
+.application-form-setting-actions form {
+  margin: 0;
+}
+
+.application-form-admin-note {
+  margin-top: 18px;
+}
+
+.application-form-type-switch {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.application-form-type-switch a {
+  padding: 9px 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--admin-text);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.application-form-type-switch a.is-current {
+  border-color: #17483e;
+  background: #17483e;
+  color: #fff;
+}
+
+.application-form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--admin-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.application-form-checkbox input {
+  width: 17px;
+  height: 17px;
+  accent-color: #17483e;
+}
+
+@media (max-width: 700px) {
+  .application-form-settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .application-form-setting-card {
+    padding: 18px;
+  }
+}
+
 .welcome-panel .eyebrow {
   color: #9bdcff;
 }

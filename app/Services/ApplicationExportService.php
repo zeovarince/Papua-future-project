@@ -83,7 +83,7 @@ final class ApplicationExportService
             $sheet->setCellValueExplicit($coordinate, $column['label'], DataType::TYPE_STRING);
         }
 
-        $hyperlinkColumns = ['photo_url' => 17, 'cv_url' => 18];
+        $hyperlinkColumns = ['photo_url' => 18, 'cv_url' => 19];
         foreach ($applications as $rowIndex => $application) {
             $values = $this->exportValues($application);
             $excelRow = $rowIndex + 2;
@@ -107,7 +107,7 @@ final class ApplicationExportService
         $sheet->getStyle('A1:' . $lastColumn . $lastRow)->getAlignment()->setVertical('top')->setWrapText(true);
         $sheet->getAutoFilter()->setRange('A1:' . $lastColumn . $lastRow);
         $sheet->freezePane('A2');
-        $widths = [14, 22, 28, 15, 32, 20, 25, 25, 26, 16, 42, 32, 58, 42, 16, 20, 18, 18];
+        $widths = [14, 22, 28, 15, 32, 20, 25, 25, 26, 16, 42, 32, 58, 42, 55, 16, 20, 18, 18];
         foreach ($widths as $index => $width) {
             $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($index + 1))->setWidth($width);
         }
@@ -189,6 +189,7 @@ final class ApplicationExportService
             ['key' => 'referral', 'label' => 'Sumber Informasi'],
             ['key' => 'motivation', 'label' => 'Motivasi'],
             ['key' => 'special_skills', 'label' => 'Keahlian Khusus'],
+            ['key' => 'custom_answers', 'label' => 'Jawaban Pertanyaan Tambahan'],
             ['key' => 'status', 'label' => 'Status Pendaftaran'],
             ['key' => 'created_at', 'label' => 'Tanggal Daftar'],
             ['key' => 'photo_url', 'label' => 'Foto Pendaftar'],
@@ -203,7 +204,7 @@ final class ApplicationExportService
             $record['type'], $record['batch_name'], $record['full_name'], $record['birth_date'],
             $record['email'], $record['whatsapp'], $record['domicile'], $record['occupation'],
             $record['university'], $record['duration'], $record['interests'], $record['referral'],
-            $record['motivation'], $record['special_skills'], $record['status'], $record['created_at'],
+            $record['motivation'], $record['special_skills'], $record['custom_answers_text'], $record['status'], $record['created_at'],
             $this->absoluteUrl('/admin/berkas/' . (int) $application['id'] . '/foto'),
             $this->absoluteUrl('/admin/berkas/' . (int) $application['id'] . '/cv'),
         ];
@@ -219,6 +220,11 @@ final class ApplicationExportService
             if (is_string($key) && isset($interestLabels[$key])) {
                 $interestText[] = $interestLabels[$key];
             }
+        }
+        $customAnswers = is_array($application['custom_answers'] ?? null) ? $application['custom_answers'] : [];
+        $customAnswerLines = [];
+        foreach ($customAnswers as $answer) {
+            $customAnswerLines[] = (string) ($answer['question'] ?? '') . ': ' . (string) ($answer['answer'] ?? '');
         }
         return [
             'id' => (int) $application['id'],
@@ -236,6 +242,8 @@ final class ApplicationExportService
             'referral' => Labels::referralSources()[$application['referral_source']] ?? (string) $application['referral_source'],
             'motivation' => (string) $application['motivation'],
             'special_skills' => (string) ($application['special_skills'] ?? ''),
+            'custom_answers' => $customAnswers,
+            'custom_answers_text' => implode("\n", $customAnswerLines),
             'status' => Labels::applicationStatuses()[$application['status']] ?? (string) $application['status'],
             'created_at' => (string) $application['created_at'],
         ];

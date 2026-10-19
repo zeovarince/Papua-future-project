@@ -567,7 +567,7 @@ Urutan kerja rinci ada di [STEP.md](STEP.md). Pemetaan ke langkahnya:
 Kontrol aplikasi yang sudah diterapkan pada kode:
 
 1. HMAC identifier rate limit dengan `APP_KEY`, jalur admin rahasia di production, header anti-cache dan noindex untuk panel, `Permissions-Policy`, serta HSTS hanya saat production menerima koneksi HTTPS.
-2. Log keamanan untuk login berhasil/gagal, perubahan status pendaftar, ekspor, dan penghapusan konten. Log tidak menyimpan email, sandi, token, pesan, atau data pendaftar.
+2. Log keamanan untuk login berhasil/gagal, perubahan status pendaftar dan formulir, ekspor, serta CRUD pertanyaan pendaftaran. Log tidak menyimpan email, sandi, token, isi jawaban, atau data pendaftar.
 3. Pemeriksa integritas CLI, pemblokiran berkas sensitif di `public/.htaccess`, dan pemeriksaan ukuran piksel sebelum foto diproses. Foto tim diperkecil dan dikonversi ke WebP agar metadata EXIF tidak ikut tersimpan.
 4. `APP_KEY` dan `ADMIN_PATH` sudah dijelaskan di [ARCHITECTURE.md](ARCHITECTURE.md); README memuat cara menyiapkan kunci serta memulai pemeriksaan integritas.
 

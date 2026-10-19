@@ -28,6 +28,7 @@ Satu file SQL per berkas di `database/migrations/`. Urutan mengikuti urutan peng
 | `0008_create_applications.sql` | `applications` | 9 |
 | `0009_seed_initial_programs.sql` | Lima data awal program untuk instalasi migrasi | 5 |
 | `0010_seed_news_and_faqs.sql` | Konten awal berita, penghargaan, liputan media, dan FAQ | 6 dan 7 |
+| `0011_create_application_forms.sql` | Status formulir per jenis, pertanyaan khusus per jenis, dan jawaban pendaftar | Pendaftaran |
 
 ## 3. Tabel infrastruktur migrasi
 
@@ -325,6 +326,54 @@ Catatan kolom `applications`:
 - `interest_areas`: larik JSON berisi satu atau lebih dari `LITERACY`, `HEALTH`, `CREATIVE`, `MEDIA`, `OTHER`.
 - Tipe pendaftar (Intern atau Relawan) tidak disimpan di sini. Tipe diambil dari `batches.batch_type`.
 
+### 0011_create_application_forms.sql
+
+```sql
+CREATE TABLE application_form_settings (
+  application_type ENUM('INTERN','VOLUNTEER') NOT NULL,
+  is_active        TINYINT(1) NOT NULL DEFAULT 0,
+  updated_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (application_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO application_form_settings (application_type, is_active)
+SELECT 'INTERN', EXISTS(SELECT 1 FROM batches WHERE batch_type = 'INTERN' AND is_open = 1)
+UNION ALL
+SELECT 'VOLUNTEER', EXISTS(SELECT 1 FROM batches WHERE batch_type = 'VOLUNTEER' AND is_open = 1);
+
+CREATE TABLE application_questions (
+  id               INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  application_type ENUM('INTERN','VOLUNTEER') NOT NULL,
+  question         VARCHAR(250) NOT NULL,
+  field_type       ENUM('TEXT','TEXTAREA') NOT NULL DEFAULT 'TEXTAREA',
+  is_required      TINYINT(1) NOT NULL DEFAULT 1,
+  is_active        TINYINT(1) NOT NULL DEFAULT 1,
+  sort_order       INT NOT NULL DEFAULT 0,
+  created_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_application_questions_type_active_order (application_type, is_active, sort_order, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE application_answers (
+  id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  application_id  INT UNSIGNED NOT NULL,
+  question_id     INT UNSIGNED NULL,
+  question_label  VARCHAR(250) NOT NULL,
+  answer          TEXT NOT NULL,
+  created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_application_answers_question (application_id, question_id),
+  KEY idx_application_answers_question (question_id),
+  CONSTRAINT fk_application_answers_application
+    FOREIGN KEY (application_id) REFERENCES applications (id) ON DELETE CASCADE,
+  CONSTRAINT fk_application_answers_question
+    FOREIGN KEY (question_id) REFERENCES application_questions (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+`application_form_settings` memiliki satu baris untuk masing-masing jenis. Status ini menjadi sakelar utama yang terpisah dari `batches.is_open`; formulir bisa dikirim hanya ketika keduanya aktif. `application_questions` menyimpan pertanyaan tambahan untuk satu jenis formulir. `application_answers.question_label` menyimpan snapshot teks pertanyaan agar jawaban lama tetap bermakna setelah pertanyaan diubah atau dihapus.
+
 ## 5. Strategi indeks untuk query
 
 Indeks disusun dari kolom yang dipakai untuk filter, join, dan pengurutan oleh Model. Kolom paling kiri pada indeks gabungan mengikuti kolom `WHERE` yang paling umum.
@@ -339,6 +388,8 @@ Indeks disusun dari kolom yang dipakai untuk filter, join, dan pengurutan oleh M
 | `posts(is_published, published_at)` | Daftar berita terbaru, berita terbit, dan jumlah berita terbit. |
 | `posts(category, is_published, published_at)` | Berita terkait dan filter daftar per kategori. |
 | `applications(batch_id, status, created_at)` dan `applications(status, created_at)` | Filter daftar pendaftar, pengurutan terbaru, dan hitung pendaftar baru. |
+| `application_questions(application_type, is_active, sort_order, id)` | Mengambil pertanyaan aktif berurutan untuk Internship atau Relawan. |
+| `application_answers(application_id, question_id)` | Mengambil jawaban tambahan pada detail dan ekspor pendaftar. |
 | `program_photos(program_id, sort_order)` dan `post_photos(post_id, sort_order)` | Foto dokumentasi per konten sesuai urutan. |
 
 Kolom isi panjang `MEDIUMTEXT` tidak ikut diambil pada query kartu program/berita dan daftar admin. Pencarian nama pendaftar memakai `LIKE '%kata%'`, sehingga indeks B-tree tidak dapat mempercepat pencarian parsial tersebut.
@@ -365,9 +416,10 @@ Beberapa aturan tidak bisa dijaga MySQL sendiri, jadi dijaga di Validator, Model
 2. Hanya satu `team_members` yang boleh punya `is_founder = 1`. Model menurunkan flag anggota lain dalam transaksi yang sama saat flag baru dinyalakan.
 3. `batches` tidak bisa dihapus bila masih punya `team_members` atau `applications` (`ON DELETE RESTRICT`). Controller menghitung keduanya lebih dulu, lalu menampilkan pesan yang menyebut jumlahnya dan menawarkan "Tutup batch". Galat kunci asing dari database (kode 23000) hanya jaring pengaman.
 4. `applications.email` diubah ke huruf kecil dan dipangkas spasinya sebelum disimpan atau dibandingkan. Keunikan dijaga oleh `uq_applications_batch_email`. Controller menangkap galat duplikat (kode 1062) dan menampilkan pesan yang jelas.
-5. `applications` hanya boleh dibuat bila `batches.is_open = 1` pada saat penyimpanan. Pemeriksaan memakai `SELECT ... FOR UPDATE` pada baris batch di dalam transaksi yang sama dengan `INSERT`, sehingga penutupan batch di tengah proses tidak terlewat.
-6. Saat batch dibuka, `opened_at` diisi dan `closed_at` dikosongkan. Saat ditutup, `closed_at` diisi.
-7. `about_content` hanya punya satu baris. Tidak ada aksi buat atau hapus, hanya ubah.
+5. `applications` hanya boleh dibuat bila `application_form_settings.is_active = 1` dan `batches.is_open = 1` pada saat penyimpanan. Keduanya dikunci dan diperiksa dengan `SELECT ... FOR UPDATE` dalam transaksi yang sama dengan `INSERT`.
+6. Jawaban tambahan harus berasal dari pertanyaan aktif milik jenis batch yang dipilih. Server memvalidasi ulang kewajiban dan panjang jawaban, lalu menyimpan teks pertanyaan sebagai snapshot.
+7. Saat batch dibuka, `opened_at` diisi dan `closed_at` dikosongkan. Saat ditutup, `closed_at` diisi.
+8. `about_content` hanya punya satu baris. Tidak ada aksi buat atau hapus, hanya ubah.
 8. Menghapus `programs` atau `posts` menghapus baris foto lewat `CASCADE`, tetapi file fisiknya harus dihapus lebih dulu oleh `GalleryService`. Hal yang sama berlaku untuk `team_members.photo_path` dan `cover_image`.
 9. Satu `programs` atau `posts` maksimal punya 30 foto. Dijaga di `GalleryService` sebelum `INSERT`.
 10. `slug` dibuat dari judul dengan huruf kecil dan tanda hubung. Bila bentrok, tambahkan angka di belakangnya. Slug tidak berubah saat judul diubah, supaya tautan lama tetap berlaku.

@@ -12,6 +12,8 @@ erDiagram
   posts ||--o{ post_photos : "punya foto dokumentasi"
   batches ||--o{ team_members : "mengelompokkan"
   batches ||--o{ applications : "menerima"
+  applications ||--o{ application_answers : "menyimpan jawaban"
+  application_questions o|--o{ application_answers : "label pertanyaan"
 
   programs {
     int id PK
@@ -64,6 +66,26 @@ erDiagram
     varchar email
     enum status "NEW, REVIEWED, ACCEPTED, REJECTED"
   }
+  application_form_settings {
+    enum application_type PK "INTERN atau VOLUNTEER"
+    tinyint is_active
+  }
+  application_questions {
+    int id PK
+    enum application_type "INTERN atau VOLUNTEER"
+    varchar question
+    enum field_type "TEXT atau TEXTAREA"
+    tinyint is_required
+    tinyint is_active
+    int sort_order
+  }
+  application_answers {
+    bigint id PK
+    int application_id FK
+    int question_id FK "NULL bila pertanyaan dihapus"
+    varchar question_label "snapshot"
+    text answer
+  }
   about_content {
     tinyint id PK "selalu 1"
     mediumtext story
@@ -103,9 +125,12 @@ programs      1 ----< 0..N  program_photos     (program_photos.program_id)
 posts         1 ----< 0..N  post_photos        (post_photos.post_id)
 batches       1 ----< 0..N  team_members       (team_members.batch_id, 0..1 di sisi anak)
 batches       1 ----< 0..N  applications       (applications.batch_id)
+applications  1 ----< 0..N  application_answers (application_answers.application_id)
+application_questions 0..1 ----< 0..N application_answers (application_answers.question_id)
 
 Tabel berdiri sendiri (tanpa relasi):
-  admin_users, about_content, faqs, contact_messages, rate_limits
+  admin_users, about_content, faqs, contact_messages, rate_limits,
+  application_form_settings
 ```
 
 ## 3. Penjelasan relasi
@@ -116,6 +141,8 @@ Tabel berdiri sendiri (tanpa relasi):
 | `posts` ke `post_photos` | Satu berita punya nol sampai banyak foto. Satu foto milik satu berita. | `post_photos.post_id` | `CASCADE` | Sama seperti program. |
 | `batches` ke `team_members` | Satu batch punya nol sampai banyak anggota. Satu anggota milik nol atau satu batch. | `team_members.batch_id` (boleh `NULL`) | `RESTRICT` (ditolak bila masih ada anggota) | Anggota grup `CORE` tidak punya batch. Anggota `INTERN` dan `VOLUNTEER` wajib punya batch dengan tipe yang cocok. Dijaga di Validator dan Model. |
 | `batches` ke `applications` | Satu batch menerima nol sampai banyak pendaftar. Satu pendaftar milik satu batch. | `applications.batch_id` | `RESTRICT` | Email unik per batch. Pendaftaran hanya bisa dibuat bila `batches.is_open = 1`. |
+| `applications` ke `application_answers` | Satu pendaftar punya nol sampai banyak jawaban tambahan. | `application_answers.application_id` | `CASCADE` | Jawaban ikut dihapus jika data pendaftar dihapus. |
+| `application_questions` ke `application_answers` | Satu pertanyaan dapat memiliki banyak jawaban. Satu jawaban terhubung ke nol atau satu definisi pertanyaan. | `application_answers.question_id` (nullable) | `SET NULL` | Teks pertanyaan disalin ke `question_label`, jadi jawaban lama tetap bisa dibaca setelah definisi pertanyaan dihapus. |
 
 ## 4. Ringkasan tabel
 
@@ -133,6 +160,9 @@ Tabel berdiri sendiri (tanpa relasi):
 | `faqs` | Pertanyaan umum. | Kontak. |
 | `contact_messages` | Pesan dari form kontak. | Kontak, admin Pesan masuk. |
 | `applications` | Data pendaftar relawan dan intern, termasuk jalur file foto dan CV. | Bergabung, admin Pendaftar, ekspor. |
+| `application_form_settings` | Sakelar aktif/nonaktif formulir Internship dan Relawan secara terpisah. | Bergabung, admin Form Pendaftaran. |
+| `application_questions` | Pertanyaan tambahan, jenis jawaban, kewajiban, status tampil, dan urutan per jenis formulir. | Bergabung, admin Form Pendaftaran. |
+| `application_answers` | Snapshot pertanyaan dan jawaban tambahan dari pendaftar. | Detail admin Pendaftar, ekspor. |
 
 Tabel pendukung `schema_migrations` dibuat oleh `bin/migrate.php` dan tidak termasuk diagram.
 
@@ -141,7 +171,8 @@ Tabel pendukung `schema_migrations` dibuat oleh `bin/migrate.php` dan tidak term
 1. **Tipe pendaftar tidak disimpan di `applications`.** Tipe (Intern atau Relawan) diambil dari `batches.batch_type`, sehingga satu form melayani dua tipe tanpa data ganda.
 2. **Penghargaan dan Liputan Media adalah kategori di `posts`,** bukan tabel terpisah. Beranda mengambil tiga berita Penghargaan terbaru, dan halaman Berita mengelompokkannya di bagian "Diakui dan Diliput".
 3. **Profil founder adalah satu baris `team_members`** dengan `is_founder = 1`. Teks profil panjang untuk Beranda disimpan di `long_bio`.
-4. **Tidak ada tabel pengaturan situs.** Konten statis (hero, angka impact, peta, logo mitra, kontak) berada di `config/site.php` sesuai PRD A4.
+4. **`application_form_settings` hanya menyimpan sakelar dua jenis form.** Konten statis situs (hero, angka impact, peta, logo mitra, kontak) tetap berada di `config/site.php` sesuai PRD A4.
 5. **Daftar sederhana disimpan sebagai teks per baris** (`activities`, `partners` di `programs`, dan `mission` di `about_content`). Pasangan label dan nilai di Informasi Program disimpan sebagai JSON (`info_rows`).
 6. **`applications.file_token`** adalah nama folder file pendaftar yang acak, jadi jalur file tidak bisa ditebak dari `id`.
-7. **Aturan yang tidak bisa dijaga MySQL** (kecocokan `member_group` dengan `batch_type`, hanya satu founder) dijaga di Validator dan Model. Lihat [SCHEMA.md](SCHEMA.md) bagian 5.
+7. **Pendaftaran memerlukan dua status aktif:** `application_form_settings.is_active` untuk jenis formulir dan `batches.is_open` untuk batch tertentu.
+8. **Aturan yang tidak bisa dijaga MySQL** (kecocokan `member_group` dengan `batch_type`, hanya satu founder, dan kesesuaian pertanyaan dengan jenis batch) dijaga di Validator dan Model. Lihat [SCHEMA.md](SCHEMA.md) bagian 5.

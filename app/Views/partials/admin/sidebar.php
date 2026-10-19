@@ -17,6 +17,7 @@
         <a class="sidebar-link <?= ($page ?? '') === 'post' ? 'is-active' : '' ?>" href="<?= url('/admin/berita') ?>" aria-label="Berita dan Kegiatan" title="Berita &amp; Kegiatan"><span class="sidebar-link-icon" aria-hidden="true">&#9641;</span><span class="sidebar-link-label">Berita &amp; Kegiatan</span></a>
         <a class="sidebar-link <?= ($page ?? '') === 'faq' ? 'is-active' : '' ?>" href="<?= url('/admin/faq') ?>" aria-label="FAQ" title="FAQ"><span class="sidebar-link-icon" aria-hidden="true">?</span><span class="sidebar-link-label">FAQ</span></a>
         <p class="sidebar-label">Data</p>
+        <a class="sidebar-link <?= ($page ?? '') === 'application-form' ? 'is-active' : '' ?>" href="<?= url('/admin/pendaftaran') ?>" aria-label="Form Pendaftaran" title="Form Pendaftaran"><span class="sidebar-link-icon" aria-hidden="true">&#9998;</span><span class="sidebar-link-label">Form Pendaftaran</span></a>
         <a class="sidebar-link <?= ($page ?? '') === 'application' ? 'is-active' : '' ?>" href="<?= url('/admin/pendaftar') ?>" aria-label="Pendaftar" title="Pendaftar"><span class="sidebar-link-icon" aria-hidden="true">&#9776;</span><span class="sidebar-link-label">Pendaftar</span></a>
         <a class="sidebar-link <?= ($page ?? '') === 'message' ? 'is-active' : '' ?>" href="<?= url('/admin/pesan') ?>" aria-label="Pesan Masuk" title="Pesan Masuk"><span class="sidebar-link-icon" aria-hidden="true">&#9993;</span><span class="sidebar-link-label">Pesan Masuk</span></a>
     </nav>

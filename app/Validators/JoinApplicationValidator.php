@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Validators;
 
 use App\Models\Batch;
+use App\Models\ApplicationFormSetting;
+use App\Models\ApplicationQuestion;
 use App\Support\Labels;
 use DateTimeImmutable;
 
@@ -29,18 +31,43 @@ final class JoinApplicationValidator
             'referral_source' => self::text($input, 'referral_source'),
             'motivation' => self::text($input, 'motivation'),
             'special_skills' => self::text($input, 'special_skills'),
+            'custom_answers' => [],
         ];
         $errors = [];
+        $applicationType = null;
 
         $batchId = filter_var($values['batch_id'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         if ($batchId === false) {
             $errors['batch_id'] = 'Pilih batch yang pendaftarannya masih dibuka.';
         } else {
             $batch = Batch::find((int) $batchId);
-            if ($batch === null || (int) $batch['is_open'] !== 1) {
+            if ($batch === null) {
                 $errors['batch_id'] = 'Batch ini tidak ditemukan atau pendaftarannya sudah ditutup. Pilih batch yang masih dibuka.';
             } else {
-                $values['batch_id'] = (int) $batchId;
+                $applicationType = (string) $batch['batch_type'];
+                if ((int) $batch['is_open'] !== 1) {
+                    $errors['batch_id'] = 'Batch ini tidak ditemukan atau pendaftarannya sudah ditutup. Pilih batch yang masih dibuka.';
+                } elseif (!ApplicationFormSetting::isActive($applicationType)) {
+                    $errors['batch_id'] = 'Pendaftaran jenis ini sedang ditutup. Pilih jalur yang masih dibuka.';
+                } else {
+                    $values['batch_id'] = (int) $batchId;
+                }
+            }
+        }
+
+        if ($applicationType !== null) {
+            $submittedAnswers = is_array($input['custom_answers'] ?? null) ? $input['custom_answers'] : [];
+            foreach (ApplicationQuestion::activeByType($applicationType) as $question) {
+                $questionId = (int) $question['id'];
+                $rawAnswer = $submittedAnswers[$questionId] ?? '';
+                $answer = is_scalar($rawAnswer) ? trim((string) $rawAnswer) : '';
+                $values['custom_answers'][$questionId] = $answer;
+                $maxLength = $question['field_type'] === 'TEXT' ? 200 : 2000;
+                if ((int) $question['is_required'] === 1 && $answer === '') {
+                    $errors['custom_answers_' . $questionId] = 'Jawaban ini wajib diisi.';
+                } elseif (mb_strlen($answer) > $maxLength) {
+                    $errors['custom_answers_' . $questionId] = 'Jawaban maksimal ' . number_format($maxLength, 0, ',', '.') . ' karakter.';
+                }
             }
         }
 

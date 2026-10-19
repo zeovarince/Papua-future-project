@@ -2,7 +2,7 @@
 -- Import this file into an already-created, empty database using phpMyAdmin.
 -- Compatible with MySQL 8+ and MariaDB 10.6+.
 -- Source of truth: docs/SCHEMA.md and docs/ERD.md.
--- The schema_migrations rows mark migrations 0001 through 0010 as applied so bin/migrate.php
+-- The schema_migrations rows mark migrations 0001 through 0011 as applied so bin/migrate.php
 -- will not try to recreate these tables after this complete schema is imported.
 
 SET NAMES utf8mb4;
@@ -215,6 +215,46 @@ CREATE TABLE applications (
     FOREIGN KEY (batch_id) REFERENCES batches (id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE application_form_settings (
+  application_type ENUM('INTERN','VOLUNTEER') NOT NULL,
+  is_active        TINYINT(1) NOT NULL DEFAULT 0,
+  updated_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (application_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO application_form_settings (application_type, is_active) VALUES
+  ('INTERN', 0), ('VOLUNTEER', 0);
+
+CREATE TABLE application_questions (
+  id               INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  application_type ENUM('INTERN','VOLUNTEER') NOT NULL,
+  question         VARCHAR(250) NOT NULL,
+  field_type       ENUM('TEXT','TEXTAREA') NOT NULL DEFAULT 'TEXTAREA',
+  is_required      TINYINT(1) NOT NULL DEFAULT 1,
+  is_active        TINYINT(1) NOT NULL DEFAULT 1,
+  sort_order       INT NOT NULL DEFAULT 0,
+  created_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_application_questions_type_active_order (application_type, is_active, sort_order, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE application_answers (
+  id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  application_id  INT UNSIGNED NOT NULL,
+  question_id     INT UNSIGNED NULL,
+  question_label  VARCHAR(250) NOT NULL,
+  answer          TEXT NOT NULL,
+  created_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_application_answers_question (application_id, question_id),
+  KEY idx_application_answers_question (question_id),
+  CONSTRAINT fk_application_answers_application
+    FOREIGN KEY (application_id) REFERENCES applications (id) ON DELETE CASCADE,
+  CONSTRAINT fk_application_answers_question
+    FOREIGN KEY (question_id) REFERENCES application_questions (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 INSERT INTO about_content (id, story, vision, mission) VALUES (
   1,
   'Pada 2020, Bhrisco Jordy Dudi Padatu turun langsung ke Pulau Mansinam dan melihat anak-anak yang ingin belajar tetapi memiliki akses terbatas terhadap buku, guru, dan layanan kesehatan.\n\nPapua Future Project lahir dari kepedulian itu sebagai gerakan kecil yang dimulai dari satu tenda belajar dan relawan yang percaya bahwa setiap anak itu penting.\n\nGerakan ini terus bertumbuh untuk mendukung anak-anak dan komunitas di Papua Barat.',
@@ -283,4 +323,6 @@ INSERT INTO faqs (question, answer, sort_order, is_published) VALUES
 ('Di mana saja wilayah jangkauan program Papua Future Project?', 'Kegiatan PFP berpusat di Kabupaten Manokwari, Papua Barat. Pulau Mansinam menjadi salah satu titik utama kegiatan.', 7, 1),
 ('Bagaimana cara memantau perkembangan program Papua Future Project?', 'Ikuti Instagram @papuafutureproject atau baca halaman Berita & Kegiatan di website ini untuk mendapatkan kabar terbaru.', 8, 1);
 
-INSERT INTO schema_migrations (migration) VALUES ('0010_seed_news_and_faqs.sql');
+INSERT INTO schema_migrations (migration) VALUES
+  ('0010_seed_news_and_faqs.sql'),
+  ('0011_create_application_forms.sql');

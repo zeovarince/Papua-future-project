@@ -97,6 +97,8 @@ Panduan visual untuk panel admin Papua Future Project. Layout memakai **sidebar 
 | 10 | Pendaftar | 📋 clipboard-list | `/admin/pendaftar` | jumlah status Baru |
 | 11 | Pesan Masuk | ✉️ mail | `/admin/pesan` | jumlah belum dibaca |
 
+Item tambahan di grup DATA: **Form Pendaftaran** (`/admin/pendaftaran`) membuka toggle aktif/nonaktif Internship dan Relawan serta tautan menuju pengelolaan pertanyaan masing-masing.
+
 Label grup (TIM, KONTEN, DATA) ditampilkan sebagai teks kecil uppercase abu-abu, bukan item yang bisa diklik.
 
 ### 3.5 Page Header
@@ -285,7 +287,14 @@ Sama persis dengan Internship, tetapi filter batch ke tipe `VOLUNTEER`.
   - CV: tombol "Lihat CV" (buka tab baru) dan "Download CV".
   - Dropdown ubah status: Baru → Ditinjau → Diterima / Ditolak. Tombol "Simpan Status".
 
-### 5.11 Pesan Masuk (`/admin/pesan`)
+### 5.11 Form Pendaftaran (`/admin/pendaftaran`)
+
+- Dua kartu terpisah untuk Internship dan Relawan; masing-masing menunjukkan status formulir, jumlah batch yang dibuka, dan jumlah pertanyaan aktif.
+- Tombol aktif/nonaktif bekerja terpisah per jenis dan tidak mengubah status batch. Pendaftaran publik hanya diterima jika jenis aktif serta batch terpilih dibuka.
+- Tombol "Atur pertanyaan" membuka daftar dan CRUD yang hanya berlaku untuk jenis itu. Pertanyaan bisa berupa jawaban singkat atau paragraf, wajib atau opsional, tampil atau disembunyikan, serta diurutkan.
+- Maksimal 25 pertanyaan tambahan per jenis. Jawaban tampil di detail pendaftar dan ikut ekspor. Teks pertanyaan disalin pada jawaban untuk mempertahankan riwayat setelah perubahan atau penghapusan.
+
+### 5.12 Pesan Masuk (`/admin/pesan`)
 
 - Tabel: pengirim, email, ringkasan pesan (dipotong 50 karakter), tanggal, status (pill: Belum dibaca/Sudah dibaca), "Lihat".
 - Baris belum dibaca: font-weight bold, titik biru di kiri.
@@ -295,7 +304,7 @@ Sama persis dengan Internship, tetapi filter batch ke tipe `VOLUNTEER`.
   - Tombol: "Balas lewat Email" (mailto:), "Balas lewat WA" (wa.me, jika ada nomor), "Hapus" (merah, konfirmasi dialog).
   - Pesan ditandai sudah dibaca saat halaman ini dibuka.
 
-### 5.12 Login (`/admin/login`)
+### 5.13 Login (`/admin/login`)
 
 - Tidak ada sidebar. Layout khusus auth.
 - Desain yang sudah ada di `login.html` dipertahankan: split view desktop (kiri: slider foto dengan gradient gelap, kanan: kartu form), mobile: form full-width.

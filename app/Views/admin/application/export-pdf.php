@@ -48,6 +48,7 @@
 
       <div class="long-text"><strong>Motivasi:</strong><br><?= nl2br(e($record['motivation'])) ?></div>
       <?php if ($record['special_skills'] !== ''): ?><div class="long-text"><strong>Keahlian khusus:</strong><br><?= nl2br(e($record['special_skills'])) ?></div><?php endif; ?>
+      <?php foreach ($record['custom_answers'] as $answer): ?><div class="long-text"><strong><?= e($answer['question']) ?>:</strong><br><?= nl2br(e($answer['answer'])) ?></div><?php endforeach; ?>
 
       <table class="files"><tr>
         <td style="width: 68px"><?php if ($record['photo_data_uri'] !== null): ?><img class="photo" src="<?= e($record['photo_data_uri']) ?>" alt="Foto <?= e($record['full_name']) ?>"><?php else: ?><span>Foto tidak tersedia</span><?php endif; ?></td>

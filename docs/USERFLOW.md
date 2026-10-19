@@ -29,6 +29,11 @@ Peta halaman dan alur pengguna website Papua Future Project, untuk Public dan Ad
 /admin/tim/penggerak           Tim Penggerak
 /admin/tim/internship          Intern per batch
 /admin/tim/volunteer           Relawan per batch
+/admin/pendaftaran              Status formulir Internship dan Relawan
+/admin/pendaftaran/internship/pertanyaan
+                               Pertanyaan khusus Internship
+/admin/pendaftaran/relawan/pertanyaan
+                               Pertanyaan khusus Relawan
 /admin/program                 Daftar, tambah, ubah (termasuk foto dokumentasi)
 /admin/berita                  Daftar, tambah, ubah (termasuk foto dokumentasi)
 /admin/faq                     Daftar, tambah, ubah
@@ -61,16 +66,16 @@ Detail program dan berita memuat bagian Dokumentasi dari foto yang diunggah admi
 ```mermaid
 flowchart TD
   A["Buka /bergabung"] --> B["Baca ajakan, manfaat, dan 4 langkah"]
-  B --> C{"Ada batch yang dibuka?"}
+  B --> C{"Jenis formulir aktif dan batch dibuka?"}
   C -- "Tidak" --> D["Tampil pesan pendaftaran belum dibuka dan tautan Instagram"]
   C -- "Ya" --> E["Pilih batch"]
-  E --> F["Isi data diri, ketersediaan dan minat, motivasi"]
+  E --> F["Isi data diri, ketersediaan dan minat, serta pertanyaan khusus jenis terpilih"]
   F --> G["Unggah foto dan CV"]
   G --> H{"Validasi di layar lolos?"}
   H -- "Tidak" --> F
   H -- "Ya" --> I["Kirim"]
   I --> J{"Pemeriksaan di server"}
-  J -- "Batch sudah ditutup" --> K["Pesan: batch ini sudah ditutup. Isian teks tetap ada"]
+  J -- "Formulir atau batch sudah ditutup" --> K["Pesan: pendaftaran jenis/batch ini ditutup. Isian teks tetap ada"]
   J -- "Email sudah terdaftar di batch ini" --> L["Pesan: email ini sudah mendaftar di batch ini"]
   J -- "Isian atau file ditolak" --> M["Pesan: jelaskan field atau file mana dan alasannya"]
   J -- "Lolos" --> N["Simpan data dan file"]
@@ -156,14 +161,22 @@ Program atau berita baru harus disimpan lebih dulu sebelum foto bisa ditambahkan
 
 ```mermaid
 flowchart TD
-  A["Buka /admin/batch, atau header kelompok di halaman Internship atau Volunteer"] --> B{"Batch sudah ada?"}
-  B -- "Belum" --> C["Tambah batch: pilih tipe Intern atau Relawan dan beri nama"]
-  C --> D["Batch dibuat dalam keadaan tertutup"]
-  B -- "Ya" --> E["Geser toggle Pendaftaran dibuka"]
-  D --> E
-  E --> F["Toast: Pendaftaran Batch X dibuka atau ditutup"]
-  F --> G["/bergabung langsung mengikuti status baru"]
+  A["Buka /admin/pendaftaran"] --> B{"Pilih jenis pendaftaran"}
+  B -- "Internship" --> C["Aktifkan/nonaktifkan formulir Internship"]
+  B -- "Relawan" --> D["Aktifkan/nonaktifkan formulir Relawan"]
+  C --> E["Atur pertanyaan Internship secara terpisah"]
+  D --> F["Atur pertanyaan Relawan secara terpisah"]
+  E --> G["Buka /admin/batch untuk mengatur batch"]
+  F --> G
+  G --> H{"Batch sudah ada?"}
+  H -- "Belum" --> I["Tambah batch: pilih tipe Intern atau Relawan dan beri nama"]
+  I --> J["Batch dibuat dalam keadaan tertutup"]
+  H -- "Ya" --> K["Buka atau tutup pendaftaran per batch"]
+  J --> K
+  K --> L["/bergabung mengikuti kedua status: formulir jenis dan batch"]
 ```
+
+Saat pertanyaan dihapus, jawaban lama tetap tampil pada detail pendaftar karena sistem menyimpan salinan teks pertanyaan.
 
 ## 9. Alur Admin 5: meninjau pendaftar
 

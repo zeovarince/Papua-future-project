@@ -42,7 +42,7 @@ final class Application
             . $where . ' ORDER BY a.created_at DESC, a.id DESC LIMIT ' . $limit
         );
         $statement->execute($parameters);
-        return $statement->fetchAll(PDO::FETCH_ASSOC);
+        return self::attachAnswers($statement->fetchAll(PDO::FETCH_ASSOC));
     }
 
     public static function find(int $id): ?array
@@ -53,7 +53,10 @@ final class Application
         );
         $statement->execute(['id' => $id]);
         $application = $statement->fetch(PDO::FETCH_ASSOC);
-        return is_array($application) ? $application : null;
+        if (!is_array($application)) {
+            return null;
+        }
+        return self::attachAnswers([$application])[0];
     }
 
     public static function createForOpenBatch(array $values, array $files, string $token): int
@@ -61,11 +64,15 @@ final class Application
         $pdo = Database::connection();
         $pdo->beginTransaction();
         try {
-            $batch = $pdo->prepare('SELECT is_open FROM batches WHERE id = :id FOR UPDATE');
+            $batch = $pdo->prepare(
+                'SELECT b.is_open, b.batch_type, s.is_active AS form_is_active '
+                . 'FROM batches b INNER JOIN application_form_settings s ON s.application_type = b.batch_type '
+                . 'WHERE b.id = :id FOR UPDATE'
+            );
             $batch->execute(['id' => $values['batch_id']]);
-            $isOpen = $batch->fetchColumn();
-            if ($isOpen === false || (int) $isOpen !== 1) {
-                throw new RuntimeException('Batch ini sudah ditutup. Pilih batch yang pendaftarannya masih dibuka.');
+            $batchRow = $batch->fetch(PDO::FETCH_ASSOC);
+            if (!is_array($batchRow) || (int) $batchRow['is_open'] !== 1 || (int) $batchRow['form_is_active'] !== 1) {
+                throw new RuntimeException('Pendaftaran untuk batch ini sedang ditutup. Pilih batch yang masih dibuka.');
             }
 
             $statement = $pdo->prepare(
@@ -92,6 +99,38 @@ final class Application
                 'cv_path' => $files['cv_path'],
             ]);
             $id = (int) $pdo->lastInsertId();
+
+            $questionStatement = $pdo->prepare(
+                'SELECT id, question, field_type, is_required FROM application_questions '
+                . 'WHERE application_type = :application_type AND is_active = 1 ORDER BY sort_order, id FOR UPDATE'
+            );
+            $questionStatement->execute(['application_type' => $batchRow['batch_type']]);
+            $questions = $questionStatement->fetchAll(PDO::FETCH_ASSOC);
+            $answerStatement = $pdo->prepare(
+                'INSERT INTO application_answers (application_id, question_id, question_label, answer) '
+                . 'VALUES (:application_id, :question_id, :question_label, :answer)'
+            );
+            $submittedAnswers = is_array($values['custom_answers'] ?? null) ? $values['custom_answers'] : [];
+            foreach ($questions as $question) {
+                $questionId = (int) $question['id'];
+                $answer = trim((string) ($submittedAnswers[$questionId] ?? ''));
+                if ($answer === '' && (int) $question['is_required'] === 1) {
+                    throw new RuntimeException('Pertanyaan formulir berubah. Muat ulang halaman dan isi kembali jawaban yang diminta.');
+                }
+                if ($answer === '') {
+                    continue;
+                }
+                $maxLength = $question['field_type'] === 'TEXT' ? 200 : 2000;
+                if (mb_strlen($answer) > $maxLength) {
+                    throw new RuntimeException('Jawaban pertanyaan formulir terlalu panjang.');
+                }
+                $answerStatement->execute([
+                    'application_id' => $id,
+                    'question_id' => $questionId,
+                    'question_label' => $question['question'],
+                    'answer' => $answer,
+                ]);
+            }
             $pdo->commit();
             return $id;
         } catch (\Throwable $exception) {
@@ -136,5 +175,37 @@ final class Application
             $parameters['search'] = '%' . mb_substr($search, 0, 100) . '%';
         }
         return [$conditions === [] ? '' : ' WHERE ' . implode(' AND ', $conditions), $parameters];
+    }
+
+    private static function attachAnswers(array $applications): array
+    {
+        if ($applications === []) {
+            return $applications;
+        }
+        $ids = array_values(array_unique(array_map(static fn (array $application): int => (int) $application['id'], $applications)));
+        $placeholders = [];
+        $parameters = [];
+        foreach ($ids as $index => $id) {
+            $key = 'application_' . $index;
+            $placeholders[] = ':' . $key;
+            $parameters[$key] = $id;
+        }
+        $statement = Database::connection()->prepare(
+            'SELECT application_id, question_label, answer FROM application_answers '
+            . 'WHERE application_id IN (' . implode(', ', $placeholders) . ') ORDER BY id ASC'
+        );
+        $statement->execute($parameters);
+        $answersByApplication = [];
+        foreach ($statement->fetchAll(PDO::FETCH_ASSOC) as $answer) {
+            $answersByApplication[(int) $answer['application_id']][] = [
+                'question' => (string) $answer['question_label'],
+                'answer' => (string) $answer['answer'],
+            ];
+        }
+        foreach ($applications as &$application) {
+            $application['custom_answers'] = $answersByApplication[(int) $application['id']] ?? [];
+        }
+        unset($application);
+        return $applications;
     }
 }

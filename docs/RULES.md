@@ -94,6 +94,8 @@ Dokumen ini menetapkan aturan dasar. Untuk konfigurasi hosting, pemantauan integ
 - Identifier pembatas laju dibuat dengan HMAC-SHA256 dan `APP_KEY`; jangan menyimpan IP mentah sebagai identifier.
 - Di production, akses admin memakai jalur acak `ADMIN_PATH`. Jalur default `/admin` menjawab 404; semua route admin tetap wajib memakai middleware autentikasi.
 - Catat login, ekspor, perubahan status, dan penghapusan ke `storage/logs/security.log` tanpa kata sandi, email, isi form, token, atau data pribadi.
+- Jawaban pertanyaan pendaftaran adalah data pendaftar: hanya tampil kepada admin terautentikasi, selalu di-escape saat dirender, dan tidak dimasukkan ke security log.
+- Untuk menyimpan pendaftaran, periksa status formulir jenis dan status batch di dalam transaksi; jangan hanya mengandalkan status toggle di tampilan.
 
 ### 3.5 Upload File
 

@@ -10,6 +10,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\View;
 use App\Models\Batch;
+use App\Models\ApplicationQuestion;
 use App\Services\ApplicationService;
 use App\Services\RateLimiter;
 use App\Validators\JoinApplicationValidator;
@@ -21,14 +22,24 @@ final class JoinController
 {
     public function index(): Response
     {
+        $oldValue = Flash::get('old', []);
+        $old = is_array($oldValue) ? $oldValue : [];
+        $oldBatchId = filter_var($old['batch_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $oldBatch = $oldBatchId === false ? null : Batch::find((int) $oldBatchId);
         return View::render('public/join/index', [
             'title' => 'Bergabung — Papua Future Project',
             'page' => 'join',
             'stylesheet' => 'css/pages/join.css',
             'openInternBatches' => Batch::openByType('INTERN'),
             'openVolunteerBatches' => Batch::openByType('VOLUNTEER'),
+            'questionsByType' => [
+                'INTERN' => ApplicationQuestion::activeByType('INTERN'),
+                'VOLUNTEER' => ApplicationQuestion::activeByType('VOLUNTEER'),
+            ],
+            'oldBatchType' => is_array($oldBatch) ? (string) $oldBatch['batch_type'] : null,
+            'script' => 'js/pages/join.js',
             'errors' => Flash::get('errors', []),
-            'old' => Flash::get('old', []),
+            'old' => $old,
             'flashError' => Flash::get('error'),
         ]);
     }
@@ -75,7 +86,8 @@ final class JoinController
             }
             Logger::error($exception);
         } catch (RuntimeException $exception) {
-            if (str_contains($exception->getMessage(), 'Batch ini sudah ditutup')) {
+            if (str_contains($exception->getMessage(), 'Batch ini sudah ditutup')
+                || str_contains($exception->getMessage(), 'Pendaftaran untuk batch ini sedang ditutup')) {
                 Flash::set('errors', ['batch_id' => $exception->getMessage()]);
                 Flash::set('old', $values);
                 Flash::set('error', 'Batch yang dipilih sudah ditutup saat pendaftaran dikirim.');

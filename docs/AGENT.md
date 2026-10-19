@@ -33,7 +33,8 @@ Situs publik berisi Beranda, Tentang Kami, Program dan detail program, Berita & 
 ## Batasan produk yang harus dijaga
 
 - Role v1 hanya Public dan satu Admin/Product Owner.
-- Pendaftaran intern dan relawan memakai batch. Admin dapat membuka atau menutup pendaftaran per batch.
+- Pendaftaran intern dan relawan memakai batch. Formulir utama Internship dan Relawan memiliki toggle aktif/nonaktif terpisah; setiap batch juga punya status buka/tutup sendiri. Form hanya dapat menerima pendaftaran jika kedua status aktif.
+- Pertanyaan tambahan Internship dan Relawan dikelola terpisah. Jawaban baru harus divalidasi server dan disimpan dengan snapshot teks pertanyaan agar riwayat terbaca setelah pertanyaan diedit atau dihapus.
 - Foto dan CV pendaftar disimpan di lokasi privat dan hanya disajikan setelah pemeriksaan sesi admin. Foto dokumentasi program/berita adalah data terpisah.
 - Foto dokumentasi berada di dalam detail program atau berita/kegiatan; jangan menambahkan halaman galeri mandiri.
 - Konten yang ditetapkan statis di PRD tetap berada di `config/site.php` untuk v1; jangan membuat CMS umum tanpa perubahan ruang lingkup.

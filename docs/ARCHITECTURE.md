@@ -348,6 +348,19 @@ Semua tautan internal memakai `url()`. Tidak boleh ada tautan yang berakhiran `.
 
 `$_GET`, `$_POST`, `$_FILES`, `$_SERVER`, dan `$_COOKIE` hanya dibaca oleh kelas `Request`. Kode lain menerima nilai dari `Request`.
 
+Implementasi pengelolaan formulir pendaftaran memakai file berikut:
+
+| File | Tanggung jawab |
+| --- | --- |
+| `app/Controllers/Admin/ApplicationFormController.php` | Toggle status formulir per jenis dan CRUD pertanyaan admin. |
+| `app/Models/ApplicationFormSetting.php` | Membaca dan mengubah status Internship/Relawan. |
+| `app/Models/ApplicationQuestion.php` | Mengambil dan menyimpan pertanyaan tambahan per jenis. |
+| `app/Validators/ApplicationQuestionValidator.php` | Validasi teks, tipe jawaban, kewajiban, status tampil, dan urutan. |
+| `app/Views/admin/application-form/` | Halaman status formulir, daftar pertanyaan, dan form tambah/ubah. |
+| `app/Models/Application.php` | Menyimpan jawaban dengan snapshot pertanyaan dan menyiapkannya untuk detail/ekspor. |
+| `public/assets/js/pages/join.js` | Menampilkan hanya pertanyaan yang cocok dengan jenis batch terpilih. |
+| `database/migrations/0011_create_application_forms.sql` | Membuat sakelar per jenis formulir, definisi pertanyaan, dan penyimpanan jawaban. |
+
 ## 6. Peta route
 
 Form HTML hanya mengenal GET dan POST, jadi ubah dan hapus memakai POST ke jalur khusus.
@@ -379,6 +392,9 @@ Form HTML hanya mengenal GET dan POST, jadi ubah dan hapus memakai POST ke jalur
 | GET | `/admin/tentang` | `Admin\AboutController@edit` | auth |
 | POST | `/admin/tentang` | `Admin\AboutController@update` | auth, csrf |
 | POST | `/admin/batch/{id}/toggle` | `Admin\BatchController@toggle` | auth, csrf |
+| GET | `/admin/pendaftaran` | `Admin\ApplicationFormController@index` | auth |
+| POST | `/admin/pendaftaran/{internship\|relawan}/toggle` | `Admin\ApplicationFormController@toggle` | auth, csrf |
+| GET/POST | `/admin/pendaftaran/{type}/pertanyaan[/{id}/ubah]` | `Admin\ApplicationFormController` CRUD pertanyaan per jenis | auth; csrf untuk POST |
 | GET | `/admin/pendaftar` | `Admin\ApplicationController@index` | auth |
 | GET | `/admin/pendaftar/{id}` | `Admin\ApplicationController@show` | auth |
 | POST | `/admin/pendaftar/{id}/status` | `Admin\ApplicationController@updateStatus` | auth, csrf |
@@ -422,12 +438,14 @@ Semua rute di bawah `/admin` (kecuali login) memakai middleware `auth`, dan semu
 1. Browser mengirim POST multipart ke `/bergabung`. Form membawa token CSRF dan satu kolom jebakan (honeypot) yang disembunyikan dengan CSS.
 2. Middleware memeriksa CSRF dan batas laju `join` per IP (usulan: 5 percobaan per jam).
 3. `JoinController@store` membaca masukan lewat `Request`, menolak diam-diam bila honeypot terisi, lalu memanggil `ApplicationService`.
-4. `JoinApplicationValidator` memeriksa semua field teks (PRD bagian 8), memastikan `batch_id` ada dan sedang dibuka, dan menerapkan aturan bersyarat (asal universitas, usia minimal).
+4. `JoinApplicationValidator` memeriksa semua field teks (PRD bagian 8), memastikan jenis formulir aktif dan `batch_id` sedang dibuka, lalu memvalidasi pertanyaan aktif khusus jenis batch yang dipilih.
 5. `UploadService` memeriksa setiap file: `UPLOAD_ERR_OK`, ukuran (foto 2 MB, CV 5 MB), tipe dari isi file dengan `finfo_file` (bukan dari ekstensi atau `Content-Type` kiriman browser), `getimagesize` untuk foto, dan awalan `%PDF-` untuk CV.
 6. `ImageService` membaca foto dengan GD, mengecilkan sisi terpanjang menjadi maksimal 1200 px, lalu menyimpannya ulang sebagai WebP. Karena foto disimpan ulang dari data piksel, metadata EXIF (termasuk lokasi GPS) hilang.
 7. Server membuat `file_token` acak (32 karakter heksadesimal dari `random_bytes`), lalu menulis `photo.webp` dan `cv.pdf` ke `storage/applications/{file_token}/` dengan izin folder 0750.
-8. Model `Application` membuka transaksi, mengunci baris batch dengan `SELECT ... FOR UPDATE`, memastikan `is_open = 1`, lalu `INSERT`. Bila batch sudah ditutup atau email sudah terdaftar (galat 1062), transaksi dibatalkan dan folder file dihapus.
+8. Model `Application` membuka transaksi, mengunci status formulir dan batch dengan `SELECT ... FOR UPDATE`, memastikan keduanya aktif, menyimpan pendaftar serta snapshot jawaban tambahan, lalu commit. Bila formulir/batch ditutup atau email sudah terdaftar (galat 1062), transaksi dibatalkan dan folder file dihapus.
 9. Setelah berhasil, redirect ke `/bergabung/berhasil` (pola Post/Redirect/Get). Bila gagal, simpan galat dan isian teks lama di flash session lalu redirect kembali ke `/bergabung#form-daftar`. File yang sudah dipilih harus dipilih ulang karena browser tidak bisa mengisi ulang input file.
+
+Status formulir Internship dan Relawan berada di `application_form_settings` dan dapat diubah terpisah. Status batch tetap dikelola sendiri di `batches.is_open`. Pertanyaan tambahan disimpan per jenis di `application_questions`; jawaban bersama salinan teks pertanyaan disimpan di `application_answers` agar riwayat tetap terbaca.
 
 ### 7.2 Admin membuka file pendaftar
 
@@ -459,7 +477,7 @@ Semua rute di bawah `/admin` (kecuali login) memakai middleware `auth`, dan semu
 1. `ExportController@download` memeriksa sesi dan membaca filter (tipe, batch, status, pencarian) dari query string lewat `Request`.
 2. **XLSX** (format utama): PhpSpreadsheet. Kolom tautan foto dan CV berisi hyperlink sel ke URL absolut dari `APP_URL` ke `/admin/berkas/{id}/foto` dan `/cv`. Kolom motivasi dan keahlian khusus diberi pembungkus teks. Larik bidang kontribusi digabung dengan koma.
 3. **CSV**: ditulis dengan `fputcsv` ke `php://output`, diawali BOM UTF-8 agar huruf Indonesia terbaca benar di Excel. Pemisah kolom memakai titik koma, karena Excel dengan pengaturan regional Indonesia memakai titik koma sebagai pemisah daftar. Tautan di CSV berupa URL teks biasa.
-4. **PDF**: Dompdf dari satu template View (`admin/application/export-pdf.php`). Tiap pendaftar mendapat satu blok berisi data teks, foto kecil (maksimal 160 px, dibuat dengan GD dan disisipkan sebagai data URI), dan tautan CV yang bisa diklik. Pengambilan sumber dari URL luar dimatikan.
+4. **PDF**: Dompdf dari satu template View (`admin/application/export-pdf.php`). Tiap pendaftar mendapat satu blok berisi data teks, jawaban pertanyaan tambahan, foto kecil (maksimal 160 px, dibuat dengan GD dan disisipkan sebagai data URI), dan tautan CV yang bisa diklik. Pengambilan sumber dari URL luar dimatikan.
 5. Dompdf boros memori. Batasi satu PDF maksimal 100 pendaftar. Bila hasil filter lebih besar, tampilkan pesan agar admin mempersempit filter, misalnya per batch.
 
 Tautan di file ekspor tetap meminta login admin saat dibuka. Ini disengaja, karena file ekspor bisa berpindah tangan.

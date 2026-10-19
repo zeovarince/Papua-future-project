@@ -45,6 +45,17 @@ $cvUrl = url('/admin/berkas/' . (int) $application['id'] . '/cv');
       </dl>
     </section>
 
+    <?php if (($application['custom_answers'] ?? []) !== []): ?>
+      <section class="application-detail-section">
+        <h3>Jawaban pertanyaan tambahan</h3>
+        <dl class="application-detail-list">
+          <?php foreach ($application['custom_answers'] as $answer): ?>
+            <dt><?= e($answer['question']) ?></dt><dd class="application-long-text"><?= nl2br(e($answer['answer'])) ?></dd>
+          <?php endforeach; ?>
+        </dl>
+      </section>
+    <?php endif; ?>
+
     <section class="application-detail-section application-document-actions">
       <h3>Berkas</h3>
       <a class="button-secondary" href="<?= e($cvUrl) ?>" target="_blank" rel="noopener noreferrer">Lihat CV</a>

@@ -1,6 +1,9 @@
 <section class="admin-page-toolbar">
-    <p>Buat batch untuk mengelompokkan intern dan relawan, lalu atur status pendaftarannya.</p>
-    <a class="button-primary button-link" href="<?= url('/admin/batch/tambah') ?>">+ Tambah batch</a>
+    <p>Buat batch dan buka/tutup pendaftaran per batch. Status aktif formulir Internship dan Relawan diatur terpisah.</p>
+    <div class="application-form-setting-actions">
+        <a class="button-secondary" href="<?= url('/admin/pendaftaran') ?>">Status &amp; pertanyaan formulir</a>
+        <a class="button-primary button-link" href="<?= url('/admin/batch/tambah') ?>">+ Tambah batch</a>
+    </div>
 </section>
 <?php if ($batches === []): ?>
     <section class="card-surface empty-state"><h2>Belum ada batch</h2><p>Tambahkan batch Intern atau Volunteer untuk mulai mengelola anggota dan pendaftaran.</p></section>

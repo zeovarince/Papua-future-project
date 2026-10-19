@@ -116,7 +116,7 @@ Lima program awal: Bimbingan Belajar dan Literasi, Literasi Digital, Pojok Baca 
 | --- | --- | --- |
 | PUB-40 | Hero ajakan dan tombol Daftar Sekarang yang menuju form. | Statis |
 | PUB-41 | Manfaat menjadi relawan (tiga poin) dan langkah bergabung (empat langkah dengan perkiraan waktu). | Statis |
-| PUB-42 | Form pendaftaran, hanya tampil saat ada batch yang dibuka. Bila tidak ada, tampil pesan bahwa pendaftaran belum dibuka beserta tautan Instagram. Isian dan aturan di bagian 8. | DB: batch yang dibuka |
+| PUB-42 | Form pendaftaran hanya tampil bila jenis formulir aktif dan ada batch jenis itu yang dibuka. Pilihan Internship dan Relawan dipisah; tiap jenis menampilkan pertanyaan tambahannya sendiri. Bila keduanya tidak tersedia, tampil pesan pendaftaran ditutup. | DB: status formulir, batch, dan pertanyaan |
 | PUB-43 | Setelah berhasil, tampil halaman konfirmasi (`/bergabung/berhasil`). | Statis |
 
 ### 6.6 Kontak (`/kontak`)
@@ -152,6 +152,8 @@ Lima program awal: Bimbingan Belajar dan Literasi, Literasi Digital, Pojok Baca 
 | ADM-11 | Ekspor data pendaftar ke Excel/CSV dan PDF (bagian 10). |
 | ADM-12 | (Tambahan, A6) Pesan masuk: daftar pesan dari form kontak, detail, tanda sudah dibaca, hapus. |
 | ADM-13 | (Tambahan) Ringkasan: jumlah pendaftar baru, pesan belum dibaca, batch yang sedang dibuka, dan berita terakhir. |
+| ADM-14 | Status aktif formulir Internship dan Relawan dapat diubah secara terpisah. Pendaftaran publik hanya diterima bila formulir jenis tersebut aktif dan batch yang dipilih terbuka. |
+| ADM-15 | CRUD pertanyaan tambahan formulir secara terpisah untuk Internship dan Relawan: teks, jawaban singkat/paragraf, wajib/opsional, tampil/sembunyi, dan urutan. Jawaban tersimpan bersama pendaftar, tampil di detail, dan ikut ekspor. |
 
 ## 8. Pendaftaran Relawan dan Intern
 
@@ -178,10 +180,12 @@ Satu form dipakai untuk dua tipe. Tipe (Intern atau Relawan) ditentukan oleh bat
 Aturan bisnis:
 
 1. Satu email hanya bisa mendaftar satu kali per batch.
-2. Bila batch ditutup saat pengunjung mengisi, pengiriman ditolak dengan pesan yang jelas dan isian teks tidak hilang.
-3. File disimpan di server di luar folder publik. Foto dan CV hanya bisa dibuka admin yang sedang login.
-4. Batch yang sudah punya pendaftar atau anggota tim tidak bisa dihapus. Admin cukup menutupnya.
-5. Setelah berhasil, pengunjung melihat halaman konfirmasi yang menyebut bahwa tim PFP akan menghubungi lewat WhatsApp atau email dalam 3 sampai 5 hari kerja.
+2. Jenis formulir Internship dan Relawan memiliki toggle aktif/nonaktif terpisah. Form hanya bisa dikirim jika jenis formulir aktif dan batch terpilih juga terbuka.
+3. Pertanyaan tambahan diatur terpisah per jenis; hanya pertanyaan aktif untuk jenis yang dipilih ditampilkan dan divalidasi. Jawaban menyimpan salinan teks pertanyaan agar riwayat tetap terbaca jika admin mengubah atau menghapus pertanyaan.
+4. Bila formulir atau batch ditutup saat pengunjung mengisi, pengiriman ditolak dengan pesan yang jelas dan isian teks tidak hilang.
+5. File disimpan di server di luar folder publik. Foto dan CV hanya bisa dibuka admin yang sedang login.
+6. Batch yang sudah punya pendaftar atau anggota tim tidak bisa dihapus. Admin cukup menutupnya.
+7. Setelah berhasil, pengunjung melihat halaman konfirmasi yang menyebut bahwa tim PFP akan menghubungi lewat WhatsApp atau email dalam 3 sampai 5 hari kerja.
 
 ## 9. Form kontak
 
