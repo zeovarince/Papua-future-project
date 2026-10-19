@@ -7,6 +7,9 @@
 !/storage/applications/.htaccess
 /storage/cache/*
 !/storage/cache/.gitkeep
+/storage/integrity-baseline.json
+/storage/integrity-baseline.json.*.tmp
+/storage/integrity-baseline.json.*.bak
 /storage/sessions/*
 !/storage/sessions/.gitkeep
 /public/uploads/*

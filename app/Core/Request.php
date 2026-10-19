@@ -31,6 +31,15 @@ final class Request
             $path = substr($path, strlen($basePath)) ?: '/';
         }
 
+        if (getenv('APP_ENV') === 'production') {
+            $secretAdminPath = \admin_path();
+            if ($secretAdminPath !== null && ($path === $secretAdminPath || str_starts_with($path, $secretAdminPath . '/'))) {
+                $path = '/admin' . substr($path, strlen($secretAdminPath));
+            } elseif ($path === '/admin' || str_starts_with($path, '/admin/')) {
+                $path = '/_invalid-admin-path' . substr($path, strlen('/admin'));
+            }
+        }
+
         return new self(
             strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')),
             $path,

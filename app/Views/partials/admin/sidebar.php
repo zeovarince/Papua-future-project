@@ -1,7 +1,7 @@
 <aside class="admin-sidebar" id="admin-sidebar" aria-label="Menu admin" data-admin-sidebar>
     <button class="sidebar-close" type="button" aria-label="Tutup menu" data-sidebar-close>&times;</button>
     <a class="admin-brand" href="<?= url('/admin') ?>" aria-label="Papua Future Project, Admin Panel">
-        <span class="admin-brand-mark" aria-hidden="true">P</span>
+        <img src="<?= asset('img/logo.png') ?>" class="admin-brand-mark" alt="" aria-hidden="true" width="50" height="50" />
         <span class="admin-brand-copy"><strong>Papua Future Project</strong><small>Admin Panel</small></span>
     </a>
     <nav class="sidebar-nav" aria-label="Navigasi admin">

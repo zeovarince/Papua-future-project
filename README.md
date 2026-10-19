@@ -32,6 +32,7 @@ Mulai dari [`AGENT.md`](AGENT.md) untuk konteks agent, kemudian ikuti [`docs/STE
 | [RWD](docs/RWD.md) | Breakpoint serta perilaku responsif halaman publik dan panel admin. |
 | [GSAP](docs/GSAP.md) | Panduan animasi publik dan admin. |
 | [RULES](docs/RULES.md) | Konvensi kode, MVC, keamanan, aksesibilitas, dan Git. |
+| [SECURITY](docs/SECURITY.md) | Kontrol keamanan aplikasi, audit integritas, dan persiapan hosting. |
 
 ## Stack target
 
@@ -47,7 +48,7 @@ Mulai dari [`AGENT.md`](AGENT.md) untuk konteks agent, kemudian ikuti [`docs/STE
 
 1. Buat database kosong di phpMyAdmin dengan nama yang kamu pilih dan collation `utf8mb4_unicode_ci`.
 2. Pilih database itu, buka tab **Import**, lalu impor [`database/pfp.sql`](database/pfp.sql). File ini membuat seluruh tabel dari ERD/SCHEMA sekaligus dan menandai skema awal sebagai sudah diterapkan.
-3. Isi nama database dan kredensial MySQL yang sama di `.env` (`DB_NAME`, `DB_USER`, `DB_PASS`, `DB_HOST`, `DB_PORT`). Jangan commit `.env`.
+3. Konfigurasi aplikasi hanya disimpan di `.env` pada akar proyek. File ini tersedia di lingkungan kerja lokal dan sengaja tidak masuk Git. Pada instalasi baru, buat `.env` lalu isi variabel yang tercantum di bagian [Variabel lingkungan](docs/ARCHITECTURE.md#12-variabel-lingkungan). Isi kredensial MySQL (`DB_NAME`, `DB_USER`, `DB_PASS`, `DB_HOST`, `DB_PORT`), buat `APP_KEY` dengan `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"`, dan untuk production isi `ADMIN_PATH` dengan nilai acak, misalnya hasil `php -r "echo '/panel-' . bin2hex(random_bytes(8)), PHP_EOL;"`. Jangan commit `.env`.
 4. Jika database sudah pernah dibuat dari versi skema sebelumnya, pilih database tersebut di phpMyAdmin lalu jalankan sekali file [`database/optimize_existing.sql`](database/optimize_existing.sql). Untuk database baru, indeks optimal sudah termasuk di `pfp.sql`.
 5. Dari PowerShell Laragon di root proyek, jalankan:
 
@@ -80,7 +81,11 @@ try {
 }
 ```
 
-Halaman publik tersedia di `/`, `/tentang`, `/program`, `/berita`, `/bergabung`, dan `/kontak`. Login admin ada di `/admin/login`, dashboard di `/admin`.
+Halaman publik tersedia di `/`, `/tentang`, `/program`, `/berita`, `/bergabung`, dan `/kontak`. Di lokal, login admin ada di `/admin/login` dan dashboard di `/admin`. Di production, isi `ADMIN_PATH` dengan jalur rahasia acak; URL admin akan mengikuti nilai itu.
+
+### Audit integritas
+
+Sebelum membuat acuan pertama, jalankan `php bin/integrity-check.php --scan` dan tinjau hasilnya. Setelah memastikan deployment bersih, jalankan `php bin/integrity-check.php --init`. Pemeriksaan rutin memakai `php bin/integrity-check.php`; panduan cron cPanel ada di [`docs/SECURITY.md`](docs/SECURITY.md#53-deteksi-dini).
 ## Target deployment
 
 Deployment produksi dirancang memakai Git Version Control cPanel, Composer production, migrasi CLI, HTTPS, dan folder aplikasi/penyimpanan privat di luar document root bila paket hosting mengizinkan. Lihat [panduan deployment](docs/ARCHITECTURE.md#13-deployment-di-cpanel-dengan-git). Pada shared hosting, ketersediaan PHP 8.4, ekstensi, SSH/Terminal, cron, dan batas upload/resource bergantung pada provider serta paket akun. Uji paket yang dipilih; tidak diperlukan akses root.

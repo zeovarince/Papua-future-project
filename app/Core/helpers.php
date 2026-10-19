@@ -18,8 +18,35 @@ if (!function_exists('url')) {
         return ($basePath === '/' || $basePath === '.') ? '' : rtrim($basePath, '/');
     }
 
+    function admin_path(): ?string
+    {
+        if (getenv('APP_ENV') !== 'production') {
+            return '/admin';
+        }
+
+        $path = trim((string) (getenv('ADMIN_PATH') ?: ''));
+        if (preg_match('~^/[A-Za-z0-9-]{12,80}$~', $path) !== 1 || preg_match('/[0-9]/', $path) !== 1) {
+            return null;
+        }
+
+        return $path;
+    }
+
+    function rewrite_admin_path(string $path): string
+    {
+        if (getenv('APP_ENV') !== 'production' || !preg_match('~^/admin(?:/|[?#]|$)~', $path)) {
+            return $path;
+        }
+
+        $secretPath = admin_path();
+        return $secretPath === null
+            ? '/_admin-disabled' . substr($path, strlen('/admin'))
+            : $secretPath . substr($path, strlen('/admin'));
+    }
+
     function url(string $path = '/'): string
     {
+        $path = rewrite_admin_path('/' . ltrim($path, '/'));
         $base = getenv('APP_ENV') === 'production'
             ? rtrim((string) (getenv('APP_URL') ?: ''), '/')
             : app_base_path();

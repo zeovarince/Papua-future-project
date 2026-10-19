@@ -17,6 +17,9 @@ final class Response
 
     public static function redirect(string $location, int $status = 303): self
     {
+        if (function_exists('rewrite_admin_path') && str_starts_with($location, '/')) {
+            $location = \rewrite_admin_path($location);
+        }
         return new self('', $status, ['Location' => $location, 'Cache-Control' => 'no-store']);
     }
 

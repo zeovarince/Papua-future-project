@@ -11,3 +11,9 @@ DirectoryIndex index.php
 <FilesMatch "^\.(?!well-known)">
     Require all denied
 </FilesMatch>
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)(?:\.(?:env|sql|bak|old|orig|zip|tar|gz|log|md|lock)$|^error_log$)">
+        Require all denied
+    </FilesMatch>
+</IfModule>

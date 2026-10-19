@@ -7,6 +7,7 @@ namespace App\Controllers\Admin;
 use App\Core\Flash;
 use App\Core\Request;
 use App\Core\Response;
+use App\Core\SecurityLogger;
 use App\Core\Session;
 use App\Core\View;
 use App\Services\AuthService;
@@ -41,7 +42,7 @@ final class AuthController
             return Response::redirect('/admin/login');
         }
 
-        $identifier = hash('sha256', $request->ipAddress() . '|' . $email);
+        $identifier = RateLimiter::identifier($request->ipAddress() . '|' . $email);
         $limiter = new RateLimiter();
         if ($limiter->isLimited('login', $identifier, 5, 900)) {
             Flash::set('error', 'Terlalu banyak percobaan masuk. Coba lagi dalam 15 menit.');
@@ -51,10 +52,12 @@ final class AuthController
 
         if ((new AuthService())->attempt($email, $password)) {
             $limiter->clear('login', $identifier);
+            SecurityLogger::record('admin_login_succeeded', $request);
             return Response::redirect('/admin');
         }
 
         $limiter->hit('login', $identifier);
+        SecurityLogger::record('admin_login_failed', $request);
         Flash::set('error', 'Email atau kata sandi tidak sesuai.');
         Flash::set('email', $email);
         return Response::redirect('/admin/login');

@@ -14,7 +14,7 @@ final class ContactController
         if(is_scalar($trap)&&trim((string)$trap)!==''){Flash::set('success','Pesan berhasil dikirim. Terima kasih sudah menghubungi kami.');return Response::redirect('/kontak#contact-form');}
         [$values,$errors]=ContactValidator::validate($request->post());
         if($errors!==[]){Flash::set('old',$values);Flash::set('errors',$errors);Flash::set('error','Periksa kembali data pesan.');return Response::redirect('/kontak#contact-form');}
-        $limiter=new RateLimiter();$identifier=hash('sha256',$request->ipAddress());
+        $limiter=new RateLimiter();$identifier=RateLimiter::identifier($request->ipAddress());
         if($limiter->isLimited('contact',$identifier,5,3600)){Flash::set('error','Batas pengiriman pesan tercapai. Silakan coba lagi nanti.');return Response::redirect('/kontak#contact-form');}
         ContactMessage::create($values);$limiter->hit('contact',$identifier);
         Flash::set('success','Pesan berhasil dikirim. Terima kasih sudah menghubungi kami.');

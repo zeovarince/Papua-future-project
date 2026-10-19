@@ -8,6 +8,7 @@ use App\Core\Flash;
 use App\Core\Logger;
 use App\Core\Request;
 use App\Core\Response;
+use App\Core\SecurityLogger;
 use App\Core\View;
 use App\Models\Application;
 use App\Models\Batch;
@@ -74,6 +75,7 @@ final class ApplicationController
             Flash::set('error', 'Pendaftar tidak ditemukan.');
             return Response::redirect('/admin/pendaftar');
         }
+        SecurityLogger::record('application_status_changed', $request, $id);
         Flash::set('success', 'Status pendaftar berhasil diperbarui.');
         return Response::redirect('/admin/pendaftar/' . $id);
     }
@@ -116,6 +118,7 @@ final class ApplicationController
         if (!in_array($format, ['csv', 'xlsx', 'pdf'], true)) {
             return new Response('Format ekspor tidak tersedia.', 404, ['Content-Type' => 'text/plain; charset=UTF-8']);
         }
+        SecurityLogger::record('application_exported_' . $format, $request);
         try {
             return (new ApplicationExportService())->download($format, $this->filters($request));
         } catch (RuntimeException $exception) {

@@ -11,6 +11,7 @@ final class ProgramImageService
     public const MAX_PHOTOS = 30;
     public const MAX_FILES_PER_UPLOAD = 20;
     private const MAX_BYTES = 8_388_608;
+    private const MAX_PIXELS = 16_000_000;
 
     public function store(?array $file, int $programId, string $area = 'programs'): ?string
     {
@@ -25,7 +26,7 @@ final class ProgramImageService
         if (!in_array($mime, ['image/jpeg','image/png','image/webp'], true) || !$imageInfo || ($imageInfo['mime'] ?? '') !== $mime) {
             throw new RuntimeException('Gambar harus berupa JPEG, PNG, atau WebP yang valid.');
         }
-        if ($imageInfo[0] > 12000 || $imageInfo[1] > 12000) throw new RuntimeException('Dimensi gambar maksimal 12.000 × 12.000 piksel.');
+        if ($imageInfo[0] > 8000 || $imageInfo[1] > 8000 || $imageInfo[0] * $imageInfo[1] > self::MAX_PIXELS) throw new RuntimeException('Resolusi gambar terlalu besar. Unggah gambar maksimal 16 megapiksel.');
         if (!function_exists('imagewebp')) throw new RuntimeException('Ekstensi GD dengan dukungan WebP perlu diaktifkan di PHP hosting.');
         $source = match ($mime) {
             'image/jpeg' => @imagecreatefromjpeg((string) $file['tmp_name']),

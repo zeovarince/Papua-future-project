@@ -26,7 +26,7 @@ Situs publik berisi Beranda, Tentang Kami, Program dan detail program, Berita & 
 2. Tentukan tahap aktif di `docs/STEP.md`; kerjakan prasyarat tahap itu terlebih dahulu.
 3. Baca bagian dokumen yang langsung mengatur perubahan. Jangan menciptakan fitur atau mengubah keputusan produk tanpa dasar di PRD.
 4. Buat perubahan sekecil yang menyelesaikan kebutuhan, sesuai struktur dan aturan MVC. Controller tipis; query berada di Model; aturan lintas model/file berada di Service; View hanya menyajikan data yang sudah di-escape.
-5. Jangan menaruh kredensial atau data pribadi di repositori. Gunakan `.env.example` untuk nama variabel tanpa nilai rahasia.
+5. Jangan menaruh kredensial atau data pribadi di repositori. Semua konfigurasi lingkungan berada di satu file `.env` yang dikecualikan dari Git; jangan menyalin nilainya ke dokumentasi atau commit file tersebut.
 6. Perbarui dokumentasi terkait bila implementasi mengubah route, tabel, keputusan produk, atau proses deployment. Jika dokumen saling bertentangan, tandai konflik dan selaraskan dokumen acuan sebelum melanjutkan.
 7. Laporkan file yang diubah, keputusan yang diambil, batasan, dan pemeriksaan yang benar-benar dijalankan. Jangan menyatakan pemeriksaan lulus bila belum dilakukan.
 

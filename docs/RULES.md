@@ -57,6 +57,8 @@ Aturan wajib untuk semua kode di proyek Papua Future Project. Berlaku untuk manu
 
 ## 3. Keamanan
 
+Dokumen ini menetapkan aturan dasar. Untuk konfigurasi hosting, pemantauan integritas, pencatatan keamanan, dan respons insiden, ikuti [SECURITY.md](SECURITY.md).
+
 ### 3.1 SQL Injection
 
 - **Semua query memakai prepared statement PDO** dengan parameter binding (`:param` atau `?`).
@@ -69,7 +71,7 @@ Aturan wajib untuk semua kode di proyek Papua Future Project. Berlaku untuk manu
 - Semua output dinamis di View melewati `e()` (`htmlspecialchars(ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8')`).
 - Konten berita dan program disimpan sebagai teks biasa, bukan HTML. `Text::render()` yang meng-escape dulu, lalu mengubah paragraf dan `**tebal**`.
 - Tidak ada `{!! !!}` atau `echo` tanpa escaping.
-- Content Security Policy header diaktifkan (lihat ARCHITECTURE.md bagian 10).
+- Content Security Policy belum diaktifkan karena masih ada style/script inline dan dependensi CDN. Jangan aktifkan sebelum aset dipindah dan kebijakan diuji; lihat [SECURITY.md](SECURITY.md).
 
 ### 3.3 CSRF
 
@@ -89,6 +91,9 @@ Aturan wajib untuk semua kode di proyek Papua Future Project. Berlaku untuk manu
 - Cookie sesi: `HttpOnly`, `Secure` (di production), `SameSite=Lax`.
 - Pesan login gagal tidak menyebutkan apakah email atau password yang salah.
 - Rate limit login: 5 percobaan gagal per 15 menit per kombinasi IP+email.
+- Identifier pembatas laju dibuat dengan HMAC-SHA256 dan `APP_KEY`; jangan menyimpan IP mentah sebagai identifier.
+- Di production, akses admin memakai jalur acak `ADMIN_PATH`. Jalur default `/admin` menjawab 404; semua route admin tetap wajib memakai middleware autentikasi.
+- Catat login, ekspor, perubahan status, dan penghapusan ke `storage/logs/security.log` tanpa kata sandi, email, isi form, token, atau data pribadi.
 
 ### 3.5 Upload File
 
@@ -114,8 +119,10 @@ Aturan wajib untuk semua kode di proyek Papua Future Project. Berlaku untuk manu
 X-Content-Type-Options: nosniff
 X-Frame-Options: SAMEORIGIN
 Referrer-Policy: strict-origin-when-cross-origin
-Content-Security-Policy: default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; frame-src https://www.openstreetmap.org; base-uri 'self'; form-action 'self'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
 ```
+
+Panel admin juga mengirim `X-Robots-Tag: noindex, nofollow` dan `Cache-Control: no-store`. HSTS hanya dikirim di production ketika koneksi HTTPS terdeteksi. CSP menunggu pembersihan inline style/script dan dependensi eksternal.
 
 ## 4. Database
 

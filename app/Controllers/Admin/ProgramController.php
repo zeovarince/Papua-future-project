@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace App\Controllers\Admin;
-use App\Core\Flash; use App\Core\Request; use App\Core\Response; use App\Core\View;
+use App\Core\Flash; use App\Core\Request; use App\Core\Response; use App\Core\SecurityLogger; use App\Core\View;
 use App\Models\Program; use App\Services\ProgramImageService; use App\Validators\ProgramValidator; use PDOException; use Throwable;
 final class ProgramController
 {
@@ -25,7 +25,7 @@ final class ProgramController
         catch(Throwable $e){if($newCover!==null)$images->delete($newCover);if($id===null&&$savedId!==null)Program::delete($savedId);$errors['cover_image']=$e->getMessage();return $this->invalid($values,$errors,$id);}
     }
     private function invalid(array $values,array $errors,?int $id): Response { Flash::set('errors',$errors);Flash::set('old',$values);Flash::set('error','Periksa kembali data program.');return Response::redirect($id===null?'/admin/program/tambah':'/admin/program/'.$id.'/ubah'); }
-    public function destroy(Request $r,int $id): Response { $p=Program::find($id);if($p!==null){$photos=Program::photos($id);Program::delete($id);(new ProgramImageService())->deleteProgramFiles($id,$p,$photos);Flash::set('success','Program dan foto dokumentasinya berhasil dihapus.');}return Response::redirect('/admin/program'); }
+    public function destroy(Request $r,int $id): Response { $p=Program::find($id);if($p!==null){$photos=Program::photos($id);Program::delete($id);(new ProgramImageService())->deleteProgramFiles($id,$p,$photos);SecurityLogger::record('program_deleted',$r,$id);Flash::set('success','Program dan foto dokumentasinya berhasil dihapus.');}return Response::redirect('/admin/program'); }
     public function uploadPhotos(Request $r,int $id): Response
     {
         if(Program::find($id)===null)return Response::redirect('/admin/program');$service=new ProgramImageService();$stored=[];

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace App\Controllers\Admin;
-use App\Core\Flash;use App\Core\Request;use App\Core\Response;use App\Core\View;use App\Models\Post;use App\Services\PostImageService;use App\Validators\PostValidator;use PDOException;use Throwable;
+use App\Core\Flash;use App\Core\Request;use App\Core\Response;use App\Core\SecurityLogger;use App\Core\View;use App\Models\Post;use App\Services\PostImageService;use App\Validators\PostValidator;use PDOException;use Throwable;
 final class PostController
 {
     public function index(): Response { return View::render('admin/post/index',['title'=>'Berita & Kegiatan','page'=>'post','breadcrumb'=>['Admin','Berita & Kegiatan'],'posts'=>Post::adminList()],'admin'); }
@@ -28,7 +28,7 @@ final class PostController
         catch(Throwable $e){if($cover!==null)$images->delete($cover);if($id===null&&$savedId!==null)Post::delete($savedId);$errors['cover_image']=$e->getMessage();return $this->invalid($values,$errors,$id);}
     }
     private function invalid(array $values,array $errors,?int $id): Response { Flash::set('old',$values);Flash::set('errors',$errors);Flash::set('error','Periksa kembali data berita.');return Response::redirect($id===null?'/admin/berita/tambah':'/admin/berita/'.$id.'/ubah'); }
-    public function destroy(Request $r,int $id): Response { $p=Post::find($id);if($p!==null){$photos=Post::photos($id);Post::delete($id);(new PostImageService())->deleteItemFiles($id,$p['cover_image'],$photos);Flash::set('success','Berita dan dokumentasinya dihapus.');}return Response::redirect('/admin/berita'); }
+    public function destroy(Request $r,int $id): Response { $p=Post::find($id);if($p!==null){$photos=Post::photos($id);Post::delete($id);(new PostImageService())->deleteItemFiles($id,$p['cover_image'],$photos);SecurityLogger::record('post_deleted',$r,$id);Flash::set('success','Berita dan dokumentasinya dihapus.');}return Response::redirect('/admin/berita'); }
     public function uploadPhotos(Request $r,int $id): Response
     {
         if(Post::find($id)===null)return Response::redirect('/admin/berita');$service=new PostImageService();$stored=[];

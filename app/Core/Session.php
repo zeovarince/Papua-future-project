@@ -24,8 +24,10 @@ final class Session
             throw new RuntimeException('Direktori sesi tidak dapat ditulis.');
         }
         session_save_path($sessionDirectory);
+        session_name('pfp_session');
         ini_set('session.use_strict_mode', '1');
         ini_set('session.use_only_cookies', '1');
+        ini_set('session.use_trans_sid', '0');
         $secure = (getenv('APP_ENV') === 'production') || $secureConnection;
         session_set_cookie_params([
             'lifetime' => 0,

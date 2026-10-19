@@ -42,7 +42,7 @@ final class JoinController
         }
 
         $limiter = new RateLimiter();
-        $identifier = hash('sha256', $request->ipAddress());
+        $identifier = RateLimiter::identifier($request->ipAddress());
         if ($limiter->isLimited('join', $identifier, 5, 3600)) {
             Flash::set('error', 'Batas pengiriman pendaftaran tercapai. Silakan coba lagi nanti.');
             Flash::set('old', $request->post());

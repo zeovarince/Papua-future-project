@@ -53,7 +53,6 @@ pfp/
 ├─ phpunit.xml
 ├─ phpcs.xml                         aturan PSR-12
 ├─ phpstan.neon
-├─ .env.example                      contoh isi .env (tanpa rahasia)
 ├─ .gitignore
 ├─ .cpanel.yml                       tugas deployment cPanel Git
 │
@@ -61,7 +60,8 @@ pfp/
 │  ├─ migrate.php                    menjalankan file migrasi
 │  ├─ create-database.php             membuat DB lokal (opsional, CLI)
 │  ├─ create-admin.php                membuat akun admin awal secara aman
-│  └─ cleanup-rate-limits.php         membersihkan rate_limits lama (cron)
+│  ├─ cleanup-rate-limits.php         membersihkan rate_limits lama (cron)
+│  └─ integrity-check.php             memeriksa perubahan file dan isi uploads (cron)
 │
 ├─ config/
 │  ├─ app.php                        nama aplikasi, URL, zona waktu, sesi
@@ -103,6 +103,7 @@ pfp/
 │  │  ├─ Validator.php               mesin aturan validasi
 │  │  ├─ Environment.php              pembaca .env
 │  │  ├─ Logger.php
+│  │  ├─ SecurityLogger.php           catatan peristiwa keamanan tanpa data pribadi
 │  │  └─ helpers.php                 e(), url(), asset(), old(), error(), csrf_field(), active()
 │  │
 │  ├─ Support/
@@ -520,14 +521,19 @@ Aset statis (CSS, JS, gambar) diberi versi lewat `?v=` dari waktu ubah file (fun
 
 ## 12. Variabel lingkungan
 
-Dibaca dari `.env` lewat kelas `Env`. Jangan memanggil `getenv()` di tempat lain. Salin `.env.example` menjadi `.env` di server dan isi manual. `.env` tidak masuk Git.
+Dibaca dari satu file `.env` di akar proyek lewat kelas `Environment`. File `.env` bersifat khusus untuk tiap lingkungan dan tidak masuk Git. Di instalasi baru, buat file tersebut dan isi variabel berikut.
 
 | Nama | Fungsi |
 | --- | --- |
+| `APP_NAME` | Nama aplikasi yang ditampilkan. |
 | `APP_ENV` | `local` atau `production`. Menentukan tampilan galat. |
+| `APP_DEBUG` | `true` hanya untuk pengembangan lokal; gunakan `false` di production. |
 | `APP_URL` | URL dasar situs, dipakai untuk tautan di file ekspor. |
+| `APP_KEY` | 32 byte acak heksadesimal untuk HMAC identifier pembatas laju dan hash IP log keamanan. |
+| `ADMIN_PATH` | Jalur acak panel admin; wajib di production, diabaikan di local. |
 | `APP_TIMEZONE` | Bawaan `Asia/Jayapura`. |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS` | Koneksi MySQL atau MariaDB. |
+| `STORAGE_DIR` | Opsional; lokasi penyimpanan privat. Kosong memakai folder `storage/` di akar proyek. |
 | `STORAGE_DIR` | Jalur absolut folder penyimpanan privat, di luar `public/`. |
 | `SEED_ADMIN_EMAIL` | Email admin awal. |
 | `SEED_ADMIN_PASSWORD` | Kata sandi admin awal. Ganti setelah login pertama. |
@@ -581,9 +587,9 @@ require APP_ROOT . '/vendor/autoload.php';
 2. Buka **MultiPHP INI Editor** dan set: `upload_max_filesize = 8M`, `post_max_size = 32M`, `max_file_uploads = 20`, `memory_limit = 256M`, `display_errors = Off`.
 3. Buat database dan pengguna MySQL di **MySQL Databases**, lalu beri semua hak pada database itu.
 4. Buka **Git Version Control**, pilih **Create**, isi URL repositori (untuk repositori privat, pasang deploy key SSH), dan pilih jalur `repositories/pfp`.
-5. Buat folder `/home/USERNAME/pfp-app` dan `.env` di dalamnya lewat File Manager, isi sesuai bagian 12 dengan `STORAGE_DIR=/home/USERNAME/pfp-app/storage` dan `APP_ENV=production`.
+5. Buat folder `/home/USERNAME/pfp-app` dan `.env` di dalamnya lewat File Manager, isi sesuai bagian 12 dengan `STORAGE_DIR=/home/USERNAME/pfp-app/storage`, `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://domain-anda`, `APP_KEY` acak, dan `ADMIN_PATH` acak.
 6. Pastikan AutoSSL aktif untuk domain.
-7. Tambahkan cron di **Cron Jobs**: `0 3 * * * /usr/local/bin/ea-php84 /home/USERNAME/pfp-app/bin/cleanup-rate-limits.php`. Jalur PHP CLI berbeda antar hosting. Cek dengan `which ea-php84` atau tanyakan ke penyedia hosting; cron hanya diperlukan untuk cleanup terjadwal dan bukan proses yang harus terus hidup.
+7. Tambahkan cron di **Cron Jobs**: cleanup harian `0 3 * * * /usr/local/bin/ea-php84 /home/USERNAME/pfp-app/bin/cleanup-rate-limits.php` dan integrity check `0 */6 * * * /usr/local/bin/ea-php84 /home/USERNAME/pfp-app/bin/integrity-check.php`. Jalur PHP CLI berbeda antar hosting. Cek dengan `which ea-php84` atau tanyakan ke penyedia hosting; cron hanya diperlukan untuk tugas terjadwal dan bukan proses yang harus terus hidup.
 
 ### 13.3 `.cpanel.yml`
 
@@ -596,11 +602,13 @@ deployment:
     - export APP_DIR=/home/USERNAME/pfp-app
     - export WEB_DIR=/home/USERNAME/public_html
     - /bin/mkdir -p $APP_DIR/storage/logs $APP_DIR/storage/applications $APP_DIR/storage/sessions $APP_DIR/storage/cache
+    - /bin/cp storage/.htaccess $APP_DIR/storage/.htaccess
+    - /bin/cp storage/applications/.htaccess $APP_DIR/storage/applications/.htaccess
     - /usr/bin/rsync -a --delete app/ $APP_DIR/app/
     - /usr/bin/rsync -a --delete config/ $APP_DIR/config/
     - /usr/bin/rsync -a --delete database/ $APP_DIR/database/
     - /usr/bin/rsync -a --delete bin/ $APP_DIR/bin/
-    - /bin/cp composer.json composer.lock $APP_DIR/
+    - /bin/cp bootstrap.php composer.json composer.lock $APP_DIR/
     - /usr/bin/rsync -a --include='uploads/' --include='uploads/.htaccess' --exclude='uploads/*' --exclude='.well-known/' --exclude='cgi-bin/' public/ $WEB_DIR/
     - cd $APP_DIR && /opt/cpanel/composer/bin/composer install --no-dev --optimize-autoloader --no-interaction
     - cd $APP_DIR && /usr/local/bin/ea-php84 bin/migrate.php
@@ -700,7 +708,7 @@ server {
 
 ```
 composer install
-Copy-Item .env.example .env   # isi koneksi database lokal
+# Pastikan .env ada di akar proyek dan berisi konfigurasi lokal (lihat tabel di atas).
 php bin/create-database.php   # opsional, buat database lokal
 php bin/migrate.php
 php bin/create-admin.php admin@example.com "Admin PFP" # password lewat PFP_ADMIN_PASSWORD

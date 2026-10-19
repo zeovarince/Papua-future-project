@@ -7,6 +7,7 @@ namespace App\Controllers\Admin;
 use App\Core\Flash;
 use App\Core\Request;
 use App\Core\Response;
+use App\Core\SecurityLogger;
 use App\Core\View;
 use App\Models\Batch;
 use App\Models\TeamMember;
@@ -135,6 +136,7 @@ final class TeamController
         if ($member !== null && $member['member_group'] === self::GROUPS[$group]) {
             TeamMember::delete($id);
             (new TeamPhotoService())->delete($member['photo_path']);
+            SecurityLogger::record('team_member_deleted', $request, $id);
             Flash::set('success', 'Anggota berhasil dihapus.');
         }
         return Response::redirect('/admin/tim/' . rawurlencode($group));

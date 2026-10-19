@@ -12,11 +12,15 @@ final class App
     public function run(): void
     {
         try {
+            if (getenv('APP_ENV') === 'production') {
+                ini_set('display_errors', '0');
+                ini_set('log_errors', '1');
+            }
             $settings = require APP_ROOT . '/config/app.php';
             date_default_timezone_set($settings['timezone']);
             $request = Request::capture();
             Session::start($request->isSecure());
-            $this->setSecurityHeaders();
+            $this->setSecurityHeaders($request);
             set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
                 if (!(error_reporting() & $severity)) {
                     return false;
@@ -35,10 +39,22 @@ final class App
         }
     }
 
-    private function setSecurityHeaders(): void
+    private function setSecurityHeaders(Request $request): void
     {
+        header_remove('X-Powered-By');
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: SAMEORIGIN');
         header('Referrer-Policy: strict-origin-when-cross-origin');
+        header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+
+        if (getenv('APP_ENV') === 'production' && $request->isSecure()) {
+            header('Strict-Transport-Security: max-age=31536000');
+        }
+
+        if ($request->path() === '/admin' || str_starts_with($request->path(), '/admin/')) {
+            header('X-Robots-Tag: noindex, nofollow');
+            header('Cache-Control: no-store, private, max-age=0');
+            header('Pragma: no-cache');
+        }
     }
 }

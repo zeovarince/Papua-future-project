@@ -269,6 +269,9 @@ final class ApplicationExportService
 
     private function absoluteUrl(string $path): string
     {
+        if (function_exists('rewrite_admin_path')) {
+            $path = \rewrite_admin_path($path);
+        }
         $configuredUrl = rtrim((string) (getenv('APP_URL') ?: ''), '/');
         if ($configuredUrl !== '') {
             return $configuredUrl . '/' . ltrim($path, '/');

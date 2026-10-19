@@ -145,6 +145,17 @@ Implementasi saat ini memakai GSAP 3.15.0 dan ScrollTrigger lokal, modul dinamis
 
 **Kriteria selesai:** tidak ada cacat blocker pada alur utama; semua pemeriksaan yang dijalankan tercatat; masalah yang belum selesai mempunyai langkah tindak lanjut.
 
+#### Catatan audit awal — 19 Oktober 2026
+
+- `composer validate --no-check-publish` menyatakan `composer.json` valid; ada peringatan bahwa metadata lisensi belum diisi.
+- PHP CLI yang tersedia adalah 8.4.23. Pemeriksaan sintaks lolos untuk 125 file PHP dan 17 file JavaScript. Ekstensi PDO MySQL dan GD tersedia, tetapi `zip` belum dimuat sehingga ekspor XLSX belum dapat diuji penuh.
+- Smoke test lokal: `/admin/login` merespons 200, `/admin` mengarahkan ke login (303), route tidak dikenal merespons 404, dan aset CSS/JS merespons 200.
+- Halaman publik yang membaca MySQL merespons 500 karena tidak ada listener TCP di `127.0.0.1:3306` meskipun service `MySQL80` berstatus berjalan. Periksa port di Laragon dan samakan dengan `DB_PORT` pada `.env`. Pemeriksaan CRUD, form, unggahan, dan ekspor yang membutuhkan database menunggu koneksi pulih.
+- `tests/Unit` dan `tests/E2E` masih berisi placeholder; PHPUnit belum terpasang.
+- Header Content Security Policy belum diterapkan. Halaman publik masih memuat Tailwind CDN dan Google Fonts, jadi kebijakan CSP perlu diselaraskan dengan aset tersebut sebelum diberlakukan agar tidak merusak tampilan.
+
+**Status:** Step 12 masih berlangsung. Ulangi pemeriksaan halaman publik dan alur CRUD/form/unggah/ekspor setelah MySQL dan ekstensi yang dibutuhkan aktif. Lengkapi audit CSP sebelum menandai tahap ini selesai.
+
 ### Step 13 — Siapkan dan deploy ke shared hosting cPanel
 
 1. Pastikan paket provider menyediakan PHP 8.4+, ekstensi wajib, MySQL/MariaDB, HTTPS, dan batas resource/unggah memadai. Verifikasi di paket akun yang benar karena fasilitas dapat berbeda antar paket.
