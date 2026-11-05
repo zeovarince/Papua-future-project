@@ -1,0 +1,4 @@
+ALTER TABLE application_questions
+  MODIFY COLUMN field_type ENUM('TEXT', 'TEXTAREA', 'RADIO', 'CHECKBOX', 'SELECT', 'FILE') NOT NULL DEFAULT 'TEXTAREA',
+  ADD COLUMN options TEXT NULL AFTER field_type;
+

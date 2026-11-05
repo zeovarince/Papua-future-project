@@ -1,25 +1,40 @@
 # DESIGN-ADMIN: Spesifikasi Desain Panel Admin
 
-Panduan visual untuk panel admin Papua Future Project. Layout memakai **sidebar tetap** (bukan navbar atas). Kebutuhan fitur ada di [PRD.md](PRD.md) bagian 7. Route ada di [ARCHITECTURE.md](ARCHITECTURE.md) bagian 6. Alur pengguna ada di [USERFLOW.md](USERFLOW.md).
+Panduan visual untuk panel admin Papua Future Project. Layout memakai **rail ikon tetap di kiri** (bukan navbar atas) dengan **flyout detail yang muncul saat hover**. Kebutuhan fitur ada di [PRD.md](PRD.md) bagian 7. Route ada di [ARCHITECTURE.md](ARCHITECTURE.md) bagian 6. Alur pengguna ada di [USERFLOW.md](USERFLOW.md).
+
+> **Ringkasan perubahan dari versi sebelumnya**
+> - Sidebar lebar 260 px diganti **rail ikon 64 px berwarna biru terang** (Primary `#3770c1`). Label tidak lagi tampil permanen.
+> - Menu dikelompokkan menjadi 5 ikon utama. Saat di-hover, **flyout putih** muncul di sisi kanan rail berisi nama halaman, deskripsi singkat, dan sub-halaman.
+> - Flyout menimpa konten (overlay), tidak mendorong layout.
+> - Tidak ada tema gelap di navigasi dan tidak ada emoji. Ikon memakai set ikon garis (misalnya Lucide).
+> - **Area isi ikut dirombak** mengikuti gambar referensi: kartu putih membulat 20 px di atas latar abu muda, tombol pill, tabel lebih ringan, dan pola halaman yang seragam (daftar, form, detail).
+> - Ringkasan dibuat ulang: sapaan polos, 4 kartu metrik, kartu tren pendaftar dengan legenda, kartu aksi cepat berlatar gradient biru, dan daftar aktivitas terbaru.
+> - Inkonsistensi lama diselesaikan: bagian 3.3 menyebut sidebar tablet 76 px, sedangkan bagian 7 menyebut hamburger di 768-1023 px. Sekarang rail berlaku di semua layar >= 768 px.
 
 ## 1. Prinsip desain
 
-1. **Sidebar tetap, bukan navbar.** Sidebar ada di sisi kiri pada layar lebar, dan berubah menjadi laci geser di layar sempit.
-2. **Konsisten dengan situs publik.** Font Plus Jakarta Sans, palet warna Primary `#3770c1`, Secondary `#40b8fd`, dan aksen yang sama.
-3. **Minimalis tapi informatif.** Ruang putih cukup, tipografi jelas, dan ikon hanya untuk mendampingi teks.
-4. **Responsif.** Sidebar penuh di desktop (>1024 px), ikon saja di tablet (768–1024 px), dan menjadi drawer hamburger di bawah 768 px. Tabel dapat digulir horizontal jika kolomnya melebihi lebar layar. Detail breakpoint ada di [RWD.md](RWD.md).
-5. **Toast, bukan modal, untuk umpan balik.** Kecuali konfirmasi hapus yang memakai dialog.
+1. **Rail ikon tetap, bukan navbar.** Rail ada di sisi kiri pada layar >= 768 px, dan berubah menjadi laci geser di layar sempit.
+2. **Detail muncul saat dibutuhkan.** Rail hanya berisi ikon agar area konten luas. Nama halaman, deskripsi, dan sub-menu tampil di flyout saat hover atau fokus.
+3. **Konsisten dengan situs publik.** Font Plus Jakarta Sans, palet warna Primary `#3770c1`, Secondary `#40b8fd`, dan aksen yang sama.
+4. **Minimalis tapi informatif.** Ruang putih cukup, tipografi jelas, dan ikon hanya untuk mendampingi teks.
+5. **Isi berbasis kartu.** Semua konten berada di kartu putih membulat di atas latar `--admin-bg`. Tiap kartu punya judul, dan kontrolnya (cari, filter, aksi) ada di baris atas kartu.
+6. **Responsif.** Rail + flyout di >= 768 px, drawer hamburger di bawah 768 px. Tabel dapat digulir horizontal jika kolomnya melebihi lebar layar. Detail breakpoint ada di [RWD.md](RWD.md).
+7. **Toast, bukan modal, untuk umpan balik.** Kecuali konfirmasi hapus yang memakai dialog.
 
 ## 2. Palet warna admin
 
 | Token | Hex | Pemakaian |
 | --- | --- | --- |
 | `--admin-bg` | `#f4f7fb` | Latar belakang halaman |
-| `--admin-sidebar` | `#0c1527` | Latar sidebar |
-| `--admin-sidebar-hover` | `#162240` | Item sidebar saat di-hover |
-| `--admin-sidebar-active` | `#1e3260` | Item sidebar yang aktif |
-| `--admin-sidebar-text` | `#94a3b8` | Teks sidebar |
-| `--admin-sidebar-text-active` | `#ffffff` | Teks item aktif |
+| `--admin-sidebar` | `#3770c1` | Latar rail dan drawer (sama dengan Primary) |
+| `--admin-sidebar-hover` | `rgba(255,255,255,0.16)` | Ikon atau baris navigasi saat di-hover |
+| `--admin-sidebar-active` | `#ffffff` | Latar kotak ikon rail yang aktif |
+| `--admin-sidebar-text` | `#dbe7f7` | Ikon dan teks pada rail dan drawer |
+| `--admin-sidebar-text-active` | `#3770c1` | Ikon atau teks pada item aktif (di atas latar putih) |
+| `--admin-flyout` | `#ffffff` | **Baru.** Latar kartu flyout |
+| `--admin-flyout-border` | `#e2e8f0` | **Baru.** Border kartu flyout dan pemisah di dalamnya |
+| `--admin-flyout-hover` | `#eef4fc` | **Baru.** Baris flyout saat di-hover |
+| `--admin-flyout-active` | `#dfeafa` | **Baru.** Baris flyout halaman aktif |
 | `--admin-card` | `#ffffff` | Latar kartu dan tabel |
 | `--admin-border` | `#e2e8f0` | Border kartu dan pemisah |
 | `--admin-primary` | `#3770c1` | Tombol utama, tautan, aksen |
@@ -34,113 +49,200 @@ Panduan visual untuk panel admin Papua Future Project. Layout memakai **sidebar 
 ## 3. Layout utama
 
 ```
-┌──────────────────────────────────────────────────────┐
-│ Browser viewport                                     │
-│                                                      │
-│ ┌─────────┬──────────────────────────────────────┐   │
-│ │         │  ┌──────────────────────────────────┐ │   │
-│ │         │  │ Page Header                      │ │   │
-│ │         │  │ Judul · Breadcrumb · Tombol aksi │ │   │
-│ │ SIDEBAR │  └──────────────────────────────────┘ │   │
-│ │  260px  │                                      │   │
-│ │         │  ┌──────────────────────────────────┐ │   │
-│ │  Logo   │  │                                  │ │   │
-│ │  Menu   │  │        KONTEN HALAMAN            │ │   │
-│ │  Items  │  │                                  │ │   │
-│ │         │  │                                  │ │   │
-│ │         │  └──────────────────────────────────┘ │   │
-│ │         │                                      │   │
-│ │ ─────── │                                      │   │
-│ │ Profil  │                                      │   │
-│ │ Logout  │                                      │   │
-│ └─────────┴──────────────────────────────────────┘   │
-└──────────────────────────────────────────────────────┘
+┌────┬────────────────────────────────────────────────────┐
+│ PF │  Admin > Tim > Internship                          │
+│ +  │  Internship                    [+ Tambah Anggota]  │
+│ -- │                                                    │
+│ Rg │  ┌──────────────────────────────────────────────┐  │
+│ Tk │  │                                              │  │
+│ Tm ├──┼─────────────────────┐                        │  │
+│ Kn │  │ Tim                 │    KONTEN HALAMAN      │  │
+│ Dt │  │ Anggota, magang ... │                        │  │
+│    │  │ | Tim Penggerak     │                        │  │
+│    │  │   Internship        │                        │  │
+│    │  │   Volunteer         │                        │  │
+│    │  │   Batch         [2] │                        │  │
+│ -- │  └─────────────────────┘                        │  │
+│ Ad │  └──────────────────────────────────────────────┘  │
+└────┴────────────────────────────────────────────────────┘
+ 64px   flyout muncul saat hover, menimpa konten
 ```
 
-### 3.1 Sidebar (desktop, > 1024 px)
+Keterangan diagram: PF = logo, Rg = Ringkasan, Tk = Tentang Kami, Tm = Tim, Kn = Konten, Dt = Data, Ad = avatar admin. Pada implementasi, singkatan ini diganti ikon garis.
 
-- Lebar tetap: 260 px.
-- Latar: `--admin-sidebar` (#0c1527), teks `--admin-sidebar-text`.
-- **Atas:** logo PFP kecil + teks "Papua Future Project" + subtitle "Admin Panel".
-- **Tengah:** item menu. Tiap item berisi ikon 20 px dan label. Item aktif: latar `--admin-sidebar-active`, teks putih, garis kiri 3 px `--admin-primary`. Hover: latar `--admin-sidebar-hover`.
-- **Bawah:** pemisah garis. Profil admin: avatar inisial lingkaran 36 px (gradient primary), nama, keterangan "Administrator". Tombol "Keluar" dengan ikon.
+### 3.1 Rail (>= 768 px)
 
-### 3.2 Sidebar (mobile, < 768 px)
+- Lebar tetap: 64 px, tinggi penuh viewport, posisi `fixed`. Konten digeser `margin-left: 64px`.
+- Latar `--admin-sidebar` (#3770c1), biru solid tanpa gradient gelap.
+- **Atas:** logo PFP dalam kotak putih 36 px (border-radius 10 px). Di bawahnya tombol aksi cepat "+" (opsional, lihat 3.5), lalu garis pemisah 1 px putih 24%.
+- **Tengah:** ikon menu. Tiap item berupa kotak 44x44 px, border-radius 12 px, ikon garis 20 px berwarna `--admin-sidebar-text`, jarak antar item 8 px.
+  - Hover atau fokus: latar `--admin-sidebar-hover`, ikon putih.
+  - Aktif (halaman saat ini berada di dalam grup ini): latar putih `--admin-sidebar-active`, ikon `--admin-sidebar-text-active` (#3770c1). Kotak putih ini penanda utama item aktif.
+  - Lencana angka (pendaftar baru, pesan belum dibaca): bulatan kecil di pojok kanan atas ikon, latar `--admin-danger`, teks putih 10 px, dengan border 2 px `--admin-sidebar` supaya terpisah dari ikon.
+  - Fokus keyboard: outline 2 px putih dengan offset 2 px.
+- **Bawah:** garis pemisah, lalu avatar admin: lingkaran putih 36 px, inisial `--admin-primary` tebal, ring 2 px `--admin-secondary`. Hover pada avatar membuka flyout profil.
+- Tidak ada label teks di rail. Setiap item wajib punya `aria-label`.
 
-- Tersembunyi di luar layar (translateX -100%).
-- Tombol hamburger 44 px di pojok kiri atas area konten.
-- Saat dibuka: overlay hitam 50% dan sidebar bergeser masuk dari kiri.
-- Klik overlay, tombol X, tombol hamburger, tautan navigasi, atau tekan Escape untuk menutup sidebar.
+### 3.2 Flyout detail (hover)
 
-### 3.3 Sidebar (tablet, 768–1024 px)
+Kartu putih kecil yang muncul di kanan item rail saat di-hover atau difokus. Ini yang menjelaskan halaman apa yang ada di balik tiap ikon. Kontras biru-putih membuatnya jelas terpisah dari rail.
 
-- Sidebar tetap terlihat di kiri dengan lebar 76 px.
-- Tampilkan ikon navigasi dan avatar; sembunyikan label, label kelompok, dan nama admin.
-- Setiap ikon memiliki nama aksesibel dan tooltip agar rute tetap dapat dikenali.
+```
+┌──────────────────────────────┐
+│ [ ]  Tim                     │
+│ Anggota, magang, dan relawan │
+│ ──────────────────────────── │
+│ | [ ] Tim Penggerak          │
+│       Pengurus dan founder   │
+│   [ ] Internship             │
+│       Anggota magang/batch   │
+│   [ ] Volunteer              │
+│       Relawan per batch      │
+│   [ ] Batch              [2] │
+│       Periode Intern/Vol.    │
+└──────────────────────────────┘
+```
 
-### 3.4 Daftar item sidebar
+Tanda "[ ]" adalah tempat ikon garis. Tanda "|" di kiri baris adalah penanda halaman aktif.
 
-| # | Label | Ikon | Route | Lencana |
+**Struktur kartu**
+
+1. **Header:** kotak ikon 32 px (border-radius 10 px) berlatar gradient `--admin-primary` ke `--admin-secondary` dengan ikon putih. Di sampingnya nama grup (15 px, bold, `--admin-text`) dan satu baris deskripsi grup (12 px, `--admin-text-muted`).
+2. **Pemisah:** garis 1 px `--admin-flyout-border`.
+3. **Daftar sub-halaman:** tiap baris berisi ikon 18 px `--admin-text-muted`, nama halaman (13 px, semi-bold, `--admin-text`), deskripsi satu baris (11 px, `--admin-text-muted`), dan lencana jika ada. Tinggi baris minimal 48 px, padding 8 px 10 px, border-radius 10 px.
+   - Hover baris: latar `--admin-flyout-hover`, ikon dan nama `--admin-primary`.
+   - Baris halaman aktif: latar `--admin-flyout-active`, garis kiri 3 px `--admin-primary`, ikon dan nama `--admin-primary`.
+4. **Grup dengan satu halaman** (Ringkasan, Tentang Kami): kartu hanya berisi header, deskripsi, dan satu baris info singkat (opsional, misalnya "3 pendaftar baru, 2 pesan belum dibaca" untuk Ringkasan).
+
+**Tampilan**
+
+- Lebar 280 px. Latar `--admin-flyout`, border 1 px `--admin-flyout-border`, border-radius 16 px, padding 12 px, shadow `0 12px 32px rgba(15,23,42,0.18)`.
+- Posisi: 8 px di kanan tepi rail, sejajar dengan atas item yang di-hover. Jika kartu akan keluar dari bagian bawah viewport, geser ke atas sampai muat. Flyout profil di bawah rail membuka ke atas, sejajar dengan bawah avatar.
+- `z-index: 50`: di atas konten, di bawah dialog (100) dan toast (110).
+- Animasi masuk: opacity 0 ke 1 dan translateX -6 px ke 0, 150 ms ease-out. Keluar: 100 ms.
+- Fokus keyboard pada baris: outline 2 px `--admin-secondary`.
+- Flyout **tidak mendorong konten**. Ia menimpa area konten selama terbuka.
+
+### 3.3 Perilaku hover, fokus, dan sentuh
+
+| Aksi | Hasil |
+| --- | --- |
+| Kursor masuk ke ikon rail | Flyout grup itu terbuka setelah jeda 80 ms |
+| Kursor pindah ke ikon rail lain | Flyout langsung berganti tanpa jeda |
+| Kursor pindah dari ikon ke flyout | Flyout tetap terbuka. Celah 8 px di antaranya ditutup elemen transparan agar kursor tidak "jatuh" |
+| Kursor keluar dari rail dan flyout | Flyout tertutup setelah jeda 150 ms |
+| Klik ikon grup | Menuju sub-halaman pertama grup tersebut. Ikon grup satu halaman langsung menuju halamannya |
+| Klik baris di flyout | Menuju halaman itu dan flyout tertutup |
+| Fokus keyboard (Tab) ke ikon | Flyout terbuka seperti hover |
+| Panah bawah / atas di dalam flyout | Pindah antar baris. `Enter` membuka halaman |
+| `Esc` atau Tab keluar dari flyout | Flyout tertutup, fokus kembali ke ikon |
+| Layar sentuh, ketuk ikon grup | Ketukan pertama membuka flyout, ketukan pada baris membuka halaman. Ketuk di luar menutup |
+
+Persyaratan aksesibilitas: ikon memakai `aria-haspopup="menu"` dan `aria-expanded`. Flyout memakai `role="menu"` dan baris memakai `role="menuitem"`. Animasi dimatikan jika pengguna memilih `prefers-reduced-motion`.
+
+### 3.4 Daftar menu rail dan isi flyout
+
+| # | Ikon rail (Lucide) | Grup | Isi flyout (sub-halaman, route, deskripsi) | Lencana |
 | --- | --- | --- | --- | --- |
-| 1 | Ringkasan | 📊 grid/dashboard | `/admin` | — |
-| 2 | Tentang Kami | ℹ️ info-circle | `/admin/tentang` | — |
-| — | **TIM** | — | — | — |
-| 3 | Tim Penggerak | 👥 users | `/admin/tim/penggerak` | — |
-| 4 | Internship | 🎓 graduation-cap | `/admin/tim/internship` | — |
-| 5 | Volunteer | 🤝 hand-heart | `/admin/tim/volunteer` | — |
-| 6 | Batch | 📦 layers | `/admin/batch` | — |
-| — | **KONTEN** | — | — | — |
-| 7 | Program | 📚 book-open | `/admin/program` | — |
-| 8 | Berita | 📰 newspaper | `/admin/berita` | — |
-| 9 | FAQ | ❓ help-circle | `/admin/faq` | — |
-| — | **DATA** | — | — | — |
-| 10 | Pendaftar | 📋 clipboard-list | `/admin/pendaftar` | jumlah status Baru |
-| 11 | Pesan Masuk | ✉️ mail | `/admin/pesan` | jumlah belum dibaca |
+| 1 | `layout-dashboard` | Ringkasan | `/admin`: "Ringkasan aktivitas dan data terbaru." | - |
+| 2 | `info` | Tentang Kami | `/admin/tentang`: "Cerita, visi, dan misi organisasi." | - |
+| 3 | `users` | Tim | **Tim Penggerak** `/admin/tim/penggerak`: "Pengurus dan founder." **Internship** `/admin/tim/internship`: "Anggota magang per batch." **Volunteer** `/admin/tim/volunteer`: "Relawan per batch." **Batch** `/admin/batch`: "Periode Intern dan Volunteer." | - |
+| 4 | `newspaper` | Konten | **Program** `/admin/program`: "Program, kegiatan, dan foto dokumentasi." **Berita** `/admin/berita`: "Berita, liputan, dan penghargaan." **FAQ** `/admin/faq`: "Pertanyaan yang sering diajukan." | - |
+| 5 | `inbox` | Data | **Pendaftar** `/admin/pendaftar`: "Tinjau dan ubah status pendaftar." **Pesan Masuk** `/admin/pesan`: "Pesan dari formulir kontak." **Form Pendaftaran** `/admin/pendaftaran`: "Buka atau tutup form dan atur pertanyaan." | Pendaftar: jumlah status Baru. Pesan Masuk: jumlah belum dibaca |
+| - | avatar | Profil | Nama admin, keterangan "Administrator", tautan **Lihat Website** (buka tab baru), dan **Keluar** | - |
 
-Item tambahan di grup DATA: **Form Pendaftaran** (`/admin/pendaftaran`) membuka toggle aktif/nonaktif Internship dan Relawan serta tautan menuju pengelolaan pertanyaan masing-masing.
+Ikon sub-halaman di flyout (Lucide): `user-check` (Tim Penggerak), `graduation-cap` (Internship), `hand-heart` (Volunteer), `layers` (Batch), `book-open` (Program), `newspaper` (Berita), `help-circle` (FAQ), `clipboard-list` (Pendaftar), `mail` (Pesan Masuk), `file-cog` (Form Pendaftaran).
 
-Label grup (TIM, KONTEN, DATA) ditampilkan sebagai teks kecil uppercase abu-abu, bukan item yang bisa diklik.
+- Lencana pada ikon grup Data adalah **jumlah gabungan** Pendaftar Baru + Pesan belum dibaca. Rinciannya muncul di baris flyout masing-masing.
+- Ikon Tim, Konten, dan Data aktif bila route saat ini berada di salah satu sub-halamannya, termasuk halaman tambah, ubah, dan detail.
 
-### 3.5 Page Header
+### 3.5 Aksi cepat "+" (opsional)
+
+Tombol bulat 36 px di bawah logo, latar putih 16%, ikon putih. Hover membuka flyout berisi pintasan tambah data: Tambah Program, Tambah Berita, Tambah Anggota Tim, Tambah FAQ. Tiap pintasan menuju form tambah yang sudah ada di [ARCHITECTURE.md](ARCHITECTURE.md). Jika belum ingin dipakai, hapus tombol ini tanpa mengubah bagian lain.
+
+### 3.6 Navigasi mobile (< 768 px)
+
+Hover tidak ada di layar sentuh kecil, jadi navigasi memakai drawer penuh dengan label.
+
+- Rail tersembunyi (translateX -100%). Tombol hamburger 44 px di pojok kiri atas area konten.
+- Saat dibuka: overlay hitam 50% dan drawer selebar 280 px bergeser masuk dari kiri, berlatar `--admin-sidebar` (biru terang yang sama dengan rail).
+- Isi drawer: logo dalam kotak putih + teks "Papua Future Project" dan subtitle "Admin Panel" (putih), lalu grup dari tabel 3.4. Label grup berupa teks kecil uppercase putih 70%. Grup yang punya sub-halaman tampil sebagai akordeon (ketuk untuk membuka). Item aktif: latar putih, teks dan ikon `--admin-primary`, border-radius 12 px. Item biasa: teks `--admin-sidebar-text`. Bagian bawah: profil admin dan tombol "Keluar".
+- Klik overlay, tombol X, tombol hamburger, tautan navigasi, atau tekan Escape untuk menutup drawer.
+
+### 3.7 Page Header
 
 - Di atas area konten, di dalam wrapper dengan padding 24 px.
 - Baris 1: Breadcrumb (contoh: Admin > Program > Ubah).
-- Baris 2: Judul halaman (h1, 24 px, bold) di kiri; tombol aksi utama di kanan (contoh: "+ Tambah Program").
+- Baris 2: Judul halaman (h1, 24 px, bold) di kiri. Tombol aksi utama di kanan (contoh: "+ Tambah Program"). Di kanan jauh ada tombol pill Secondary "Lihat Website" dengan ikon `external-link`. Khusus Ringkasan, di sebelahnya ada dropdown periode (bagian 5.1).
 - Di mobile, tombol hamburger ada di kiri sebelum breadcrumb.
+
+### 3.8 Varian B: rail melebar (opsional)
+
+Alternatif bila flyout dirasa kurang cocok, mengikuti perilaku sidebar pada video referensi.
+
+- Saat kursor masuk ke rail, seluruh rail melebar dari 64 px menjadi 240 px dalam 180 ms, menampilkan ikon + label putih. Konten **tidak bergeser**: rail melebar sebagai overlay dengan shadow `4px 0 24px rgba(15,23,42,0.25)` di sisi kanan.
+- Grup berisi sub-halaman tampil sebagai daftar berindentasi di bawah labelnya. Deskripsi singkat tidak ditampilkan.
+- Baris yang di-hover: latar `--admin-sidebar-hover`. Item aktif: latar putih, teks `--admin-primary`. Kursor keluar: rail menyempit kembali setelah 150 ms.
+- Varian ini lebih cepat untuk berpindah halaman, tetapi tidak menampilkan deskripsi halaman. Pilih satu varian untuk seluruh panel dan jangan dicampur.
 
 ## 4. Komponen UI admin
 
+### 4.0 Tipografi, jarak, dan bentuk
+
+| Elemen | Ukuran / nilai |
+| --- | --- |
+| Font | Plus Jakarta Sans |
+| Judul halaman (h1) | 24 px, bold |
+| Subjudul halaman | 13 px, `--admin-text-muted` |
+| Judul kartu | 14 px, bold |
+| Teks isi dan sel tabel | 13 px |
+| Label dan teks bantu | 12 px, `--admin-text-muted` |
+| Keterangan kecil (waktu, pill) | 11 px |
+| Angka besar (metrik, total) | 28 px, extra-bold (800) |
+| Padding halaman | 24 px (16 px di mobile) |
+| Lebar maksimal konten | 1280 px, rata tengah |
+| Jarak antar kartu | 16 px |
+| Radius kartu | 20 px |
+| Radius input | 12 px |
+| Radius tombol dan pill | penuh (999 px) |
+
 ### 4.1 Kartu (Card)
 
-- Latar putih, border 1 px `--admin-border`, border-radius 16 px, shadow `0 1px 3px rgba(0,0,0,0.04)`.
-- Padding dalam: 24 px. Jarak antar kartu: 20 px.
+- Latar putih, border 1 px `--admin-border`, border-radius 20 px, shadow `0 1px 2px rgba(15,23,42,0.04)`.
+- Padding dalam: 20 px (16 px di mobile). Jarak antar kartu: 16 px.
+- **Header kartu** (opsional): baris atas berisi judul (14 px, bold) dengan teks bantu 12 px di bawahnya di kiri, dan kontrol (pencarian, filter, tombol kecil, tautan "Lihat semua") di kanan. Jarak ke isi 16 px.
+- Kartu yang bisa diklik: hover mengubah border menjadi `--admin-primary`, transisi 150 ms.
 
 ### 4.2 Tabel data
 
-- Di dalam kartu. Header: latar `#f8fafc`, teks uppercase 11 px bold, tracking wide.
-- Baris: tinggi minimal 56 px, border bawah 1 px, hover latar `#f8fafc`.
-- Kolom aksi: tombol kecil (pill) di kanan. Warna sesuai aksi: biru untuk "Ubah", merah untuk "Hapus", hijau untuk "Setujui".
+- Di dalam kartu. Tabel memenuhi lebar kartu, padding sel 12 px 20 px.
+- Header: tanpa latar penuh, teks uppercase 11 px semi-bold, tracking wide, `--admin-text-muted`, dengan border bawah 1 px.
+- Baris: tinggi minimal 52 px, border bawah 1 px `#eef2f7`, hover latar `#f8fafc`.
+- Foto orang berbentuk lingkaran 40 px. Thumbnail gambar border-radius 8 px.
+- Kolom aksi: tombol pill kecil bergaya lembut (latar warna 10%, teks warna penuh): biru untuk "Ubah", merah untuk "Hapus", hijau untuk "Setujui".
 - Di layar sempit: tabel gulung horizontal, atau berubah menjadi kartu bertumpuk.
 
 ### 4.3 Form
 
 - Label: 13 px, font-weight 600, warna `--admin-text`, margin bawah 6 px.
-- Input: tinggi 44 px, latar `#f8fafc`, border 1 px `--admin-border`, border-radius 10 px, padding kiri 14 px.
+- Input: tinggi 44 px, latar `#f8fafc`, border 1 px `--admin-border`, border-radius 12 px, padding kiri 14 px.
 - Focus: border `--admin-primary`, ring 2 px `--admin-primary` 15%.
 - Textarea: minimal tinggi 120 px.
 - Select: sama dengan input, dengan ikon panah bawah.
 - Error: teks 12 px merah `--admin-danger` di bawah field, border input berubah merah.
+- Kolom pencarian di header kartu: input berbentuk pill, tinggi 36 px, ikon `search` di kiri.
 
 ### 4.4 Tombol
 
 | Variasi | Latar | Teks | Border | Pemakaian |
 | --- | --- | --- | --- | --- |
-| Primary | `--admin-primary` | putih | — | Simpan, Tambah |
-| Secondary | transparan | `--admin-primary` | 1 px `--admin-primary` | Batal, Kembali |
-| Danger | `--admin-danger` | putih | — | Hapus (di dialog konfirmasi) |
-| Ghost | transparan | `--admin-text-muted` | — | Aksi minor |
+| Primary | `--admin-primary` | putih | - | Simpan, Tambah |
+| Secondary | putih | `--admin-primary` | 1 px `--admin-primary` | Batal, Kembali, Lihat Website |
+| Soft | `--admin-primary` 10% | `--admin-primary` | - | Aksi baris tabel (Ubah, Lihat) |
+| Danger | `--admin-danger` | putih | - | Hapus (di dialog konfirmasi) |
+| Ghost | transparan | `--admin-text-muted` | - | Aksi minor |
 
-Semua tombol: border-radius 10 px, tinggi 40 px (atau 36 px untuk yang kecil), font-weight 600, transisi 150 ms.
+Semua tombol berbentuk pill (border-radius penuh), tinggi 40 px (atau 36 px untuk yang kecil), font-weight 600, transisi 150 ms. Hover Primary memakai `--admin-primary-hover`. Fokus keyboard: outline 2 px `--admin-secondary` dengan offset 2 px.
 
 ### 4.5 Toggle switch
 
@@ -175,39 +277,115 @@ Font-size 11 px, font-weight 600, padding 4 px 10 px, border-radius penuh.
 ### 4.8 Dialog konfirmasi hapus
 
 - Modal tengah layar, overlay hitam 60%.
-- Kartu: maks 400 px, border-radius 16 px, padding 24 px.
+- Kartu: maks 400 px, border-radius 20 px, padding 24 px.
 - Ikon peringatan bulat merah di atas.
 - Teks menyebut nama item yang dihapus.
-- Dua tombol: "Batal" (secondary), "Hapus" (danger).
+- Dua tombol pill: "Batal" (Secondary), "Hapus" (Danger).
 
 ### 4.9 Pagination
 
-- Di bawah tabel, rata kanan.
-- Tombol angka, tombol panah kiri dan kanan.
-- Halaman aktif: latar `--admin-primary`, teks putih.
+- Di footer kartu tabel, dipisah border atas 1 px. Kiri: "Menampilkan 1-10 dari 24". Kanan: tombol angka dan tombol panah kiri dan kanan.
+- Tombol angka bulat 32 px. Halaman aktif: latar `--admin-primary`, teks putih.
 
 ### 4.10 Gallery manager (foto dokumentasi)
 
-- Grid 4 kolom (2 di mobile) di bawah form ubah program atau berita.
-- Tiap foto: thumbnail 1:1 dengan border-radius 8 px, keterangan di bawah (input kecil), tombol hapus (×) di pojok kanan atas.
-- Tombol "+ Tambah foto" di akhir grid: area putus-putus 1:1, ikon kamera.
-- Sisa kuota ditampilkan: "12 dari 30 foto".
+- Berada di kartu tersendiri dengan judul "Foto dokumentasi", di bawah form ubah program atau berita.
+- Grid 4 kolom (2 di mobile). Tiap foto: thumbnail 1:1 dengan border-radius 12 px, keterangan di bawah (input kecil), tombol hapus (x) di pojok kanan atas.
+- Tombol "+ Tambah foto" di akhir grid: area putus-putus 1:1, ikon kamera garis (`camera`).
+- Sisa kuota ditampilkan di header kartu: "12 dari 30 foto".
+
+### 4.11 Flyout menu
+
+Komponen navigasi. Spesifikasi lengkap ada di bagian 3.2 dan 3.3. Ringkasnya: kartu putih 280 px dengan border tipis, border-radius 16 px, muncul di kanan rail biru saat hover atau fokus, berisi header grup, deskripsi, dan daftar sub-halaman beserta deskripsi satu barisnya.
+
+### 4.12 Kartu metrik
+
+- Memakai kartu 4.1, padding 20 px.
+- Baris atas: label (12 px, `--admin-text-muted`) di kiri, dan badge pill opsional di kanan (contoh: "Perlu ditinjau" memakai gaya status Baru).
+- Angka utama: 28 px, extra-bold, `--admin-text`.
+- Teks bantu di bawah angka: 12 px, `--admin-text-muted` (contoh: "status Baru").
+- Grafik mini (sparkline) opsional di kanan bawah kartu: garis `--admin-primary` 2 px, lebar 80 px, tinggi 32 px, tanpa sumbu. Hanya tampil bila datanya ada.
+- Kartu bisa diklik menuju daftar terkait (aturan hover ada di 4.1).
+
+### 4.13 Kartu tren (grafik area)
+
+- Kartu lebar dengan header: judul "Tren Pendaftar", angka total periode (28 px, extra-bold) di bawahnya, dan teks bantu periode (contoh: "30 hari terakhir").
+- Di kanan header: legenda berupa pill kecil dengan titik warna, label, dan angka. Warna titik mengikuti status pill: Baru (kuning), Ditinjau (biru), Diterima (hijau), Ditolak (merah).
+- Grafik: area dengan garis `--admin-primary` 2 px, isi gradient `--admin-primary` 20% ke transparan, garis grid horizontal putus-putus `--admin-border`, sumbu X berupa tanggal atau bulan, tinggi 220 px. Tooltip saat hover titik menampilkan tanggal dan jumlah. Titik data terakhir diberi penanda bulat.
+- Kosong: teks "Belum ada pendaftar pada periode ini." di tengah area grafik.
+
+### 4.14 Kartu aksi cepat
+
+- Kartu 20 px radius berlatar gradient `--admin-primary` ke `--admin-secondary` (135 derajat), tanpa border, teks putih. Teks ditempatkan di sisi kiri atas yang lebih gelap agar kontrasnya terjaga.
+- Isi: label kecil "Perlu ditinjau" (12 px, putih 85%), angka besar (28 px, extra-bold) berisi jumlah pendaftar status Baru, subteks "pendaftar menunggu tinjauan".
+- Dua tombol pill di bawah: "Tinjau Pendaftar" (latar putih, teks `--admin-primary`) dan "Pesan Masuk" (latar putih 20%, teks putih).
+
+### 4.15 Daftar aktivitas
+
+- Di dalam kartu "Aktivitas Terbaru" dengan teks bantu "Pembaruan terkini".
+- Tiap entri: ikon bulat 36 px (latar `--admin-primary` 10%, ikon garis `--admin-primary`), satu baris teks 13 px dengan nama atau judul tebal, dan waktu relatif 11 px `--admin-text-muted` ("2 jam lalu"). Jarak antar entri 4 px, padding entri 8 px, hover latar `#f8fafc` dengan radius 12 px.
+- Ikon: `user-plus` untuk pendaftar baru, `mail` untuk pesan masuk.
+- Maksimal 6 entri. Tautan "Lihat semua" di dasar kartu menuju Pendaftar.
+
+### 4.16 Pola halaman
+
+**Pola Daftar** (Program, Berita, FAQ, Batch, Tim, Pendaftar, Pesan):
+1. Page Header (3.7).
+2. Satu kartu besar. Header kartu: judul + jumlah data (pill abu "24 data") di kiri; kolom cari pill, filter, dan tombol ekspor atau tambah di kanan.
+3. Tabel (4.2), lalu footer kartu berisi pagination (4.9).
+4. Bila kosong: state kosong (bagian 6) di dalam kartu yang sama.
+
+**Pola Form** (tambah dan ubah):
+1. Page Header dengan breadcrumb.
+2. Grid 12 kolom, jarak 16 px. Pada >= 1280 px: kolom utama 8 kolom (kartu isian utama) dan kolom samping 4 kolom (kartu Publikasi, Gambar, atau Pengaturan). Di bawah 1280 px: satu kolom, kartu samping berada setelah kartu utama.
+3. Tiap kartu punya judul 14 px bold dan teks bantu opsional.
+4. **Bilah aksi** menempel di bawah layar (sticky): latar putih, border atas 1 px, padding 12 px 24 px, tombol "Batal" (Secondary) dan "Simpan" (Primary) rata kanan. Mulai di kanan rail (offset kiri 64 px) dan z-index 30 (di bawah flyout).
+5. Form sederhana (Batch, FAQ, Tentang Kami) memakai satu kolom dalam satu kartu selebar maksimal 720 px.
+
+**Pola Detail** (Pendaftar, Pesan):
+1. Page Header dengan breadcrumb.
+2. Grid yang sama dengan Pola Form: kolom utama (data lengkap atau isi pesan) dan kolom samping (kartu status, berkas, atau aksi).
 
 ## 5. Halaman per halaman
 
 ### 5.1 Ringkasan (`/admin`)
 
-- Salam: "Selamat datang, [nama]" di banner gradient gelap (sama seperti yang sudah ada di prototype).
-- 4 kartu metrik dalam satu baris:
-  - Pendaftar baru (status Baru, jumlah + ikon)
-  - Pesan belum dibaca
-  - Batch sedang dibuka (jumlah)
-  - Berita terbit (jumlah)
-- Tabel "Pendaftar Terbaru" (5 baris terakhir, kolom: nama, batch, tipe, status, tanggal, tombol "Lihat").
-- Tabel "Pesan Terbaru" (3 baris terakhir, kolom: nama, email, ringkasan pesan, tanggal, sudah dibaca?).
+```
+Selamat malam, Nama                      [30 hari v]  [Lihat Website]
+Ringkasan aktivitas Papua Future Project.
+
+┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐
+│ Pendaftar  │ │ Pesan      │ │ Batch      │ │ Berita     │
+│ baru       │ │ belum      │ │ sedang     │ │ terbit     │
+│ 12         │ │ dibaca  3  │ │ dibuka  2  │ │ 18         │
+└────────────┘ └────────────┘ └────────────┘ └────────────┘
+┌──────────────────────────────┐ ┌──────────────────────────┐
+│ Tren Pendaftar               │ │ Kartu aksi cepat         │
+│ 87      (grafik area)        │ │ (gradient biru)          │
+└──────────────────────────────┘ └──────────────────────────┘
+┌──────────────────────────────┐ ┌──────────────────────────┐
+│ Pendaftar Terbaru (tabel)    │ │ Aktivitas Terbaru        │
+└──────────────────────────────┘ │ (daftar)                 │
+┌──────────────────────────────┐ │                          │
+│ Pesan Terbaru (tabel)        │ │                          │
+└──────────────────────────────┘ └──────────────────────────┘
+```
+
+- **Sapaan:** "Selamat [pagi/siang/sore/malam], [nama]" (h1) dan subjudul "Ringkasan aktivitas Papua Future Project." Kata sapaan mengikuti jam lokal pengguna. Tanpa banner.
+- **Dropdown periode** (pill, di kanan atas): "30 hari" (default), "90 hari", "12 bulan". Hanya memengaruhi kartu Tren Pendaftar dan angka di legendanya. Kartu metrik selalu menunjukkan kondisi saat ini.
+- **Baris 1, empat kartu metrik** (4.12), empat kolom di desktop:
+  - Pendaftar baru: jumlah status Baru, badge "Perlu ditinjau" bila lebih dari 0, subteks "status Baru". Klik menuju daftar Pendaftar terfilter status Baru.
+  - Pesan belum dibaca: jumlah, subteks "dari [total] pesan". Klik menuju Pesan Masuk.
+  - Batch sedang dibuka: jumlah, subteks "Intern [n], Volunteer [n]".
+  - Berita terbit: jumlah, subteks "[n] draf".
+- **Kolom kiri** (8 dari 12 kolom): kartu Tren Pendaftar (4.13), kartu "Pendaftar Terbaru" (5 baris terakhir; kolom: nama, batch, tipe, status, tanggal, tombol Soft "Lihat"), kartu "Pesan Terbaru" (3 baris terakhir; kolom: nama, email, ringkasan pesan, tanggal, sudah dibaca?). Header tiap kartu tabel punya tautan "Lihat semua".
+- **Kolom kanan** (4 dari 12 kolom): kartu aksi cepat (4.14), lalu kartu Aktivitas Terbaru (4.15).
+- **Data:** Tren Pendaftar dan Aktivitas Terbaru dihitung dari data pendaftar dan pesan yang sudah ada (agregat per tanggal dan gabungan terbaru), tanpa perubahan skema. Jika salah satunya belum bisa dibuat, sembunyikan kartu itu dan biarkan kartu lain mengisi ruangnya.
+- **Responsif:** di bawah 1280 px menjadi satu kolom dengan urutan: metrik (2x2 di tablet, satu kolom di mobile), kartu aksi cepat, Tren Pendaftar, Pendaftar Terbaru, Pesan Terbaru, Aktivitas Terbaru.
 
 ### 5.2 Tentang Kami (`/admin/tentang`)
 
+- **Tata letak:** Pola Form satu kolom (4.16). Tiga kartu terpisah (Cerita, Visi, Misi) dengan bilah aksi "Simpan" di bawah.
 - Satu form berisi:
   - Cerita (textarea besar, minimal 200 px tinggi). Teks biasa, `**tebal**` diperbolehkan.
   - Visi (textarea satu paragraf).
@@ -217,12 +395,14 @@ Font-size 11 px, font-weight 600, padding 4 px 10 px, border-radius penuh.
 
 ### 5.3 Tim Penggerak (`/admin/tim/penggerak`)
 
+- **Tata letak:** Pola Daftar (4.16). Form memakai Pola Form: kartu utama berisi nama, jabatan, deskripsi, bio panjang. Kartu samping berisi foto, checkbox Founder, dan nomor urut.
 - Tabel: foto (lingkaran 40 px), nama, jabatan, urutan, tombol "Ubah" dan "Hapus".
 - Kolom khusus: tanda bintang atau label "Founder" di samping nama untuk yang ditandai `is_founder`.
 - Form tambah/ubah: nama, jabatan, deskripsi (textarea), bio panjang (textarea, opsional, untuk Beranda), foto (upload dengan pratinjau), checkbox "Founder", nomor urut.
 
 ### 5.4 Internship (`/admin/tim/internship`)
 
+- **Tata letak:** tiap batch berupa satu kartu (4.1). Header kartu berisi nama batch, pill status, toggle, dan tombol "+ Tambah Anggota", dengan tabel di dalamnya. Form anggota memakai Pola Form.
 - Dikelompokkan per batch. Tiap kelompok punya header: nama batch, pill status (Dibuka/Ditutup), toggle, tombol "+ Tambah Anggota".
 - Tabel per batch: foto (lingkaran 40 px), nama, universitas, peran, urutan, "Ubah", "Hapus".
 - Bila belum ada batch bertipe Intern, tampilkan ajakan: "Buat batch Intern lebih dulu di halaman Batch."
@@ -230,16 +410,18 @@ Font-size 11 px, font-weight 600, padding 4 px 10 px, border-radius penuh.
 
 ### 5.5 Volunteer (`/admin/tim/volunteer`)
 
-Sama persis dengan Internship, tetapi filter batch ke tipe `VOLUNTEER`.
+Sama persis dengan Internship (termasuk tata letaknya), tetapi filter batch ke tipe `VOLUNTEER`.
 
 ### 5.6 Batch (`/admin/batch`)
 
+- **Tata letak:** Pola Daftar (4.16). Form satu kolom dalam satu kartu.
 - Tabel: nama batch, tipe (pill: Intern/Volunteer), status (pill: Dibuka/Ditutup), jumlah anggota, jumlah pendaftar, tanggal dibuat, toggle, "Ubah", "Hapus".
 - Hapus ditolak jika ada anggota atau pendaftar (pesan galat dengan jumlah).
 - Form tambah/ubah: nama, tipe (pilih Intern atau Volunteer, tidak bisa diubah setelah ada data), deskripsi (opsional).
 
 ### 5.7 Program (`/admin/program`)
 
+- **Tata letak:** Pola Daftar. Form memakai Pola Form: kartu utama (judul, slug, ringkasan, konten, kegiatan, mitra, informasi program). Kartu samping "Publikasi" (kategori, unggulan, terbit, nomor urut) dan kartu "Thumbnail". Gallery manager (4.10) berupa kartu penuh di bawah.
 - Tabel: thumbnail kecil (60×40 px, border-radius 6 px), judul, kategori (pill), unggulan (bintang), status (pill: Terbit/Draf), urutan, "Ubah", "Hapus".
 - Form tambah/ubah:
   - Judul, slug (otomatis dari judul, bisa diubah manual).
@@ -256,6 +438,7 @@ Sama persis dengan Internship, tetapi filter batch ke tipe `VOLUNTEER`.
 
 ### 5.8 Berita dan Kegiatan (`/admin/berita`)
 
+- **Tata letak:** Pola Daftar. Form memakai Pola Form: kartu utama (judul, slug, ringkasan, isi). Kartu samping "Publikasi" (kategori, tanggal terbit, penulis, terbitkan) dan kartu "Gambar sampul". Kolom khusus Penghargaan dan Liputan Media tampil di kartu "Detail tambahan" sesuai kategori. Gallery manager berupa kartu penuh di bawah.
 - Tabel: thumbnail, judul, kategori (pill), status (pill), tanggal terbit, "Ubah", "Hapus".
 - Empat kategori: Kegiatan Lapangan, Update Program, Liputan Media, Penghargaan.
 - Form tambah/ubah:
@@ -273,11 +456,13 @@ Sama persis dengan Internship, tetapi filter batch ke tipe `VOLUNTEER`.
 
 ### 5.9 FAQ (`/admin/faq`)
 
+- **Tata letak:** Pola Daftar. Form satu kolom dalam satu kartu.
 - Tabel: pertanyaan (dipotong 60 karakter), urutan, status (pill: Terbit/Sembunyi), "Ubah", "Hapus".
 - Form tambah/ubah: pertanyaan (input teks), jawaban (textarea), nomor urut, checkbox "Tampilkan".
 
 ### 5.10 Pendaftar (`/admin/pendaftar`)
 
+- **Tata letak:** daftar memakai Pola Daftar. Bar filter berada di header kartu tabel. Detail memakai Pola Detail: kolom utama berisi kartu data lengkap; kolom samping berisi kartu "Status" (dropdown dan tombol Simpan Status), kartu "Foto", dan kartu "Berkas" (tombol CV).
 - Bar filter: tipe (Semua/Intern/Relawan), batch (dropdown), status (dropdown), pencarian nama.
 - Tombol "Ekspor data" (dropdown: Excel, CSV, PDF).
 - Tabel: nama, email, batch (pill), tipe (pill), status (pill warna), tanggal daftar, "Lihat".
@@ -285,10 +470,11 @@ Sama persis dengan Internship, tetapi filter batch ke tipe `VOLUNTEER`.
   - Kartu data lengkap: semua field teks dalam tata letak dua kolom.
   - Foto inline: gambar pendaftar maks 200 px, border-radius 12 px.
   - CV: tombol "Lihat CV" (buka tab baru) dan "Download CV".
-  - Dropdown ubah status: Baru → Ditinjau → Diterima / Ditolak. Tombol "Simpan Status".
+  - Dropdown ubah status: Baru -> Ditinjau -> Diterima / Ditolak. Tombol "Simpan Status".
 
 ### 5.11 Form Pendaftaran (`/admin/pendaftaran`)
 
+- **Tata letak:** dua kartu berdampingan pada >= 1024 px, bertumpuk di bawahnya. Tiap kartu memuat toggle, tiga angka ringkas (status, batch dibuka, pertanyaan aktif), dan tombol "Atur pertanyaan".
 - Dua kartu terpisah untuk Internship dan Relawan; masing-masing menunjukkan status formulir, jumlah batch yang dibuka, dan jumlah pertanyaan aktif.
 - Tombol aktif/nonaktif bekerja terpisah per jenis dan tidak mengubah status batch. Pendaftaran publik hanya diterima jika jenis aktif serta batch terpilih dibuka.
 - Tombol "Atur pertanyaan" membuka daftar dan CRUD yang hanya berlaku untuk jenis itu. Pertanyaan bisa berupa jawaban singkat atau paragraf, wajib atau opsional, tampil atau disembunyikan, serta diurutkan.
@@ -296,6 +482,7 @@ Sama persis dengan Internship, tetapi filter batch ke tipe `VOLUNTEER`.
 
 ### 5.12 Pesan Masuk (`/admin/pesan`)
 
+- **Tata letak:** daftar memakai Pola Daftar. Detail memakai Pola Detail: kolom utama berisi isi pesan; kolom samping berisi kartu kontak (nama, email, WhatsApp, tanggal) dan tombol balas serta hapus.
 - Tabel: pengirim, email, ringkasan pesan (dipotong 50 karakter), tanggal, status (pill: Belum dibaca/Sudah dibaca), "Lihat".
 - Baris belum dibaca: font-weight bold, titik biru di kiri.
 - Halaman detail:
@@ -306,7 +493,7 @@ Sama persis dengan Internship, tetapi filter batch ke tipe `VOLUNTEER`.
 
 ### 5.13 Login (`/admin/login`)
 
-- Tidak ada sidebar. Layout khusus auth.
+- Tidak ada rail maupun drawer. Layout khusus auth.
 - Desain yang sudah ada di `login.html` dipertahankan: split view desktop (kiri: slider foto dengan gradient gelap, kanan: kartu form), mobile: form full-width.
 - Form: email, kata sandi (toggle show/hide), tombol "Masuk".
 - Pesan galat muncul di atas form. Tidak menyebut apakah email atau kata sandi yang salah.
@@ -328,8 +515,10 @@ Contoh untuk Program:
 
 ## 7. Responsif
 
-| Breakpoint | Perubahan |
-| --- | --- |
-| ≥ 1024 px | Sidebar tetap terlihat, konten di kanan sidebar. |
-| 768–1023 px | Sidebar tersembunyi, tombol hamburger. Tabel masih tabel. |
-| < 768 px | Sidebar laci, tabel berubah menjadi kartu bertumpuk atau gulung horizontal. Grid form satu kolom. |
+| Breakpoint | Navigasi | Isi |
+| --- | --- | --- |
+| >= 1280 px | Rail 64 px + flyout hover | Dua kolom pada Ringkasan dan Pola Form/Detail (8 + 4 kolom). Konten maks 1280 px, rata tengah. |
+| 768-1279 px | Rail 64 px + flyout hover (sama seperti desktop) | Satu kolom. Kartu metrik 2x2. Tabel tetap tabel, gulung horizontal bila kolom melebihi layar. |
+| < 768 px | Drawer hamburger 280 px dengan label dan akordeon | Satu kolom, padding halaman 16 px. Tabel berubah menjadi kartu bertumpuk atau gulung horizontal. Kartu metrik satu kolom. Bilah aksi form tetap sticky di dasar layar, tanpa offset rail. |
+
+Pada perangkat sentuh yang lebarnya >= 768 px (misalnya tablet), rail tetap tampil dan flyout dibuka dengan ketukan pertama (lihat bagian 3.3).

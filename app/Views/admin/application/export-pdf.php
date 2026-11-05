@@ -5,12 +5,12 @@
   <style>
     @page { margin: 24px 28px 30px; }
     body { color: #1f2937; font-family: "DejaVu Sans", sans-serif; font-size: 9px; }
-    h1 { margin: 0 0 5px; color: #17483e; font-size: 20px; }
+    h1 { margin: 0 0 5px; color: #3770c1; font-size: 20px; }
     .report-meta { margin: 0 0 18px; color: #64748b; font-size: 9px; }
     .record { margin: 0 0 13px; padding: 12px; border: 1px solid #dbe4e2; border-radius: 6px; page-break-inside: avoid; }
     .record-top { width: 100%; margin-bottom: 8px; border-collapse: collapse; }
     .record-top td { padding: 0; vertical-align: top; }
-    .record-top h2 { margin: 0 0 3px; color: #17483e; font-size: 13px; }
+    .record-top h2 { margin: 0 0 3px; color: #3770c1; font-size: 13px; }
     .record-top .sub { color: #64748b; }
     .status { display: inline-block; padding: 4px 7px; border-radius: 10px; background: #eff6ff; color: #1d4ed8; font-size: 8px; font-weight: bold; }
     .details { width: 100%; border-collapse: collapse; }

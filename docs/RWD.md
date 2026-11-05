@@ -1,17 +1,16 @@
 # Responsive Web Design (RWD)
 
-Dokumen ini menetapkan perilaku tampilan Papua Future Project pada ponsel, tablet, dan desktop. Implementasi CSS publik ada di public/assets/css/responsive.css; penyesuaian sidebar admin ada di public/assets/css/admin/admin-layout.css.
+Dokumen ini menetapkan perilaku tampilan Papua Future Project pada ponsel, tablet, dan desktop. Implementasi CSS publik ada di `public/assets/css/responsive.css`; penyesuaian navigasi dan layout admin ada di `public/assets/css/admin/admin-layout.css` dan `public/assets/js/admin/admin-ui.js`. Spesifikasi lengkap panel admin ada di [DESIGN-ADMIN.md](DESIGN-ADMIN.md).
 
 ## Breakpoint
 
 | Kategori | Lebar viewport | Perilaku utama |
 | --- | --- | --- |
-| Mobile | kurang dari 480 px | Navigasi hamburger; konten satu kolom bila ruang tidak cukup; gutter kecil. |
-| Tablet kecil | 480–767 px | Navigasi hamburger; menu dropdown; gutter dan ruang konten lebih lega. |
-| Tablet | 768–1024 px | Navigasi publik memakai hamburger; sidebar admin tampil sebagai ikon saja. |
-| Desktop | 1025 px ke atas | Navigasi publik horizontal; sidebar admin tampil penuh dengan lebar 260 px. |
+| Mobile & Tablet kecil | kurang dari 768 px | Navigasi publik hamburger; panel admin memakai drawer hamburger 280 px dengan label dan akordeon; konten 1 kolom; bilah aksi sticky di dasar layar tanpa offset rail; gutter/padding 16 px. |
+| Tablet | 768–1279 px | Navigasi publik memakai hamburger (sampai 1024 px) lalu horizontal; panel admin memakai rail 64 px tetap di kiri dengan flyout detail 280 px overlay saat hover/fokus/sentuh; konten 1 kolom; kartu metrik 2x2; tabel gulung horizontal bila kolom melebihi layar. |
+| Desktop | 1280 px ke atas | Navigasi publik horizontal; panel admin memakai rail 64 px tetap di kiri dengan flyout hover 280 px; layout 2 kolom (8 + 4 kolom) pada Ringkasan, Form, dan Detail; kontainer konten maksimal 1280 px rata tengah; padding 24 px. |
 
-Pada batas 768 px, layar masuk kategori Tablet. Aturan mobile berakhir di 767.98 px, aturan tablet berlaku dari 768 sampai 1024 px, dan gaya default desktop berlaku mulai 1025 px.
+Pada batas 768 px, panel admin beralih dari drawer mobile ke rail 64 px tetap.
 
 ## Navigasi publik
 
@@ -20,15 +19,15 @@ Pada batas 768 px, layar masuk kategori Tablet. Aturan mobile berakhir di 767.98
 - Jadi Relawan menjadi pilihan terakhir di dalam dropdown pada viewport sampai 1024 px.
 - Tombol berubah menjadi ikon silang saat menu terbuka.
 - Menu ditutup setelah tautan dipilih, saat pengguna menekan Escape, saat area di luar navigasi diklik, atau saat viewport berpindah ke ukuran desktop.
-- aria-expanded, aria-controls, dan label tombol diperbarui oleh JavaScript. Tombol dan tautan tetap dapat digunakan dengan keyboard.
+- `aria-expanded`, `aria-controls`, dan label tombol diperbarui oleh JavaScript. Tombol dan tautan tetap dapat digunakan dengan keyboard.
 - Menu ditampilkan mendatar dan tombol hamburger disembunyikan pada desktop (>1024 px).
 
 ## Panel admin
 
-- Desktop (>1024 px): sidebar tetap di kiri dengan lebar 260 px dan label navigasi terlihat.
-- Tablet (768–1024 px): sidebar tetap terlihat dengan lebar 76 px. Ikon tetap tampil; label, nama admin, dan label kelompok disembunyikan. Teks aksesibilitas dan tooltip tetap memberi nama item.
-- Mobile dan tablet kecil (<768 px): sidebar berada di luar layar sampai tombol hamburger di header ditekan. Sidebar masuk dari kiri dan lapisan gelap menutup area utama. Tombol X, Escape, tautan navigasi, atau klik lapisan gelap menutup menu; fokus keyboard tetap berada di dalam drawer saat terbuka.
-- Konten admin menggunakan lebar penuh saat sidebar menjadi drawer. Tabel tetap dapat digulir horizontal bila kolomnya lebih lebar daripada layar.
+- **Desktop dan Tablet (>= 768 px)**: Rail sempit 64 px tetap di sisi kiri dengan latar biru terang `--admin-sidebar` (`#3770c1`). Konten bergeser `margin-left: 64px`. Saat ikon rail di-hover atau difokus, kartu flyout putih 280 px muncul menimpa konten (overlay) tanpa mendorong layout, menampilkan nama halaman, deskripsi singkat, dan sub-halaman. Di layar sentuh tablet, ketukan pertama membuka flyout dan ketukan berikutnya membuka tautan.
+- **Mobile dan Tablet kecil (< 768 px)**: Rail tersembunyi. Tombol hamburger 40 px di kiri atas header membuka drawer selebar 280 px dari sisi kiri dengan lapisan gelap 50%. Menu ditampilkan lengkap dengan label grup dan akordeon untuk grup yang memiliki sub-halaman. Tombol X, penekanan Escape, klik lapisan gelap, atau klik pada tautan navigasi menutup drawer.
+- **Bilah Aksi Sticky**: Form tambah/ubah memiliki bilah aksi "Batal" dan "Simpan" yang menempel di dasar viewport (`z-index: 30`, di bawah flyout `z-index: 50`). Pada desktop (>= 768 px) bilah aksi memiliki offset kiri 64 px; pada mobile (< 768 px) memenuhi lebar layar penuh.
+- **Tabel Responsif**: Semua tabel berada di dalam kartu dengan pembungkus `.table-responsive` yang dapat digulir horizontal bila kolom melebihi lebar layar tanpa memicu scroll horizontal pada elemen `body`.
 
 ## Aturan layout
 
@@ -36,17 +35,19 @@ Pada batas 768 px, layar masuk kategori Tablet. Aturan mobile berakhir di 767.98
 - Kontainer publik memakai gutter yang menyesuaikan ukuran layar.
 - Grid halaman beralih menjadi jumlah kolom yang lebih sedikit bila konten tidak lagi nyaman dibaca.
 - Form dan tombol harus tetap terlihat utuh pada lebar 320 px; teks panjang boleh membungkus.
-- Animasi dropdown singkat dan tetap mengikuti pengaturan prefers-reduced-motion global.
+- Animasi dropdown dan flyout singkat dan otomatis dimatikan bila pengguna mengaktifkan preferensi `prefers-reduced-motion`.
 
 ## Berkas implementasi
 
-- app/Views/partials/public/header.php — struktur brand, tautan, dan tombol hamburger.
-- public/assets/js/main.js — buka/tutup menu dan state aksesibilitas.
-- public/assets/css/responsive.css — breakpoint publik dan aturan dropdown.
-- app/Views/partials/admin/sidebar.php — label aksesibel dan ikon sidebar.
-- public/assets/css/admin/admin-layout.css — sidebar desktop, ikon-only tablet, dan drawer ponsel.
-- public/assets/js/admin/admin-ui.js — interaksi drawer admin.
+- `app/Views/partials/public/header.php` — struktur brand, tautan, dan tombol hamburger publik.
+- `public/assets/js/main.js` — buka/tutup menu dan state aksesibilitas publik.
+- `public/assets/css/responsive.css` — breakpoint publik dan aturan dropdown.
+- `app/Support/AdminMenu.php` — definisi tunggal struktur menu panel admin.
+- `app/Views/partials/admin/sidebar.php` — rail 64 px, flyout detail 280 px, dan drawer mobile.
+- `public/assets/css/admin/admin-layout.css` — layout rail, flyout overlay, drawer mobile, page header, dan sticky action bar.
+- `public/assets/css/admin/admin-components.css` — datatable, pagination, kartu metrik, tren area chart, kartu aksi cepat, dan aktivitas.
+- `public/assets/js/admin/admin-ui.js` — interaksi hover/jeda flyout, keyboard aksesibel, drawer mobile, modal dialog, dan toast.
 
 ## Pemeriksaan tampilan
 
-Saat meninjau UI, periksa setidaknya lebar 375 px, 600 px, 900 px, dan 1280 px. Pastikan tidak ada scroll horizontal yang tidak disengaja; logo tidak terpotong; menu ponsel dapat dibuka, ditutup, dan dijalankan dengan keyboard; sidebar tablet hanya menampilkan ikon; dan drawer admin tidak menutupi konten setelah ditutup.
+Saat meninjau UI, periksa setidaknya lebar 390 px, 768 px, 1024 px, 1280 px, dan 1440 px. Pastikan tidak ada scroll horizontal pada body; rail tetap 64 px di >= 768 px; flyout tidak keluar dari layar; menu drawer ponsel dapat dibuka, ditutup, dan dijalankan dengan keyboard; serta bilah aksi form tidak menutupi isi kartu.

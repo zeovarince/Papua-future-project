@@ -113,7 +113,11 @@ final class Application
             $submittedAnswers = is_array($values['custom_answers'] ?? null) ? $values['custom_answers'] : [];
             foreach ($questions as $question) {
                 $questionId = (int) $question['id'];
-                $answer = trim((string) ($submittedAnswers[$questionId] ?? ''));
+                $raw = $submittedAnswers[$questionId] ?? '';
+                if (is_array($raw)) {
+                    $raw = implode(', ', array_values(array_filter(array_map('trim', $raw), static fn($v) => $v !== '')));
+                }
+                $answer = trim((string) $raw);
                 if ($answer === '' && (int) $question['is_required'] === 1) {
                     throw new RuntimeException('Pertanyaan formulir berubah. Muat ulang halaman dan isi kembali jawaban yang diminta.');
                 }

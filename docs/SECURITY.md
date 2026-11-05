@@ -361,7 +361,7 @@ header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 ```
 
 1. Tambahkan `Strict-Transport-Security: max-age=31536000` setelah HTTPS dipastikan stabil di semua halaman.
-2. Tambahkan `Content-Security-Policy` setelah tidak ada lagi CSS dan JS inline. Contohnya ada di [ARCHITECTURE.md](ARCHITECTURE.md) bagian 10. Peta OpenStreetMap membutuhkan `frame-src https://www.openstreetmap.org`.
+2. `App::setSecurityHeaders()` menerapkan CSP kompatibilitas: sumber skrip dibatasi ke origin sendiri dan `cdn.tailwindcss.com`, atribut event inline diblokir, sumber gaya/font/gambar dibatasi, dan frame hanya mengizinkan origin sendiri serta OpenStreetMap. Kebijakan saat ini mengizinkan `unsafe-eval` bersama CDN Tailwind (belum diverifikasi apakah runtime membutuhkannya) dan `unsafe-inline` untuk gaya lama/runtime. Ini lapisan pembatas, belum CSP ketat. Tailwind Play CDN ditujukan untuk pengembangan; ganti dengan CSS hasil build lokal, hapus gaya inline yang tidak perlu, lalu hapus kedua izin tersebut dan uji semua halaman sebelum rilis ([dokumentasi Tailwind](https://tailwindcss.com/docs/installation/play-cdn)).
 3. Halaman panel admin menambahkan `X-Robots-Tag: noindex, nofollow` dan `Cache-Control: no-store`.
 
 ### 3.11 Galat dan log

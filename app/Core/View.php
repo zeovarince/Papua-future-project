@@ -21,6 +21,8 @@ final class View
         if ($layout === 'admin') {
             $data['admin'] ??= Session::get('admin', []);
         }
+        $__httpStatus = $status;
+        unset($status);
         extract($data, EXTR_SKIP);
         ob_start();
         require $viewFile;
@@ -30,6 +32,6 @@ final class View
         require $layoutFile;
         $html = (string) ob_get_clean();
 
-        return new Response($html, $status);
+        return new Response($html, $__httpStatus);
     }
 }

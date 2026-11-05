@@ -46,7 +46,7 @@ final class Post
     public static function adminList(): array
     {
         return Database::connection()->query(
-            'SELECT p.id, p.slug, p.category, p.title, p.published_at, p.is_published, '
+            'SELECT p.id, p.slug, p.category, p.title, p.cover_image, p.published_at, p.is_published, '
             . '(SELECT COUNT(*) FROM post_photos pp WHERE pp.post_id = p.id) AS photo_count '
             . 'FROM posts p ORDER BY p.published_at DESC, p.id DESC'
         )->fetchAll(PDO::FETCH_ASSOC);

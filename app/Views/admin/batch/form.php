@@ -1,21 +1,65 @@
-<form action="<?= url($batch === null ? '/admin/batch' : '/admin/batch/' . (int) $batch['id']) ?>" method="post" class="admin-form card-surface">
-    <?= csrf_field() ?>
-    <label class="form-field">
-        <span>Jenis batch</span>
-        <select name="batch_type" <?= $batch !== null && ((int) $batch['member_count'] > 0 || (int) $batch['application_count'] > 0) ? 'disabled' : '' ?>>
-            <option value="INTERN" <?= ($values['batch_type'] ?? '') === 'INTERN' ? 'selected' : '' ?>>Internship</option>
-            <option value="VOLUNTEER" <?= ($values['batch_type'] ?? '') === 'VOLUNTEER' ? 'selected' : '' ?>>Volunteer / Relawan</option>
-        </select>
-        <?php if ($batch !== null && ((int) $batch['member_count'] > 0 || (int) $batch['application_count'] > 0)): ?>
-            <input type="hidden" name="batch_type" value="<?= e($batch['batch_type']) ?>">
-            <small>Jenis batch dikunci karena sudah memiliki anggota atau pendaftar.</small>
-        <?php endif; ?>
-        <?php if (isset($errors['batch_type'])): ?><small class="field-error"><?= e($errors['batch_type']) ?></small><?php endif; ?>
-    </label>
-    <label class="form-field">
-        <span>Nama batch</span>
-        <input name="name" maxlength="60" required value="<?= e($values['name'] ?? '') ?>" placeholder="Contoh: Batch 1 2026">
-        <?php if (isset($errors['name'])): ?><small class="field-error"><?= e($errors['name']) ?></small><?php endif; ?>
-    </label>
-    <div class="form-actions form-field-wide"><button class="button-primary" type="submit">Simpan batch</button><a class="button-secondary" href="<?= url('/admin/batch') ?>">Batal</a></div>
-</form>
+<?php
+
+declare(strict_types=1);
+
+$isEdit = ($batch !== null);
+$title = $isEdit ? 'Ubah Batch' : 'Tambah Batch';
+$breadcrumb = ['Admin', 'Tim', 'Batch', $isEdit ? 'Ubah' : 'Tambah'];
+$hasStickyActionBar = true;
+$isLocked = ($isEdit && ((int) ($batch['member_count'] ?? 0) > 0 || (int) ($batch['application_count'] ?? 0) > 0));
+?>
+
+<div class="form-container-narrow">
+    <div style="margin-bottom: 20px;">
+        <p style="color: var(--admin-text-muted); font-size: 13px; margin: 0;">
+            Kelola periode batch untuk program magang (Internship) atau relawan (Volunteer).
+        </p>
+    </div>
+
+    <form action="<?= url($isEdit ? '/admin/batch/' . (int) $batch['id'] : '/admin/batch') ?>" method="post">
+        <?= csrf_field() ?>
+
+        <div class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title"><?= $isEdit ? 'Ubah Informasi Batch' : 'Buat Batch Baru' ?></h2>
+                    <p class="card-subtitle">Tentukan jenis dan nama periode pendaftaran.</p>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label class="form-label" for="batchTypeField">Jenis Batch *</label>
+                    <select id="batchTypeField" name="batch_type" class="form-control" <?= $isLocked ? 'disabled' : '' ?>>
+                        <option value="INTERN" <?= ($values['batch_type'] ?? '') === 'INTERN' ? 'selected' : '' ?>>Internship (Magang)</option>
+                        <option value="VOLUNTEER" <?= ($values['batch_type'] ?? '') === 'VOLUNTEER' ? 'selected' : '' ?>>Volunteer (Relawan)</option>
+                    </select>
+                    <?php if ($isLocked): ?>
+                        <input type="hidden" name="batch_type" value="<?= e($batch['batch_type']) ?>">
+                        <small class="field-hint">Jenis batch dikunci karena sudah memiliki anggota atau pendaftar.</small>
+                    <?php endif; ?>
+                    <?php if (isset($errors['batch_type'])): ?>
+                        <small class="field-error"><?= e($errors['batch_type']) ?></small>
+                    <?php endif; ?>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="batchNameField">Nama Batch *</label>
+                    <input type="text" id="batchNameField" name="name" maxlength="60" required value="<?= e($values['name'] ?? '') ?>" class="form-control" placeholder="Contoh: Batch 1 2026">
+                    <?php if (isset($errors['name'])): ?>
+                        <small class="field-error"><?= e($errors['name']) ?></small>
+                    <?php endif; ?>
+                    <small class="field-hint">Nama batch ini akan ditampilkan pada formulir pendaftaran publik.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sticky Action Bar -->
+        <div class="sticky-action-bar">
+            <a href="<?= url('/admin/batch') ?>" class="btn btn-secondary">Batal</a>
+            <button type="submit" class="btn btn-primary">
+                <?= icon('check', '', 16) ?>
+                <span><?= $isEdit ? 'Simpan Perubahan' : 'Simpan Batch' ?></span>
+            </button>
+        </div>
+    </form>
+</div>

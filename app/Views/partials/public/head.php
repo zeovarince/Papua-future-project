@@ -1,5 +1,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="192x192" href="<?= asset('img/favicon.png') ?>">
 <meta name="description" content="Papua Future Project bergerak dalam pendidikan dan kesehatan anak di Papua Barat. Every Child Matters.">
 <title><?= e($title ?? 'Papua Future Project') ?></title>
 <script src="<?= asset('js/js-flag.js') ?>"></script>

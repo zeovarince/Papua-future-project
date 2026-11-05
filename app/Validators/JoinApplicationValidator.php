@@ -60,6 +60,9 @@ final class JoinApplicationValidator
             foreach (ApplicationQuestion::activeByType($applicationType) as $question) {
                 $questionId = (int) $question['id'];
                 $rawAnswer = $submittedAnswers[$questionId] ?? '';
+                if (is_array($rawAnswer)) {
+                    $rawAnswer = implode(', ', array_values(array_filter(array_map('trim', $rawAnswer), static fn($v) => $v !== '')));
+                }
                 $answer = is_scalar($rawAnswer) ? trim((string) $rawAnswer) : '';
                 $values['custom_answers'][$questionId] = $answer;
                 $maxLength = $question['field_type'] === 'TEXT' ? 200 : 2000;

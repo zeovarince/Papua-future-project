@@ -1,38 +1,120 @@
-<section class="admin-page-toolbar">
-  <p>Pertanyaan ini hanya muncul untuk pendaftar <?= e($typeLabel) ?>. Kamu bisa mengatur teks, jenis jawaban, kewajiban, status tampil, dan urutannya.</p>
-  <a class="button-primary button-link" href="<?= url('/admin/pendaftaran/' . $typeSlug . '/pertanyaan/tambah') ?>">+ Tambah pertanyaan</a>
-</section>
+<?php
 
-<section class="application-form-type-switch" aria-label="Pilih jenis formulir">
-  <a class="<?= $type === 'INTERN' ? 'is-current' : '' ?>" href="<?= url('/admin/pendaftaran/internship/pertanyaan') ?>">Internship</a>
-  <a class="<?= $type === 'VOLUNTEER' ? 'is-current' : '' ?>" href="<?= url('/admin/pendaftaran/relawan/pertanyaan') ?>">Relawan</a>
-</section>
+declare(strict_types=1);
 
-<?php if ($questions === []): ?>
-  <section class="card-surface empty-state"><h2>Belum ada pertanyaan tambahan</h2><p>Formulir <?= e($typeLabel) ?> tetap memiliki pertanyaan data diri dan berkas yang standar. Tambahkan pertanyaan khusus bila diperlukan.</p><a class="button-secondary" href="<?= url('/admin/pendaftaran/' . $typeSlug . '/pertanyaan/tambah') ?>">Tambah pertanyaan pertama</a></section>
-<?php else: ?>
-  <div class="card-surface table-scroll">
-    <table class="admin-table">
-      <thead><tr><th>Pertanyaan</th><th>Jenis jawaban</th><th>Kewajiban</th><th>Status</th><th>Urutan</th><th>Aksi</th></tr></thead>
-      <tbody>
-      <?php foreach ($questions as $question): ?>
-        <tr>
-          <td><strong><?= e($question['question']) ?></strong></td>
-          <td><?= $question['field_type'] === 'TEXT' ? 'Jawaban singkat' : 'Paragraf' ?></td>
-          <td><?= (int) $question['is_required'] === 1 ? 'Wajib' : 'Opsional' ?></td>
-          <td><span class="status-pill <?= (int) $question['is_active'] === 1 ? 'status-open' : 'status-closed' ?>"><?= (int) $question['is_active'] === 1 ? 'Tampil' : 'Disembunyikan' ?></span></td>
-          <td><?= (int) $question['sort_order'] ?></td>
-          <td class="table-actions">
-            <a href="<?= url('/admin/pendaftaran/' . $typeSlug . '/pertanyaan/' . (int) $question['id'] . '/ubah') ?>">Ubah</a>
-            <form method="post" action="<?= url('/admin/pendaftaran/' . $typeSlug . '/pertanyaan/' . (int) $question['id'] . '/hapus') ?>" data-confirm="Hapus pertanyaan ini? Jawaban pendaftar lama tetap tersimpan.">
-              <?= csrf_field() ?><button class="text-danger" type="submit">Hapus</button>
-            </form>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-      </tbody>
-    </table>
-  </div>
-<?php endif; ?>
+$title = 'Pertanyaan ' . $typeLabel;
+$breadcrumb = ['Admin', 'Data', 'Form Pendaftaran', 'Pertanyaan ' . $typeLabel];
+$primaryAction = [
+    'label' => 'Tambah Pertanyaan',
+    'url' => url('/admin/pendaftaran/' . $typeSlug . '/pertanyaan/tambah'),
+    'icon' => 'plus',
+];
+$totalQuestions = count($questions);
+?>
 
-<p class="application-form-admin-note"><a href="<?= url('/admin/pendaftaran') ?>">Kembali ke status formulir</a>. Pertanyaan yang dinonaktifkan tidak ditampilkan pada formulir baru. Jawaban yang sudah masuk tetap dapat dilihat admin.</p>
+<!-- Tab Switcher between Internship and Relawan -->
+<div style="display: flex; gap: 8px; margin-bottom: 20px;">
+    <a href="<?= url('/admin/pendaftaran/internship/pertanyaan') ?>" class="btn <?= $type === 'INTERN' ? 'btn-primary' : 'btn-secondary' ?> btn-sm">
+        <?= icon('graduation-cap', '', 15) ?>
+        <span>Internship</span>
+    </a>
+    <a href="<?= url('/admin/pendaftaran/relawan/pertanyaan') ?>" class="btn <?= $type === 'VOLUNTEER' ? 'btn-primary' : 'btn-secondary' ?> btn-sm">
+        <?= icon('hand-heart', '', 15) ?>
+        <span>Relawan</span>
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <h2 class="card-title">Daftar Pertanyaan Khusus <?= e($typeLabel) ?></h2>
+            <span class="badge-pill"><?= $totalQuestions ?> pertanyaan</span>
+        </div>
+        <div class="card-filter-bar">
+            <a href="<?= url('/admin/pendaftaran') ?>" class="btn btn-secondary btn-sm">
+                <?= icon('arrow-left', '', 14) ?>
+                <span>Kembali ke Status Formulir</span>
+            </a>
+        </div>
+    </div>
+
+    <?php if ($questions === []): ?>
+        <?php
+            $icon = 'help-circle';
+            $emptyTitle = 'Belum ada pertanyaan tambahan';
+            $description = 'Formulir ' . $typeLabel . ' sudah memuat isian standar data diri dan berkas. Tambahkan pertanyaan khusus jika diperlukan.';
+            $actionUrl = url('/admin/pendaftaran/' . $typeSlug . '/pertanyaan/tambah');
+            $actionLabel = 'Tambah Pertanyaan';
+            require APP_ROOT . '/app/Views/partials/admin/empty-state.php';
+        ?>
+    <?php else: ?>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Pertanyaan</th>
+                        <th>Jenis Jawaban</th>
+                        <th>Kewajiban</th>
+                        <th>Status</th>
+                        <th>Urutan</th>
+                        <th style="text-align: right;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($questions as $q): ?>
+                        <?php $isActive = ((int) ($q['is_active'] ?? 0) === 1); ?>
+                        <tr>
+                            <td>
+                                <strong><?= e($q['question']) ?></strong>
+                            </td>
+                            <td>
+                                <?php
+                                    $typeBadgeLabels = [
+                                        'TEXT' => 'Jawaban Singkat',
+                                        'TEXTAREA' => 'Paragraf',
+                                        'RADIO' => 'Pilihan Ganda',
+                                        'CHECKBOX' => 'Kotak Centang',
+                                        'SELECT' => 'Dropdown',
+                                        'FILE' => 'Unggah Berkas',
+                                    ];
+                                ?>
+                                <span class="badge-pill"><?= e($typeBadgeLabels[$q['field_type']] ?? $q['field_type']) ?></span>
+                            </td>
+                            <td>
+                                <?php if ((int) $q['is_required'] === 1): ?>
+                                    <span style="font-weight: 600; color: var(--admin-primary);">Wajib</span>
+                                <?php else: ?>
+                                    <span style="color: var(--admin-text-muted);">Opsional</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php $status = $isActive ? 'published' : 'closed'; $label = $isActive ? 'Tampil' : 'Disembunyikan'; require APP_ROOT . '/app/Views/partials/admin/status-pill.php'; ?>
+                            </td>
+                            <td>
+                                <span style="font-weight: 600; color: var(--admin-text-muted);"><?= (int) $q['sort_order'] ?></span>
+                            </td>
+                            <td style="text-align: right;">
+                                <div class="table-actions" style="justify-content: flex-end;">
+                                    <a href="<?= url('/admin/pendaftaran/' . $typeSlug . '/pertanyaan/' . (int) $q['id'] . '/ubah') ?>" class="btn btn-soft btn-xs">
+                                        <?= icon('edit', '', 13) ?>
+                                        <span>Ubah</span>
+                                    </a>
+                                    <form method="post" action="<?= url('/admin/pendaftaran/' . $typeSlug . '/pertanyaan/' . (int) $q['id'] . '/hapus') ?>" data-confirm="Hapus pertanyaan ini? Jawaban pada pendaftar lama tetap tersimpan.">
+                                        <?= csrf_field() ?>
+                                        <button type="submit" class="btn btn-soft-danger btn-xs">
+                                            <?= icon('trash-2', '', 13) ?>
+                                            <span>Hapus</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: var(--admin-text-muted);">Menampilkan <?= $totalQuestions ?> pertanyaan tambahan</span>
+        </div>
+    <?php endif; ?>
+</div>

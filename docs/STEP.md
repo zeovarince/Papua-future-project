@@ -152,9 +152,28 @@ Implementasi saat ini memakai GSAP 3.15.0 dan ScrollTrigger lokal, modul dinamis
 - Smoke test lokal: `/admin/login` merespons 200, `/admin` mengarahkan ke login (303), route tidak dikenal merespons 404, dan aset CSS/JS merespons 200.
 - Halaman publik yang membaca MySQL merespons 500 karena tidak ada listener TCP di `127.0.0.1:3306` meskipun service `MySQL80` berstatus berjalan. Periksa port di Laragon dan samakan dengan `DB_PORT` pada `.env`. Pemeriksaan CRUD, form, unggahan, dan ekspor yang membutuhkan database menunggu koneksi pulih.
 - `tests/Unit` dan `tests/E2E` masih berisi placeholder; PHPUnit belum terpasang.
-- Header Content Security Policy belum diterapkan. Halaman publik masih memuat Tailwind CDN dan Google Fonts, jadi kebijakan CSP perlu diselaraskan dengan aset tersebut sebelum diberlakukan agar tidak merusak tampilan.
+- Pada audit awal, Content Security Policy belum diterapkan. CSP kompatibilitas kemudian dipasang; rincian sumber yang diizinkan dan batasannya ada di pembaruan audit terbaru.
 
-**Status:** Step 12 masih berlangsung. Ulangi pemeriksaan halaman publik dan alur CRUD/form/unggah/ekspor setelah MySQL dan ekstensi yang dibutuhkan aktif. Lengkapi audit CSP sebelum menandai tahap ini selesai.
+**Status:** Step 12 masih berlangsung. Ulangi pemeriksaan halaman publik dan alur CRUD/form/unggah/ekspor setelah MySQL dan ekstensi yang dibutuhkan aktif. Uji CSP pada semua halaman publik dan admin, lalu hapus izin kompatibilitas setelah Tailwind dan gaya inline diganti.
+
+**Pembaruan audit lokal — 19 Oktober 2026:** lint PHP lolos untuk 134 file, pemeriksaan sintaks JavaScript lolos untuk 18 file, dan `composer validate --no-check-publish` menyatakan `composer.json` valid (dengan peringatan metadata lisensi belum diisi). Smoke test setelah CSP dipasang memberi `200` untuk `/admin/login` dan aset CSS/JS admin, serta mengonfirmasi header CSP terkirim. Halaman `/` dan `/bergabung` tetap `500`; pengujian koneksi database sebelumnya menemukan ketidakcocokan port dan autentikasi. Percobaan ulang `php bin/migrate.php` gagal karena koneksi ditolak; tidak ada migrasi yang diterapkan.
+
+**Pembaruan CSP:** `App::setSecurityHeaders()` kini membatasi sumber skrip, gaya, font, gambar, frame, dan koneksi. Untuk kompatibilitas saat ini kebijakan masih mengizinkan `unsafe-eval` bagi Tailwind CDN dan `unsafe-inline` untuk gaya lama/runtime. Uji visual halaman publik belum dapat dilakukan saat database gagal, dan kebijakan ini perlu diperketat setelah aset Tailwind dibangun lokal.
+
+**Pembaruan audit lokal — 19 Oktober 2026:** koneksi MySQL lokal kembali aktif. Audit menemukan migrasi `0011_create_application_forms.sql` belum tercatat sehingga `/bergabung` error karena tabel `application_form_settings` belum ada. Migrasi tersebut berhasil diterapkan; pengaturan formulir Internship dan Volunteer kini tersedia dan keduanya nonaktif sesuai data batch yang saat ini tertutup. `database/pfp.sql` juga sudah memuat tabel-tabel tersebut untuk instalasi baru.
+
+Smoke test ulang: `/`, `/tentang`, `/program`, `/program/bimbel-literasi`, `/berita`, `/berita/imunisasi-dan-edukasi-kesehatan`, `/bergabung`, dan `/kontak` memberi `200`; `/admin/login` memberi `200`; route admin tanpa sesi memberi `303`; route tidak dikenal memberi `404`; CSS/JS memberi `200`. `php -l` lolos untuk 134 file PHP, `node --check` lolos untuk 18 file JavaScript, dan `php bin/integrity-check.php --scan` selesai bersih. `composer validate --no-check-publish` valid dengan peringatan metadata lisensi.
+
+**Status Step 12:** masih berlangsung. Dengan akun admin sementara, login/CSRF, halaman admin baca-saja, toggle Internship dan Volunteer secara terpisah, serta CRUD dan pemisahan pertanyaan tiap jenis sudah diuji end-to-end dan lolos. Akun serta pertanyaan uji dihapus, dan kedua formulir dikembalikan ke nonaktif. Pengiriman formulir lengkap, unggahan privat, pembukaan/unduhan file, ekspor CSV/XLSX/PDF, dan audit visual/konsol browser masih perlu diperiksa. Folder `tests/Unit` dan `tests/E2E` masih placeholder. `composer audit` belum memperoleh hasil karena koneksi ke Packagist ditolak. CSP sudah terkirim, tetapi tetap mengizinkan `unsafe-eval` untuk Tailwind CDN dan `unsafe-inline` untuk gaya lama/runtime; izin ini perlu dihilangkan sebelum menyebut CSP ketat.
+
+**Pembaruan Redesain Admin — November 2026:** Seluruh UI panel admin (/admin/*) telah diperbarui total sesuai dokumen `docs/DESIGN-ADMIN.md`.
+- Navigasi memakai rail ikon 64 px dengan flyout 280 px (desktop) dan drawer mobile dengan akordeon (< 768 px).
+- Ikon emoji dihapus sepenuhnya dan diganti dengan inline Lucide SVG via `app/Support/Icon.php` dan helper `icon()`.
+- Warna gelap lama (#0c1527, dsb.) diganti dengan token CSS biru terang `--admin-primary: #3770c1` dan kartu latar putih radius 20 px.
+- Menambahkan komponen standar: `StatusPill`, `DataTable`, `EmptyState`, `ConfirmDialog`, `Toast`, `GalleryManager`, dan `PageHeader`.
+- Memperbaiki `app/Core/View.php` untuk mengisolasi HTTP status code dari variabel view agar tidak terjadi `TypeError: Argument #2 ($status) must be of type int`.
+- Mengonversi seluruh inline event handler (`onchange`, `oninput`) ke event listener generik di `admin-ui.js` yang mematuhi CSP `script-src-attr 'none'`.
+- Seluruh 14 modul dan form admin lolos pengujian render tanpa error sintaks maupun runtime.
 
 ### Step 13 — Siapkan dan deploy ke shared hosting cPanel
 

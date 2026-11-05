@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex,nofollow">
+    <link rel="icon" type="image/png" sizes="192x192" href="<?= asset('img/favicon.png') ?>">
     <title><?= e($title ?? 'Admin') ?> — Papua Future Project</title>
     <link rel="stylesheet" href="<?= asset('css/admin/admin-base.css') ?>">
     <link rel="stylesheet" href="<?= asset('css/admin/admin-layout.css') ?>">
@@ -11,28 +12,20 @@
 </head>
 <body class="admin-shell" data-page="<?= e($page ?? 'admin') ?>">
     <?php require APP_ROOT . '/app/Views/partials/admin/sidebar.php'; ?>
+
     <div class="admin-main">
-        <header class="admin-page-header">
-            <button class="sidebar-toggle" type="button" aria-label="Buka menu" aria-expanded="false" aria-controls="admin-sidebar" data-sidebar-toggle>
-                <span class="admin-menu-lines" aria-hidden="true"><i></i><i></i><i></i></span>
-            </button>
-            <div class="page-heading">
-                <p class="breadcrumb"><?= e(implode(' / ', $breadcrumb ?? ['Admin'])) ?></p>
-                <h1><?= e($title ?? 'Dashboard') ?></h1>
-            </div>
-        </header>
-        <?php if ($message = \App\Core\Flash::get('success')): ?>
-            <div class="flash-message flash-success" role="status"><?= e($message) ?></div>
+        <?php if (!isset($customHeader) || !$customHeader): ?>
+            <?php require APP_ROOT . '/app/Views/partials/admin/page-header.php'; ?>
         <?php endif; ?>
-        <?php if ($message = \App\Core\Flash::get('error')): ?>
-            <div class="flash-message flash-error" role="alert"><?= e($message) ?></div>
-        <?php endif; ?>
-        <main class="admin-content">
+
+        <main class="admin-content <?= !empty($hasStickyActionBar) ? 'has-sticky-bar' : '' ?>">
             <?= $content ?>
         </main>
     </div>
-    <div class="sidebar-overlay" data-sidebar-overlay hidden></div>
+
+    <?php require APP_ROOT . '/app/Views/partials/admin/confirm-dialog.php'; ?>
+    <?php require APP_ROOT . '/app/Views/partials/admin/toast.php'; ?>
+
     <script src="<?= asset('js/admin/admin-ui.js') ?>" defer></script>
-    <script src="<?= asset('js/motion/admin.js') ?>" defer></script>
 </body>
 </html>

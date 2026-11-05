@@ -46,6 +46,14 @@ final class App
         header('X-Frame-Options: SAMEORIGIN');
         header('Referrer-Policy: strict-origin-when-cross-origin');
         header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
+        header(
+            "Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; "
+            . "frame-ancestors 'self'; form-action 'self'; "
+            . "script-src 'self' https://cdn.tailwindcss.com 'unsafe-eval'; script-src-attr 'none'; "
+            . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            . "font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; "
+            . "connect-src 'self'; frame-src 'self' https://www.openstreetmap.org"
+        );
 
         if (getenv('APP_ENV') === 'production' && $request->isSecure()) {
             header('Strict-Transport-Security: max-age=31536000');

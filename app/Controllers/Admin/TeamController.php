@@ -25,12 +25,14 @@ final class TeamController
         if (!isset(self::GROUPS[$group])) {
             return View::render('public/errors/404', ['title' => 'Halaman tidak ditemukan', 'page' => 'not-found'], 'public', 404);
         }
+        $batchType = self::GROUPS[$group] === 'INTERN' ? 'INTERN' : (self::GROUPS[$group] === 'VOLUNTEER' ? 'VOLUNTEER' : null);
         return View::render('admin/team/index', [
             'title' => self::title($group),
             'page' => 'team-' . $group,
             'breadcrumb' => ['Admin', 'Tim', self::title($group)],
             'group' => $group,
             'members' => TeamMember::adminList(self::GROUPS[$group]),
+            'batches' => $batchType === null ? [] : Batch::byType($batchType),
         ], 'admin');
     }
 

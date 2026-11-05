@@ -37,7 +37,7 @@ final class Program
     public static function adminList(): array
     {
         return Database::connection()->query(
-            'SELECT p.id, p.slug, p.title, p.is_published, p.is_featured, p.sort_order, '
+            'SELECT p.id, p.slug, p.category_label, p.title, p.cover_image, p.is_published, p.is_featured, p.sort_order, '
             . '(SELECT COUNT(*) FROM program_photos pp WHERE pp.program_id = p.id) AS photo_count '
             . 'FROM programs p ORDER BY p.sort_order, p.title, p.id'
         )->fetchAll(PDO::FETCH_ASSOC);

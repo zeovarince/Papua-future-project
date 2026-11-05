@@ -72,3 +72,11 @@ if (!function_exists('asset')) {
         return $version === null ? $assetUrl : $assetUrl . '?v=' . $version;
     }
 }
+
+if (!function_exists('icon')) {
+    function icon(string $name, string $class = '', int $size = 20): string
+    {
+        return \App\Support\Icon::render($name, $class, $size);
+    }
+}
+

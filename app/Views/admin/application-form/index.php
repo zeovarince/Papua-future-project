@@ -1,35 +1,79 @@
-<section class="admin-page-toolbar">
-  <p>Aktifkan Internship dan Relawan secara terpisah. Formulir hanya menerima pendaftaran jika jenisnya aktif dan ada batch yang dibuka.</p>
-  <a class="button-secondary" href="<?= url('/admin/batch') ?>">Kelola batch</a>
-</section>
+<?php
 
-<div class="application-form-settings-grid">
-  <?php foreach ($settings as $setting): ?>
-    <?php
-      $type = $setting['application_type'];
-      $isIntern = $type === 'INTERN';
-      $label = $isIntern ? 'Internship' : 'Relawan';
-      $slug = $isIntern ? 'internship' : 'relawan';
-      $isActive = (int) $setting['is_active'] === 1;
-    ?>
-    <article class="card-surface application-form-setting-card">
-      <div class="application-form-setting-heading">
-        <div>
-          <span class="status-pill <?= $isActive ? 'status-open' : 'status-closed' ?>"><?= $isActive ? 'Formulir aktif' : 'Formulir nonaktif' ?></span>
-          <h2><?= e($label) ?></h2>
-        </div>
-        <span class="application-form-setting-icon" aria-hidden="true"><?= $isIntern ? '🎓' : '🤝' ?></span>
-      </div>
-      <p><?= (int) $setting['open_batch_count'] ?> batch dengan toggle batch dibuka · <?= (int) $setting['active_question_count'] ?> pertanyaan tambahan aktif</p>
-      <div class="application-form-setting-actions">
-        <a class="button-secondary" href="<?= url('/admin/pendaftaran/' . $slug . '/pertanyaan') ?>">Atur pertanyaan</a>
-        <form method="post" action="<?= url('/admin/pendaftaran/' . $slug . '/toggle') ?>" data-confirm="<?= $isActive ? 'Nonaktifkan semua pendaftaran ' . e($label) . '?' : 'Aktifkan formulir pendaftaran ' . e($label) . '?' ?>">
-          <?= csrf_field() ?>
-          <button class="<?= $isActive ? 'button-secondary' : 'button-primary' ?>" type="submit"><?= $isActive ? 'Nonaktifkan' : 'Aktifkan' ?> formulir</button>
-        </form>
-      </div>
-    </article>
-  <?php endforeach; ?>
+declare(strict_types=1);
+
+$title = 'Form Pendaftaran';
+$breadcrumb = ['Admin', 'Data', 'Form Pendaftaran'];
+?>
+
+<div style="margin-bottom: 20px;">
+    <p style="color: var(--admin-text-muted); font-size: 13px; margin: 0;">
+        Aktifkan formulir Internship dan Relawan secara terpisah. Pendaftaran publik hanya dibuka jika status jenis formulir aktif dan ada batch yang dibuka.
+    </p>
 </div>
 
-<p class="application-form-admin-note">Menonaktifkan formulir tidak mengubah status batch dan tidak menghapus data pendaftar atau jawaban lama. Buka/tutup batch tertentu melalui halaman Batch.</p>
+<div class="grid-12">
+    <?php foreach ($settings as $setting): ?>
+        <?php
+            $type = $setting['application_type'];
+            $isIntern = ($type === 'INTERN');
+            $label = $isIntern ? 'Internship' : 'Relawan';
+            $slug = $isIntern ? 'internship' : 'relawan';
+            $isActive = ((int) $setting['is_active'] === 1);
+            $iconName = $isIntern ? 'graduation-cap' : 'hand-heart';
+        ?>
+        <div class="col-6">
+            <article class="card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between; min-height: 240px;">
+                <div>
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px;">
+                        <div>
+                            <?php $status = $isActive ? 'open' : 'closed'; $statusLabel = $isActive ? 'Formulir Aktif' : 'Formulir Nonaktif'; require APP_ROOT . '/app/Views/partials/admin/status-pill.php'; ?>
+                            <h2 style="margin: 8px 0 0; font-size: 20px; font-weight: 700; color: var(--admin-text);"><?= e($label) ?></h2>
+                        </div>
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(55, 112, 193, 0.1); color: var(--admin-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <?= icon($iconName, '', 22) ?>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--admin-text);">
+                            <span style="font-weight: 700; color: var(--admin-primary);"><?= (int) $setting['open_batch_count'] ?></span>
+                            <span>batch dibuka untuk pendaftaran publik</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--admin-text-muted);">
+                            <span style="font-weight: 600;"><?= (int) $setting['active_question_count'] ?></span>
+                            <span>pertanyaan kustom tambahan aktif</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px solid var(--admin-border); flex-wrap: wrap;">
+                    <a href="<?= url('/admin/pendaftaran/' . $slug . '/pertanyaan') ?>" class="btn btn-secondary btn-sm">
+                        <?= icon('file-cog', '', 15) ?>
+                        <span>Atur Pertanyaan</span>
+                    </a>
+
+                    <form method="post" action="<?= url('/admin/pendaftaran/' . $slug . '/toggle') ?>">
+                        <?= csrf_field() ?>
+                        <label class="toggle-switch" title="<?= $isActive ? 'Nonaktifkan formulir' : 'Aktifkan formulir' ?>">
+                            <input type="checkbox" class="toggle-switch-input" <?= $isActive ? 'checked' : '' ?> data-auto-submit>
+                            <span class="toggle-switch-track"></span>
+                            <span class="toggle-switch-label" style="font-size: 12px; font-weight: 500;">
+                                <?= $isActive ? 'Aktif' : 'Nonaktif' ?>
+                            </span>
+                        </label>
+                    </form>
+                </div>
+            </article>
+        </div>
+    <?php endforeach; ?>
+</div>
+
+<div class="card" style="margin-top: 20px; padding: 18px 20px; background-color: #fafbfc;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="color: var(--admin-primary); flex-shrink: 0;"><?= icon('info', '', 20) ?></span>
+        <p style="margin: 0; font-size: 12px; color: var(--admin-text-muted); line-height: 1.5;">
+            Menonaktifkan jenis formulir tidak mengubah status batch dan tidak menghapus data pendaftar atau riwayat jawaban lama. Pengelolaan batch spesifik dapat dilakukan melalui menu <a href="<?= url('/admin/batch') ?>" style="color: var(--admin-primary); font-weight: 600;">Batch</a>.
+        </p>
+    </div>
+</div>

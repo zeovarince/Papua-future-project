@@ -245,8 +245,43 @@ declare(strict_types=1);
             <?php $questionId = (int) $question['id']; $answerValue = is_array($old['custom_answers'] ?? null) ? (string) ($old['custom_answers'][$questionId] ?? '') : ''; ?>
             <div class="application-field application-field-full">
               <label class="join-form-label" for="custom_answer_<?= $questionId ?>"><?= e($question['question']) ?><?= (int) $question['is_required'] === 1 ? ' *' : '' ?></label>
-              <?php if ($question['field_type'] === 'TEXT'): ?>
+              <?php
+                $qType = $question['field_type'];
+                $qOptions = array_values(array_filter(array_map('trim', explode("\n", (string) ($question['options'] ?? ''))), static fn($o) => $o !== ''));
+                $checkboxAnswers = is_array($old['custom_answers'][$questionId] ?? null)
+                  ? $old['custom_answers'][$questionId]
+                  : array_map('trim', explode(',', (string) $answerValue));
+              ?>
+              <?php if ($qType === 'TEXT'): ?>
                 <input class="join-form-input" id="custom_answer_<?= $questionId ?>" name="custom_answers[<?= $questionId ?>]" type="text" maxlength="200" value="<?= e($answerValue) ?>" <?= (int) $question['is_required'] === 1 ? 'required' : '' ?> <?= $selectedBatchType === $type ? '' : 'disabled' ?>>
+              <?php elseif ($qType === 'RADIO'): ?>
+                <div class="custom-radio-group" style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+                  <?php foreach ($qOptions as $optIdx => $option): ?>
+                    <label style="display: inline-flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                      <input type="radio" name="custom_answers[<?= $questionId ?>]" value="<?= e($option) ?>" <?= $answerValue === $option ? 'checked' : '' ?> <?= (int) $question['is_required'] === 1 && $optIdx === 0 ? 'required' : '' ?> <?= $selectedBatchType === $type ? '' : 'disabled' ?>>
+                      <span><?= e($option) ?></span>
+                    </label>
+                  <?php endforeach; ?>
+                </div>
+              <?php elseif ($qType === 'CHECKBOX'): ?>
+                <div class="custom-checkbox-group" style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px;">
+                  <?php foreach ($qOptions as $option): ?>
+                    <label style="display: inline-flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                      <input type="checkbox" name="custom_answers[<?= $questionId ?>][]" value="<?= e($option) ?>" <?= in_array($option, $checkboxAnswers, true) ? 'checked' : '' ?> <?= $selectedBatchType === $type ? '' : 'disabled' ?>>
+                      <span><?= e($option) ?></span>
+                    </label>
+                  <?php endforeach; ?>
+                </div>
+              <?php elseif ($qType === 'SELECT'): ?>
+                <select class="join-form-input" id="custom_answer_<?= $questionId ?>" name="custom_answers[<?= $questionId ?>]" <?= (int) $question['is_required'] === 1 ? 'required' : '' ?> <?= $selectedBatchType === $type ? '' : 'disabled' ?>>
+                  <option value="">-- Pilih salah satu --</option>
+                  <?php foreach ($qOptions as $option): ?>
+                    <option value="<?= e($option) ?>" <?= $answerValue === $option ? 'selected' : '' ?>><?= e($option) ?></option>
+                  <?php endforeach; ?>
+                </select>
+              <?php elseif ($qType === 'FILE'): ?>
+                <input class="join-form-input" id="custom_answer_<?= $questionId ?>" name="custom_answers[<?= $questionId ?>]" type="url" placeholder="https://drive.google.com/... atau tautan berkas lainnya" value="<?= e($answerValue) ?>" <?= (int) $question['is_required'] === 1 ? 'required' : '' ?> <?= $selectedBatchType === $type ? '' : 'disabled' ?>>
+                <small style="color: #64748b; font-size: 11px;">Masukkan tautan/link dokumen pendukung (Google Drive, Dropbox, LinkedIn, dll).</small>
               <?php else: ?>
                 <textarea class="join-form-textarea" id="custom_answer_<?= $questionId ?>" name="custom_answers[<?= $questionId ?>]" maxlength="2000" rows="4" <?= (int) $question['is_required'] === 1 ? 'required' : '' ?> <?= $selectedBatchType === $type ? '' : 'disabled' ?>><?= e($answerValue) ?></textarea>
               <?php endif; ?>

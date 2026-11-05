@@ -54,6 +54,7 @@ final class ApplicationQuestion
             'application_type' => $type,
             'question' => $values['question'],
             'field_type' => $values['field_type'],
+            'options' => !empty($values['options']) ? (string) $values['options'] : null,
             'is_required' => $values['is_required'],
             'is_active' => $values['is_active'],
             'sort_order' => $values['sort_order'],
@@ -61,8 +62,8 @@ final class ApplicationQuestion
         if ($id === null) {
             $statement = Database::connection()->prepare(
                 'INSERT INTO application_questions '
-                . '(application_type, question, field_type, is_required, is_active, sort_order) '
-                . 'VALUES (:application_type, :question, :field_type, :is_required, :is_active, :sort_order)'
+                . '(application_type, question, field_type, options, is_required, is_active, sort_order) '
+                . 'VALUES (:application_type, :question, :field_type, :options, :is_required, :is_active, :sort_order)'
             );
             $statement->execute($parameters);
             return (int) Database::connection()->lastInsertId();
@@ -70,7 +71,7 @@ final class ApplicationQuestion
 
         $parameters['id'] = $id;
         $statement = Database::connection()->prepare(
-            'UPDATE application_questions SET question = :question, field_type = :field_type, '
+            'UPDATE application_questions SET question = :question, field_type = :field_type, options = :options, '
             . 'is_required = :is_required, is_active = :is_active, sort_order = :sort_order '
             . 'WHERE id = :id AND application_type = :application_type'
         );

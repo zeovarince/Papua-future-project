@@ -146,6 +146,7 @@ final class ApplicationFormController
             'values' => Flash::get('old', $question ?? [
                 'question' => '',
                 'field_type' => 'TEXTAREA',
+                'options' => '',
                 'is_required' => 1,
                 'is_active' => 1,
                 'sort_order' => 0,
