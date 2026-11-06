@@ -70,6 +70,21 @@ final class Program
         });
     }
 
+    public static function publicPhotos(int $limit = 15): array
+    {
+        $limit = max(1, min(60, $limit));
+        return Cache::remember('programs:photos:public:' . $limit, 60, static function () use ($limit): array {
+            $statement = Database::connection()->prepare(
+                'SELECT pp.file_path, pp.caption, p.title AS program_title, p.slug AS program_slug '
+                . 'FROM program_photos pp INNER JOIN programs p ON p.id = pp.program_id '
+                . 'WHERE p.is_published = 1 ORDER BY p.sort_order, pp.sort_order, pp.id LIMIT :limit'
+            );
+            $statement->bindValue('limit', $limit, PDO::PARAM_INT);
+            $statement->execute();
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
+        });
+    }
+
     public static function photo(int $photoId, int $programId): ?array
     {
         $statement = Database::connection()->prepare('SELECT * FROM program_photos WHERE id = :photo AND program_id = :program LIMIT 1');

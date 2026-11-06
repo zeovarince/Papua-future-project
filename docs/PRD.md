@@ -116,7 +116,7 @@ Lima program awal: Bimbingan Belajar dan Literasi, Literasi Digital, Pojok Baca 
 | --- | --- | --- |
 | PUB-40 | Hero ajakan dan tombol Daftar Sekarang yang menuju form. | Statis |
 | PUB-41 | Manfaat menjadi relawan (tiga poin) dan langkah bergabung (empat langkah dengan perkiraan waktu). | Statis |
-| PUB-42 | Form pendaftaran hanya tampil bila jenis formulir aktif dan ada batch jenis itu yang dibuka. Pilihan Internship dan Relawan dipisah; tiap jenis menampilkan pertanyaan tambahannya sendiri. Bila keduanya tidak tersedia, tampil pesan pendaftaran ditutup. | DB: status formulir, batch, dan pertanyaan |
+| PUB-42 | Form pendaftaran hanya tampil bila jenis formulir aktif dan ada batch jenis itu yang dibuka. Pengunjung memilih batch dari kartu jalur sebelum formulir terbuka; form tidak meminta pilihan batch kedua kali. Internship dan Relawan memiliki konfigurasi pertanyaan terpisah; upload hanya tampil jika field file aktif. | DB: status formulir, batch, dan pertanyaan |
 | PUB-43 | Setelah berhasil, tampil halaman konfirmasi (`/bergabung/berhasil`). | Statis |
 
 ### 6.6 Kontak (`/kontak`)
@@ -153,11 +153,13 @@ Lima program awal: Bimbingan Belajar dan Literasi, Literasi Digital, Pojok Baca 
 | ADM-12 | (Tambahan, A6) Pesan masuk: daftar pesan dari form kontak, detail, tanda sudah dibaca, hapus. |
 | ADM-13 | (Tambahan) Ringkasan: jumlah pendaftar baru, pesan belum dibaca, batch yang sedang dibuka, dan berita terakhir. |
 | ADM-14 | Status aktif formulir Internship dan Relawan dapat diubah secara terpisah. Pendaftaran publik hanya diterima bila formulir jenis tersebut aktif dan batch yang dipilih terbuka. |
-| ADM-15 | CRUD pertanyaan tambahan formulir secara terpisah untuk Internship dan Relawan: teks, jawaban singkat/paragraf, wajib/opsional, tampil/sembunyi, dan urutan. Jawaban tersimpan bersama pendaftar, tampil di detail, dan ikut ekspor. |
+| ADM-15 | Kelola pertanyaan bawaan (nama, tanggal lahir, email, WhatsApp, domisili, status, universitas, ketersediaan/minat, motivasi, portofolio, foto, CV) dan pertanyaan tambahan secara terpisah untuk Internship dan Relawan. Admin dapat mengubah teks, pilihan, urutan, status wajib/opsional, dan tampil/sembunyi; tipe input field bawaan yang terkait penyimpanan khusus tetap. Jawaban tersimpan bersama pendaftar, tampil di detail, dan ikut ekspor. |
+
+| ADM-16 | Admin yang sudah masuk dapat membuat akun admin tambahan melalui panel tanpa menjalankan perintah atau mengedit kode. Setiap admin dapat mengganti kata sandi sendiri dengan verifikasi kata sandi saat ini. Semua akun memiliki satu tingkat akses Admin. |
 
 ## 8. Pendaftaran Relawan dan Intern
 
-Satu form dipakai untuk dua tipe. Tipe (Intern atau Relawan) ditentukan oleh batch yang dipilih. Isian di bawah menggabungkan form yang sudah ada di UI dengan kebutuhan baru (batch, asal universitas, foto, CV).
+Internship dan Relawan memiliki form serta konfigurasi pertanyaan masing-masing. Tipe pendaftaran ditentukan oleh halaman dan batch yang dipilih. Tabel berikut adalah isian bawaan saat database dibuat; Admin dapat menyembunyikan atau menjadikannya opsional, serta mengubah label/pilihan yang tersedia. Field upload memiliki format khusus dan hanya muncul saat diaktifkan.
 
 | Kelompok | Field | Wajib | Aturan |
 | --- | --- | --- | --- |
@@ -168,7 +170,7 @@ Satu form dipakai untuk dua tipe. Tipe (Intern atau Relawan) ditentukan oleh bat
 | | Nomor WhatsApp | Ya | Nomor Indonesia, diawali 08 atau +62. |
 | | Domisili saat ini | Ya | Maksimal 120 karakter. |
 | | Pekerjaan atau status saat ini | Ya | Pilihan: Mahasiswa, Fresh Graduate, Karyawan atau Profesional, Wiraswasta, Lainnya. |
-| | Asal universitas atau instansi | Bersyarat | Wajib bila status Mahasiswa atau Fresh Graduate, opsional untuk lainnya (A7). |
+| | Asal universitas atau instansi | Tidak (bawaan) | Admin dapat menjadikannya wajib atau menyembunyikannya. |
 | Ketersediaan dan minat | Durasi penugasan | Ya | Pilihan: 2 minggu, 1 bulan, Fleksibel. |
 | | Bidang yang ingin dikontribusikan | Ya | Pilih satu atau lebih: Literasi dan Bimbingan Belajar, Edukasi Kesehatan dan Gizi, Kegiatan Kreatif (seni, olahraga, permainan), Dokumentasi dan Media, Lainnya atau sesuai kebutuhan tim. |
 | | Dari mana tahu PFP | Ya | Pilihan: Instagram @papuafutureproject, Diajak teman atau kenalan, Artikel atau berita online, Event atau seminar atau pameran, Lainnya. |
@@ -181,7 +183,7 @@ Aturan bisnis:
 
 1. Satu email hanya bisa mendaftar satu kali per batch.
 2. Jenis formulir Internship dan Relawan memiliki toggle aktif/nonaktif terpisah. Form hanya bisa dikirim jika jenis formulir aktif dan batch terpilih juga terbuka.
-3. Pertanyaan tambahan diatur terpisah per jenis; hanya pertanyaan aktif untuk jenis yang dipilih ditampilkan dan divalidasi. Jawaban menyimpan salinan teks pertanyaan agar riwayat tetap terbaca jika admin mengubah atau menghapus pertanyaan.
+3. Pertanyaan bawaan dan tambahan diatur terpisah per jenis; hanya pertanyaan aktif untuk jenis yang dipilih ditampilkan dan divalidasi. Admin dapat memilih wajib atau opsional. Jawaban serta label pertanyaan disalin saat pendaftaran agar riwayat tetap terbaca jika admin mengubah atau menyembunyikan pertanyaan.
 4. Bila formulir atau batch ditutup saat pengunjung mengisi, pengiriman ditolak dengan pesan yang jelas dan isian teks tidak hilang.
 5. File disimpan di server di luar folder publik. Foto dan CV hanya bisa dibuka admin yang sedang login.
 6. Batch yang sudah punya pendaftar atau anggota tim tidak bisa dihapus. Admin cukup menutupnya.

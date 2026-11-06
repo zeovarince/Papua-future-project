@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 $questionId = (int) ($question['id'] ?? 0);
+$isSystemQuestion = (int) ($question['is_system'] ?? 0) === 1;
 $get = static fn (string $key, mixed $default = '') => $values[$key] ?? $default;
 $title = ($questionId === 0 ? 'Tambah Pertanyaan' : 'Ubah Pertanyaan') . ' (' . $typeLabel . ')';
 $breadcrumb = ['Admin', 'Data', 'Form Pendaftaran', 'Pertanyaan ' . $typeLabel, $questionId === 0 ? 'Tambah' : 'Ubah'];
@@ -12,7 +13,7 @@ $hasStickyActionBar = true;
 <div class="form-container-narrow">
     <div style="margin-bottom: 20px;">
         <p style="color: var(--admin-text-muted); font-size: 13px; margin: 0;">
-            Pertanyaan khusus yang hanya akan ditanyakan kepada pendaftar formulir <?= e($typeLabel) ?>.
+            Atur semua pertanyaan formulir <?= e($typeLabel) ?> di sini, termasuk nama, email, WhatsApp, foto, CV, dan portofolio. Field bawaan memiliki penyimpanan khusus, jadi jenis jawabannya tetap; teks, pilihan, urutan, status tampil, dan kewajiban bisa diubah.
         </p>
     </div>
 
@@ -37,14 +38,22 @@ $hasStickyActionBar = true;
 
                 <div class="form-group">
                     <label class="form-label" for="qFieldType">Jenis Jawaban *</label>
-                    <select id="qFieldType" name="field_type" required class="form-control" data-question-type-select>
-                        <option value="TEXT" <?= $get('field_type', 'TEXTAREA') === 'TEXT' ? 'selected' : '' ?>>Jawaban Singkat (Satu Baris)</option>
-                        <option value="TEXTAREA" <?= $get('field_type', 'TEXTAREA') === 'TEXTAREA' ? 'selected' : '' ?>>Paragraf (Teks Panjang)</option>
-                        <option value="RADIO" <?= $get('field_type') === 'RADIO' ? 'selected' : '' ?>>Pilihan Ganda (Pilih 1)</option>
-                        <option value="CHECKBOX" <?= $get('field_type') === 'CHECKBOX' ? 'selected' : '' ?>>Kotak Centang (Pilih Satu atau Lebih)</option>
-                        <option value="SELECT" <?= $get('field_type') === 'SELECT' ? 'selected' : '' ?>>Dropdown (Menu Pilihan)</option>
-                        <option value="FILE" <?= $get('field_type') === 'FILE' ? 'selected' : '' ?>>Unggah Berkas Tambahan (PDF/Gambar)</option>
-                    </select>
+                    <?php if ($isSystemQuestion): ?>
+                        <input type="hidden" name="field_type" value="<?= e($get('field_type')) ?>">
+                        <input id="qFieldType" class="form-control" value="<?= e($get('field_type')) ?> · field bawaan" disabled>
+                    <?php else: ?>
+                        <select id="qFieldType" name="field_type" required class="form-control" data-question-type-select>
+                            <option value="TEXT" <?= $get('field_type', 'TEXTAREA') === 'TEXT' ? 'selected' : '' ?>>Jawaban Singkat (Satu Baris)</option>
+                            <option value="TEXTAREA" <?= $get('field_type', 'TEXTAREA') === 'TEXTAREA' ? 'selected' : '' ?>>Paragraf (Teks Panjang)</option>
+                            <option value="RADIO" <?= $get('field_type') === 'RADIO' ? 'selected' : '' ?>>Pilihan Ganda (Pilih 1)</option>
+                            <option value="CHECKBOX" <?= $get('field_type') === 'CHECKBOX' ? 'selected' : '' ?>>Kotak Centang (Pilih Satu atau Lebih)</option>
+                            <option value="SELECT" <?= $get('field_type') === 'SELECT' ? 'selected' : '' ?>>Dropdown (Menu Pilihan)</option>
+                            <option value="EMAIL" <?= $get('field_type') === 'EMAIL' ? 'selected' : '' ?>>Email</option>
+                            <option value="TEL" <?= $get('field_type') === 'TEL' ? 'selected' : '' ?>>Nomor Telepon</option>
+                            <option value="DATE" <?= $get('field_type') === 'DATE' ? 'selected' : '' ?>>Tanggal</option>
+                            <option value="URL" <?= $get('field_type') === 'URL' || $get('field_type') === 'FILE' ? 'selected' : '' ?>>Tautan Website / Portfolio</option>
+                        </select>
+                    <?php endif; ?>
                     <?php if (isset($errors['field_type'])): ?>
                         <small class="field-error"><?= e($errors['field_type']) ?></small>
                     <?php endif; ?>
@@ -53,7 +62,7 @@ $hasStickyActionBar = true;
                 <div class="form-group" id="optionsGroup" style="<?= in_array($get('field_type'), ['RADIO', 'CHECKBOX', 'SELECT'], true) ? '' : 'display: none;' ?>">
                     <label class="form-label" for="qOptions">Pilihan Jawaban (Satu baris per pilihan) *</label>
                     <textarea id="qOptions" name="options" rows="4" class="form-control" placeholder="Pilihan 1&#10;Pilihan 2&#10;Pilihan 3"><?= e($get('options')) ?></textarea>
-                    <small class="field-hint">Tulis tiap opsi pilihan pada baris baru (tekan Enter untuk opsi berikutnya).</small>
+                    <small class="field-hint">Tulis tiap opsi pilihan pada baris baru. Pilihan bawaan seperti status dan bidang minat juga dapat disesuaikan.</small>
                     <?php if (isset($errors['options'])): ?>
                         <small class="field-error"><?= e($errors['options']) ?></small>
                     <?php endif; ?>
@@ -62,7 +71,7 @@ $hasStickyActionBar = true;
                 <div class="form-group">
                     <label class="form-label" for="qSort">Nomor Urut Tampil</label>
                     <input type="number" id="qSort" name="sort_order" min="-10000" max="10000" value="<?= e($get('sort_order', 0)) ?>" class="form-control" style="max-width: 160px;">
-                    <small class="field-hint">Urutan terkecil tampil lebih awal di bagian pertanyaan tambahan.</small>
+                    <small class="field-hint">Urutan terkecil tampil lebih awal di formulir.</small>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--admin-border); padding-top: 14px;">

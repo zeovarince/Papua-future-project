@@ -17,6 +17,7 @@ $labels = [
     'AWARD' => 'Penghargaan',
 ];
 $coverImg = $get('cover_image');
+$coverFit = in_array($get('category', 'ACTIVITY'), ['AWARD', 'MEDIA'], true) ? 'contain' : 'cover';
 ?>
 
 <form action="<?= url($id > 0 ? '/admin/berita/' . $id : '/admin/berita') ?>" method="post" enctype="multipart/form-data">
@@ -159,23 +160,24 @@ $coverImg = $get('cover_image');
                 </div>
             </div>
 
-            <!-- Gambar Sampul -->
+            <!-- Foto utama atau logo -->
             <div class="card">
                 <div class="card-header">
                     <div>
-                        <h2 class="card-title">Gambar Sampul</h2>
-                        <p class="card-subtitle">JPEG, PNG, WebP (maks 8 MB)</p>
+                        <h2 class="card-title">Foto utama atau logo</h2>
+                        <p class="card-subtitle">Unggah logo resmi untuk penghargaan atau media. JPEG, PNG, WebP (maks 8 MB).</p>
                     </div>
                 </div>
                 <div class="card-body">
                     <?php if (!empty($coverImg)): ?>
                         <div style="margin-bottom: 12px; border-radius: 12px; overflow: hidden; border: 1px solid var(--admin-border); background-color: #f1f5f9;">
-                            <img src="<?= e(url('/uploads/' . $coverImg)) ?>" alt="Sampul saat ini" style="width: 100%; height: 160px; object-fit: cover; display: block;">
+                            <img src="<?= e(url('/uploads/' . $coverImg)) ?>" alt="Foto atau logo saat ini" style="width: 100%; height: 160px; object-fit: <?= e($coverFit) ?>; display: block;">
                         </div>
                     <?php endif; ?>
 
                     <div class="form-group" style="margin-bottom: 0;">
                         <input type="file" name="cover_image" accept="image/jpeg,image/png,image/webp" class="form-control" style="padding-top: 8px;">
+                        <small class="field-hint">Penghargaan: gunakan logo penghargaan. Liputan media: gunakan logo media atau foto liputan. Aktivitas: gunakan foto dokumentasi.</small>
                     </div>
                 </div>
             </div>

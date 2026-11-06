@@ -110,10 +110,10 @@ $lastPage = (int) ($pagination['last_page'] ?? 1);
                     <?php foreach ($applications as $app): ?>
                         <tr>
                             <td>
-                                <strong><?= e($app['full_name']) ?></strong>
+                                <strong><?= e($app['full_name'] ?: 'Pendaftar #' . (int) $app['id']) ?></strong>
                             </td>
                             <td>
-                                <a href="mailto:<?= e($app['email']) ?>" style="color: var(--admin-primary);"><?= e($app['email']) ?></a>
+                                <?php if (!empty($app['email'])): ?><a href="mailto:<?= e($app['email']) ?>" style="color: var(--admin-primary);"><?= e($app['email']) ?></a><?php else: ?><span style="color: var(--admin-text-muted);">—</span><?php endif; ?>
                             </td>
                             <td>
                                 <span class="badge-pill"><?= e($app['batch_name']) ?></span>

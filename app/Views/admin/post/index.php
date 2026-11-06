@@ -19,6 +19,13 @@ $labels = [
 $totalPosts = count($posts);
 ?>
 
+<div class="post-category-actions" aria-label="Tambah konten berdasarkan kategori">
+    <span>Tambah konten:</span>
+    <a class="btn btn-secondary btn-sm" href="<?= url('/admin/berita/tambah?category=ACTIVITY') ?>">Kegiatan</a>
+    <a class="btn btn-secondary btn-sm" href="<?= url('/admin/berita/tambah?category=AWARD') ?>">Penghargaan</a>
+    <a class="btn btn-secondary btn-sm" href="<?= url('/admin/berita/tambah?category=MEDIA') ?>">Liputan media</a>
+</div>
+
 <div class="card">
     <div class="card-header">
         <div style="display: flex; align-items: center; gap: 10px;">

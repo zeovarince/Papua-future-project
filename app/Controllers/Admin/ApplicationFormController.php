@@ -95,10 +95,11 @@ final class ApplicationFormController
         if ($type === null) {
             return $this->notFound();
         }
-        if (ApplicationQuestion::find($id, $type) === null) {
+        $question = ApplicationQuestion::find($id, $type);
+        if ($question === null) {
             return $this->notFound();
         }
-        return $this->saveQuestion($request, $typeSlug, $type, $id);
+        return $this->saveQuestion($request, $typeSlug, $type, $id, $question);
     }
 
     public function destroy(Request $request, string $typeSlug, int $id): Response
@@ -107,7 +108,10 @@ final class ApplicationFormController
         if ($type === null) {
             return $this->notFound();
         }
-        if (ApplicationQuestion::delete($id, $type)) {
+        $question = ApplicationQuestion::find($id, $type);
+        if ($question !== null && (int) ($question['is_system'] ?? 0) === 1) {
+            Flash::set('error', 'Pertanyaan bawaan tidak dapat dihapus. Sembunyikan melalui pengaturan pertanyaan bila tidak ingin ditampilkan.');
+        } elseif (ApplicationQuestion::delete($id, $type)) {
             SecurityLogger::record('application_question_deleted', $request, $id);
             Flash::set('success', 'Pertanyaan berhasil dihapus. Jawaban lama pendaftar tetap tersimpan.');
         } else {
@@ -116,9 +120,9 @@ final class ApplicationFormController
         return Response::redirect('/admin/pendaftaran/' . $typeSlug . '/pertanyaan');
     }
 
-    private function saveQuestion(Request $request, string $typeSlug, string $type, ?int $id): Response
+    private function saveQuestion(Request $request, string $typeSlug, string $type, ?int $id, ?array $current = null): Response
     {
-        [$values, $errors] = ApplicationQuestionValidator::validate($request->post());
+        [$values, $errors] = ApplicationQuestionValidator::validate($request->post(), $current);
         if ($errors !== []) {
             Flash::set('errors', $errors);
             Flash::set('old', $values);

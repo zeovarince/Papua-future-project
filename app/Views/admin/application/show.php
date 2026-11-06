@@ -2,12 +2,23 @@
 
 declare(strict_types=1);
 
-$title = $application['full_name'];
+$displayName = trim((string) ($application['full_name'] ?? '')) ?: 'Pendaftar #' . (int) $application['id'];
+$hasConfiguredAnswers = false;
+$questionLabels = [];
+foreach (($application['form_answers'] ?? []) as $formAnswer) {
+    if (!empty($formAnswer['is_system'])) {
+        $hasConfiguredAnswers = true;
+    }
+    if (!empty($formAnswer['field_key'])) {
+        $questionLabels[$formAnswer['field_key']] = $formAnswer['question'];
+    }
+}
+$title = $displayName;
 $subtitle = ($types[$application['batch_type']] ?? $application['batch_type']) . ' · ' . $application['batch_name'];
 $breadcrumb = [
     'Admin',
     ['label' => 'Pendaftar', 'url' => url('/admin/pendaftar')],
-    $application['full_name'],
+    $displayName,
 ];
 
 $photoUrl = url('/admin/berkas/' . (int) $application['id'] . '/foto');
@@ -27,24 +38,24 @@ $cvUrl = url('/admin/berkas/' . (int) $application['id'] . '/cv');
             </div>
             <div class="card-body">
                 <dl class="detail-list">
-                    <dt>Nama Lengkap</dt>
-                    <dd><strong><?= e($application['full_name']) ?></strong></dd>
+                    <dt><?= e($questionLabels['full_name'] ?? 'Nama Lengkap') ?></dt>
+                    <dd><strong><?= e($application['full_name'] ?: 'Tidak diisi') ?></strong></dd>
 
-                    <dt>Email</dt>
+                    <dt><?= e($questionLabels['email'] ?? 'Email') ?></dt>
                     <dd>
-                        <a href="mailto:<?= e($application['email']) ?>" style="color: var(--admin-primary); font-weight: 500;">
-                            <?= e($application['email']) ?>
-                        </a>
+                        <?php if (!empty($application['email'])): ?>
+                            <a href="mailto:<?= e($application['email']) ?>" style="color: var(--admin-primary); font-weight: 500;"><?= e($application['email']) ?></a>
+                        <?php else: ?><span> Tidak diisi</span><?php endif; ?>
                     </dd>
 
-                    <dt>Nomor WhatsApp</dt>
+                    <dt><?= e($questionLabels['whatsapp'] ?? 'Nomor WhatsApp') ?></dt>
                     <dd>
                         <?php
-                            $cleanWa = preg_replace('/\D+/', '', (string) $application['whatsapp']);
+                            $cleanWa = preg_replace('/\D+/', '', (string) ($application['whatsapp'] ?? ''));
                             if (str_starts_with($cleanWa, '0')) $cleanWa = '62' . substr($cleanWa, 1);
                         ?>
                         <div style="display: flex; align-items: center; gap: 8px;">
-                            <span><?= e($application['whatsapp']) ?></span>
+                            <span><?= e($application['whatsapp'] ?: 'Tidak diisi') ?></span>
                             <?php if ($cleanWa !== ''): ?>
                                 <a href="https://wa.me/<?= e($cleanWa) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-soft-success btn-xs">
                                     Hubungi WA
@@ -53,17 +64,13 @@ $cvUrl = url('/admin/berkas/' . (int) $application['id'] . '/cv');
                         </div>
                     </dd>
 
-                    <dt>Tanggal Lahir</dt>
-                    <dd><?= date('d M Y', strtotime($application['birth_date'])) ?></dd>
-
-                    <dt>Domisili Saat Ini</dt>
-                    <dd><?= e($application['domicile']) ?></dd>
-
-                    <dt>Status Pekerjaan</dt>
-                    <dd><?= e($occupations[$application['occupation_status']] ?? $application['occupation_status']) ?></dd>
-
-                    <dt>Universitas / Instansi</dt>
-                    <dd><?= e($application['university'] ?: '—') ?></dd>
+                    <?php if (!$hasConfiguredAnswers): ?>
+                        <dt>Tanggal Lahir</dt>
+                        <dd><?= !empty($application['birth_date']) ? e(date('d M Y', strtotime($application['birth_date']))) : '—' ?></dd>
+                        <dt>Domisili Saat Ini</dt><dd><?= e($application['domicile'] ?: '—') ?></dd>
+                        <dt>Status Pekerjaan</dt><dd><?= e($occupations[$application['occupation_status']] ?? $application['occupation_status'] ?? '—') ?></dd>
+                        <dt>Universitas / Instansi</dt><dd><?= e($application['university'] ?: '—') ?></dd>
+                    <?php endif; ?>
 
                     <dt>Waktu Pendaftaran</dt>
                     <dd><?= date('d M Y H:i', strtotime($application['created_at'])) ?> WIT</dd>
@@ -72,6 +79,7 @@ $cvUrl = url('/admin/berkas/' . (int) $application['id'] . '/cv');
         </article>
 
         <!-- 2. Ketersediaan & Motivasi -->
+        <?php if (!$hasConfiguredAnswers): ?>
         <article class="card">
             <div class="card-header">
                 <div>
@@ -116,29 +124,31 @@ $cvUrl = url('/admin/berkas/' . (int) $application['id'] . '/cv');
                 </dl>
             </div>
         </article>
+        <?php endif; ?>
 
-        <!-- 3. Jawaban Pertanyaan Tambahan (jika ada) -->
-        <?php if (!empty($application['custom_answers'])): ?>
+        <!-- Jawaban dari pertanyaan yang diatur Admin -->
+        <?php if (!empty($application['form_answers'])): ?>
             <article class="card">
                 <div class="card-header">
                     <div>
-                        <h2 class="card-title">Jawaban Pertanyaan Tambahan</h2>
-                        <p class="card-subtitle">Pertanyaan khusus yang diisi pada formulir.</p>
+                        <h2 class="card-title">Jawaban Formulir</h2>
+                        <p class="card-subtitle">Salinan pertanyaan dan jawaban saat pendaftar mengirim formulir.</p>
                     </div>
                 </div>
                 <div class="card-body">
                     <dl class="detail-list">
-                        <?php foreach ($application['custom_answers'] as $ans): ?>
+                        <?php foreach ($application['form_answers'] as $ans): ?>
+                            <?php if (in_array($ans['field_key'] ?? '', ['full_name', 'email', 'whatsapp', 'photo', 'cv'], true)) { continue; } ?>
                             <dt><?= e($ans['question']) ?></dt>
                             <dd>
                                 <div class="detail-long-text">
                                     <?php if (str_starts_with($ans['answer'], 'http://') || str_starts_with($ans['answer'], 'https://')): ?>
                                         <a href="<?= e($ans['answer']) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-soft btn-xs" style="margin-top: 4px;">
                                             <?= icon('external-link', '', 14) ?>
-                                            <span>Buka Tautan Berkas</span>
+                                            <span>Buka tautan</span>
                                         </a>
                                     <?php else: ?>
-                                        <?= nl2br(e($ans['answer'])) ?>
+                                        <?= $ans['answer'] !== '' ? nl2br(e($ans['answer'])) : '<span style="color: var(--admin-text-muted);">Tidak diisi</span>' ?>
                                     <?php endif; ?>
                                 </div>
                             </dd>
@@ -188,17 +198,14 @@ $cvUrl = url('/admin/berkas/' . (int) $application['id'] . '/cv');
         <article class="card">
             <div class="card-header">
                 <div>
-                    <h2 class="card-title">Foto Diri</h2>
+                    <h2 class="card-title"><?= e($questionLabels['photo'] ?? 'Foto Diri') ?></h2>
                 </div>
             </div>
             <div class="card-body" style="text-align: center;">
-                <img src="<?= e($photoUrl) ?>" alt="Foto <?= e($application['full_name']) ?>" class="applicant-photo-preview" loading="lazy">
-                <div style="margin-top: 12px;">
-                    <a href="<?= e($photoUrl) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-xs">
-                        <?= icon('external-link', '', 13) ?>
-                        <span>Buka Ukuran Penuh</span>
-                    </a>
-                </div>
+                <?php if (!empty($application['photo_path'])): ?>
+                    <img src="<?= e($photoUrl) ?>" alt="Foto <?= e($displayName) ?>" class="applicant-photo-preview" loading="lazy">
+                    <div style="margin-top: 12px;"><a href="<?= e($photoUrl) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-xs"><?= icon('external-link', '', 13) ?><span>Buka Ukuran Penuh</span></a></div>
+                <?php else: ?><p style="color: var(--admin-text-muted);">Pendaftar tidak mengunggah foto.</p><?php endif; ?>
             </div>
         </article>
 
@@ -206,11 +213,11 @@ $cvUrl = url('/admin/berkas/' . (int) $application['id'] . '/cv');
         <article class="card">
             <div class="card-header">
                 <div>
-                    <h2 class="card-title">Berkas Curriculum Vitae</h2>
+                    <h2 class="card-title"><?= e($questionLabels['cv'] ?? 'Berkas Curriculum Vitae') ?></h2>
                 </div>
             </div>
             <div class="card-body">
-                <div style="display: flex; flex-direction: column; gap: 8px;">
+                <?php if (!empty($application['cv_path'])): ?><div style="display: flex; flex-direction: column; gap: 8px;">
                     <a href="<?= e($cvUrl) ?>" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm" style="justify-content: center;">
                         <?= icon('file-text', '', 16) ?>
                         <span>Lihat CV (Tab Baru)</span>
@@ -219,7 +226,7 @@ $cvUrl = url('/admin/berkas/' . (int) $application['id'] . '/cv');
                         <?= icon('download', '', 16) ?>
                         <span>Download Dokumen CV</span>
                     </a>
-                </div>
+                </div><?php else: ?><p style="color: var(--admin-text-muted);">Pendaftar tidak mengunggah CV.</p><?php endif; ?>
             </div>
         </article>
 

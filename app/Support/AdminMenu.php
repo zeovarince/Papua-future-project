@@ -211,6 +211,36 @@ final class AdminMenu
                     ],
                 ],
             ],
+            [
+                'id' => 'settings',
+                'label' => 'Pengaturan',
+                'icon' => 'settings',
+                'description' => 'Kelola akun dan keamanan admin.',
+                'route' => '/admin/akun',
+                'badge' => 0,
+                'is_single' => false,
+                'is_active' => in_array($currentPage, ['admin-accounts', 'admin-password'], true),
+                'items' => [
+                    [
+                        'id' => 'admin-accounts',
+                        'label' => 'Pengelola Admin',
+                        'route' => '/admin/akun',
+                        'description' => 'Buat akun admin baru.',
+                        'icon' => 'users',
+                        'badge' => 0,
+                        'is_active' => $currentPage === 'admin-accounts',
+                    ],
+                    [
+                        'id' => 'admin-password',
+                        'label' => 'Ubah Kata Sandi',
+                        'route' => '/admin/akun/password',
+                        'description' => 'Perbarui kata sandi akun sendiri.',
+                        'icon' => 'lock',
+                        'badge' => 0,
+                        'is_active' => $currentPage === 'admin-password',
+                    ],
+                ],
+            ],
         ];
 
         // Resolve active group based on child items

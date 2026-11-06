@@ -257,3 +257,74 @@ html { scroll-behavior: smooth; }
     .program-gallery-grid img { width:100%; height:230px; border-radius:14px; object-fit:cover; }
     .program-gallery-grid figcaption { margin-top:7px; color:#526171; }
     @media(max-width:767.98px) { .program-gallery-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .program-gallery-grid img { height:170px; } }
+
+    .program-archive-hero > p:first-child { color:rgba(255,255,255,.78); font-size:14px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:20px; }
+    .program-archive-hero h1 { color:#fff; font-size:clamp(42px,6vw,76px); font-weight:800; line-height:1.08; margin:0 0 18px; }
+    .program-archive-hero > p:last-child { max-width:720px; margin:0 auto; color:rgba(255,255,255,.86); font-size:clamp(16px,2vw,21px); line-height:1.7; }
+    .program-impact-section { padding-top:44px; padding-bottom:44px; }
+    .program-impact-section .stats-grid { margin:0 auto; }
+    .program-archive-intro { max-width:620px; }
+    .program-card-link { display:block; height:100%; color:inherit; text-decoration:none; }
+    .program-card-placeholder { color:rgba(255,255,255,.75); font-weight:800; letter-spacing:.12em; }
+    .program-gallery-heading { text-align:center; }
+    .program-gallery-heading .pfp-divider { margin-left:auto; margin-right:auto; }
+    .program-masonry-media { overflow:hidden; }
+    .program-masonry-media-0 { aspect-ratio:4 / 3; }
+    .program-masonry-media-1 { aspect-ratio:3 / 4; }
+    .program-masonry-media-2 { aspect-ratio:1 / 1; }
+    .program-masonry-media-3 { aspect-ratio:16 / 9; }
+    .program-masonry-media img { display:block; width:100%; height:100%; object-fit:cover; }
+    .program-archive-gallery .masonry-item { display:block; text-decoration:none; }
+    .program-archive-gallery .masonry-overlay,
+    .program-detail-gallery-section .masonry-overlay { z-index:1; }
+    .program-archive-gallery .masonry-overlay-icon { font-size:34px; }
+    .program-archive-gallery .masonry-caption,
+    .program-detail-gallery-section .masonry-caption { z-index:2; }
+    .program-archive-list .prog-grid-full + .prog-row-2 { margin-top:24px; }
+    @media(max-width:767.98px) {
+      .program-impact-section { padding-top:36px; padding-bottom:36px; }
+      .program-archive-hero h1 { font-size:clamp(38px,11vw,56px); }
+    }
+
+    /* Foto dokumentasi menjadi elemen utama; gunakan bidang datar saat foto belum diunggah. */
+    .hero-bg {
+      background-image:url('../../img/hero/herobanner.png');
+      background-color:#26323b;
+      background-size:cover;
+      background-position:center;
+      isolation:isolate;
+    }
+    .hero-bg::before { content:''; position:absolute; inset:0; z-index:0; background:rgba(11,20,28,.58); }
+    .hero-bg > :not(.wave-divider) { position:relative; z-index:1; }
+    .hero-bg .wave-divider { z-index:1; }
+    .program-detail-hero {
+      min-height:50vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      isolation:isolate;
+      overflow:hidden;
+      padding:112px 0 70px;
+      background-image:url('../../img/hero/herobanner.png');
+      background-color:#26323b;
+      background-size:cover;
+      background-position:center;
+    }
+    .program-detail-hero::before { content:''; position:absolute; inset:0; z-index:0; background:rgba(11,20,28,.62); }
+    .program-detail-hero-copy { position:relative; z-index:1; }
+    .detail-breadcrumb { color:rgba(255,255,255,.82); }
+    .detail-breadcrumb a { color:#fff; }
+    .program-detail-category, .prog-badge { border-radius:3px; }
+    .prog-card { border-radius:4px; box-shadow:none; transition:border-color .18s ease; }
+    .prog-card:hover { transform:none; box-shadow:none; border-color:#7d8992; }
+    .prog-img { height:auto; aspect-ratio:1 / 1; background:#e9edef; }
+    .program-card-placeholder { position:absolute; inset:0; display:grid; place-items:center; color:#697781; font-size:13px; font-weight:500; letter-spacing:0; }
+    .prog-badge { top:10px; left:10px; padding:4px 7px; background:rgba(255,255,255,.94); color:#24313a; }
+    .stat-chip { border-radius:3px; background:#edf0f2; color:#35434d; }
+    .program-detail-cover { border-radius:4px; }
+    .program-detail-facts > div { border-radius:3px; background:#f1f3f4; }
+    .masonry-item { border-radius:3px; }
+    .program-archive-gallery .masonry-caption, .program-detail-gallery-section .masonry-caption { border-radius:0; }
+    body[data-page="program"] .nav-cta { border-radius:999px; box-shadow:0 4px 12px rgba(0,0,0,.15); }

@@ -361,6 +361,8 @@ Implementasi pengelolaan formulir pendaftaran memakai file berikut:
 | `public/assets/js/pages/join.js` | Menampilkan hanya pertanyaan yang cocok dengan jenis batch terpilih. |
 | `database/migrations/0011_create_application_forms.sql` | Membuat sakelar per jenis formulir, definisi pertanyaan, dan penyimpanan jawaban. |
 
+Pengelolaan akun admin memakai `app/Controllers/Admin/AdminAccountController.php`, model `app/Models/AdminUser.php`, validator `app/Validators/AdminAccountValidator.php`, dan dua View di `app/Views/admin/accounts/`. Tidak ada perubahan skema; seluruh akun tersimpan di tabel `admin_users`.
+
 ## 6. Peta route
 
 Form HTML hanya mengenal GET dan POST, jadi ubah dan hapus memakai POST ke jalur khusus.
@@ -389,6 +391,8 @@ Form HTML hanya mengenal GET dan POST, jadi ubah dan hapus memakai POST ke jalur
 | POST | `/admin/login` | `Admin\AuthController@login` | csrf, rate-limit `login` |
 | POST | `/admin/logout` | `Admin\AuthController@logout` | auth, csrf |
 | GET | `/admin` | `Admin\DashboardController@index` | auth |
+| GET/POST | `/admin/akun` | `Admin\AdminAccountController@index/create` | auth; csrf untuk POST |
+| GET/POST | `/admin/akun/password` | `Admin\AdminAccountController@passwordForm/updatePassword` | auth; csrf untuk POST |
 | GET | `/admin/tentang` | `Admin\AboutController@edit` | auth |
 | POST | `/admin/tentang` | `Admin\AboutController@update` | auth, csrf |
 | POST | `/admin/batch/{id}/toggle` | `Admin\BatchController@toggle` | auth, csrf |

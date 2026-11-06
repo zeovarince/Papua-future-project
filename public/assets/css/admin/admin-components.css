@@ -753,3 +753,9 @@
   border: 1px solid var(--admin-border);
   background-color: #f1f5f9;
 }
+/* Admin account screens */
+.admin-account-grid { display:grid; grid-template-columns:minmax(300px,.85fr) minmax(0,1.15fr); gap:20px; align-items:start; }
+.admin-account-form { display:flex; flex-direction:column; gap:16px; }
+.admin-account-form .form-group { margin:0; }
+.admin-account-current { display:inline-block; margin-left:8px; color:var(--admin-primary); font-size:11px; font-weight:700; }
+@media(max-width:900px) { .admin-account-grid { grid-template-columns:1fr; } }

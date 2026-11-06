@@ -154,6 +154,9 @@ Aturan:
 5. Sandi seed wajib diganti setelah login pertama.
 6. Pembatas laju login: 5 kegagalan per 15 menit per kombinasi IP dan email (bagian 3.9).
 
+7. Admin yang sedang login dapat membuat akun admin. Validasi email dan kata sandi dilakukan server-side; kata sandi awal minimal 12 karakter, di-hash, dan tidak disimpan dalam flash/session/log.
+8. Penggantian kata sandi memerlukan kata sandi saat ini yang cocok. Kata sandi baru minimal 12 karakter dan harus berbeda; sesi diperbarui serta token CSRF diputar setelah perubahan.
+
 ### 3.4 CSRF
 
 ```php

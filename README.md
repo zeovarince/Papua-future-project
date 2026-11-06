@@ -12,7 +12,7 @@ Pertahankan UI publik yang sudah ada sebagai referensi saat mengikuti tahapan mi
 
 - Publik: Beranda, Tentang Kami, Program dan detail, Berita & Kegiatan dan detail, Bergabung, Kontak.
 - Admin: dashboard bersidebar, pengelolaan Tentang Kami/tim/batch, program dan foto dokumentasi, berita dan foto dokumentasi, FAQ, pendaftar, ekspor PDF/Excel, dan pesan kontak.
-- Pendaftaran intern dan relawan dibuka/ditutup per batch. Foto dan CV pendaftar disimpan secara privat.
+- Pendaftaran Internship dan Relawan diatur terpisah. Admin dapat mengatur pertanyaan bawaan (termasuk status wajib) dan menambah pertanyaan khusus; foto dan CV bersifat opsional sesuai pengaturan dan disimpan secara privat.
 
 Ruang lingkup lengkap dan keputusan produk ada di [`docs/PRD.md`](docs/PRD.md).
 
@@ -47,9 +47,9 @@ Mulai dari [`AGENT.md`](AGENT.md) untuk konteks agent, kemudian ikuti [`docs/STE
 ### Setup database lewat phpMyAdmin
 
 1. Buat database kosong di phpMyAdmin dengan nama yang kamu pilih dan collation `utf8mb4_unicode_ci`.
-2. Pilih database itu, buka tab **Import**, lalu impor [`database/pfp.sql`](database/pfp.sql). File ini membuat seluruh tabel dari ERD/SCHEMA sekaligus dan menandai skema awal sebagai sudah diterapkan.
+2. Pilih database itu, buka tab **Import**, lalu impor [`database/pfp.sql`](database/pfp.sql). Ini satu-satunya file yang perlu diimpor untuk database baru: isinya seluruh `CREATE TABLE`, indeks, seed awal, dan daftar pertanyaan bawaan Internship/Relawan.
 3. Konfigurasi aplikasi hanya disimpan di `.env` pada akar proyek. File ini tersedia di lingkungan kerja lokal dan sengaja tidak masuk Git. Pada instalasi baru, buat `.env` lalu isi variabel yang tercantum di bagian [Variabel lingkungan](docs/ARCHITECTURE.md#12-variabel-lingkungan). Isi kredensial MySQL (`DB_NAME`, `DB_USER`, `DB_PASS`, `DB_HOST`, `DB_PORT`), buat `APP_KEY` dengan `php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"`, dan untuk production isi `ADMIN_PATH` dengan nilai acak, misalnya hasil `php -r "echo '/panel-' . bin2hex(random_bytes(8)), PHP_EOL;"`. Jangan commit `.env`.
-4. Jika database sudah pernah dibuat dari versi skema sebelumnya, pilih database tersebut di phpMyAdmin lalu jalankan sekali file [`database/optimize_existing.sql`](database/optimize_existing.sql). Untuk database baru, indeks optimal sudah termasuk di `pfp.sql`.
+4. `pfp.sql` khusus untuk database baru yang masih kosong. Jangan impor ulang file ini ke database yang sudah berisi data; database lama memerlukan migrasi upgrade yang sesuai dengan versinya.
 5. Dari PowerShell Laragon di root proyek, jalankan:
 
 ```powershell

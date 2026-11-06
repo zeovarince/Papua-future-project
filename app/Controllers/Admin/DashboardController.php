@@ -23,15 +23,6 @@ final class DashboardController
         $adminName = (string) ($admin['name'] ?? 'Admin');
         $db = Database::connection();
 
-        // 1. Sapaan sesuai jam lokal pengguna
-        $hour = (int) date('G');
-        $greeting = match (true) {
-            $hour >= 4 && $hour < 11 => 'Selamat pagi',
-            $hour >= 11 && $hour < 15 => 'Selamat siang',
-            $hour >= 15 && $hour < 18 => 'Selamat sore',
-            default => 'Selamat malam',
-        };
-
         // 2. Metrik utama (Section 5.1)
         $newApplicationsCount = Application::countNew();
         $unreadMessagesCount = ContactMessage::unreadCount();
@@ -206,8 +197,8 @@ final class DashboardController
         };
 
         return View::render('admin/dashboard/index', [
-            'title' => "{$greeting}, {$adminName}",
-            'subtitle' => 'Ringkasan aktivitas Papua Future Project.',
+            'title' => "Selamat datang kembali, {$adminName}",
+            'subtitle' => 'Semoga harimu menyenangkan.',
             'page' => 'dashboard',
             'admin' => $admin,
             'breadcrumb' => ['Admin', 'Ringkasan'],

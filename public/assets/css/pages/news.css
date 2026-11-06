@@ -384,3 +384,74 @@ html { scroll-behavior: smooth; }
       .news-grid  { grid-template-columns: 1fr; }
       .feat-title { font-size: 22px; }
     }
+
+    .news-archive-hero > p:first-child { color:rgba(255,255,255,.78); font-size:14px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; margin-bottom:20px; }
+    .news-archive-hero h1 { color:#fff; font-size:clamp(42px,6vw,76px); font-weight:800; line-height:1.08; margin:0 0 18px; }
+    .news-archive-hero > p:last-child { max-width:720px; margin:0 auto; color:rgba(255,255,255,.86); font-size:clamp(16px,2vw,21px); line-height:1.7; }
+    .news-recognition-title { color:#1a1f2e; font-family:'Plus Jakarta Sans',sans-serif; font-size:18px; font-weight:700; margin:0 0 20px; }
+    .news-recognition-section .media-item { margin-bottom:16px; }
+    .news-recognition-section .media-item p { color:#6b7280; line-height:1.6; margin:10px 0; }
+    .news-recognition-section .media-item h4 { margin-top:14px; }
+    .news-recognition-section .award-item h4 { margin:0 0 6px; color:#1a1f2e; font-size:16px; }
+    .news-recognition-section .award-item p { margin:0 0 10px; color:#6b7280; line-height:1.6; }
+    .news-recognition-section .award-icon-wrap { font-size:24px; }
+    .news-featured-section .pfp-divider { margin-bottom:30px; }
+    .news-list-section .news-grid { margin-top:36px; }
+
+    /* No gradient fill for missing documentation; uploaded photos take the full square frame. */
+    .hero-bg {
+      background-image:url('../../img/hero/herobanner.png');
+      background-color:#26323b;
+      background-size:cover;
+      background-position:center;
+      isolation:isolate;
+    }
+    .hero-bg::before { content:''; position:absolute; inset:0; z-index:0; background:rgba(11,20,28,.58); }
+    .hero-bg > :not(.wave-divider) { position:relative; z-index:1; }
+    .hero-bg .wave-divider { z-index:1; }
+    .news-featured-section .featured-card { display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); max-width:none; margin:28px 0 0; border-radius:24px; box-shadow:0 12px 36px rgba(27,48,66,.08); }
+    .news-featured-section .featured-card:hover { transform:translateY(-3px); box-shadow:0 18px 42px rgba(27,48,66,.12); }
+    .news-featured-section .featured-photo { height:auto; min-height:390px; aspect-ratio:auto; background:#e9edef; }
+    .dynamic-news-photo { background:#e9edef; }
+    .news-list-section .news-img { height:auto; aspect-ratio:1 / 1; background:#e9edef; }
+    .news-card { border-radius:4px; box-shadow:none; transition:border-color .18s ease; }
+    .news-card:hover { transform:none; box-shadow:none; border-color:#87939b; }
+    .news-card:hover .news-img-placeholder { transform:none; }
+    .badge { border-radius:3px; background:#eef1f3; color:#34414a; }
+    .news-img .badge, .featured-photo .badge { top:10px; left:10px; }
+    .photo-pending, .featured-photo-caption { color:#65737d; font-size:13px; font-weight:500; text-align:center; }
+    .featured-photo-caption { position:relative; }
+    .news-recognition-section { background:#f3f4f4; }
+    .award-media-grid { align-items:start; }
+    .award-item, .media-item { border:1px solid #d9dfe2; border-left:1px solid #d9dfe2; border-radius:4px; box-shadow:none; background:#fff; }
+    .award-item { padding:18px; gap:18px; }
+    .award-logo { width:96px; min-width:96px; min-height:76px; display:grid; place-items:center; border:1px solid #e1e5e7; background:#fff; padding:8px; }
+    .award-logo img { display:block; width:100%; height:72px; object-fit:contain; }
+    .award-logo span { color:#747f86; font-size:11px; text-align:center; }
+    .recognition-copy h4 { margin:0 0 7px; }
+    .recognition-copy p { margin:0 0 10px; color:#616d74; line-height:1.6; }
+    .recognition-empty { color:#67737a; padding:16px 0; border-top:1px solid #d9dfe2; }
+    .media-header { align-items:center; }
+    .media-source { display:flex; align-items:center; gap:12px; min-width:0; }
+    .media-source img { width:52px; height:42px; object-fit:contain; }
+    .media-name { border-radius:0; background:none; padding:0; color:#26323a; font-weight:700; }
+    .media-date { color:#68747b; font-size:12px; }
+    .news-recognition-title { border-bottom:1px solid #d9dfe2; padding-bottom:12px; }
+    .media-link { color:#315c78; }
+    @media(max-width:767.98px) {
+      .news-featured-section .featured-card { grid-template-columns:1fr; }
+      .news-featured-section .featured-photo { height:280px; min-height:0; max-height:none; }
+      .news-featured-section .featured-body { padding:24px; }
+      .award-media-grid { grid-template-columns:1fr; gap:28px; }
+      .award-item { align-items:flex-start; }
+      .award-logo { width:74px; min-width:74px; min-height:64px; }
+      .award-logo img { height:56px; }
+    }
+
+    .news-featured-section .featured-body { padding:clamp(26px,4vw,48px); }
+    body[data-page="news"] .nav-cta { border-radius:999px; box-shadow:0 4px 12px rgba(0,0,0,.15); }
+    @media(max-width:767.98px) {
+      .news-featured-section .featured-card { grid-template-columns:1fr; }
+      .news-featured-section .featured-photo { height:280px; min-height:0; }
+      .news-featured-section .featured-body { padding:24px; }
+    }

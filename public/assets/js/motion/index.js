@@ -50,8 +50,11 @@ async function enableMotion() {
     const page = document.body.dataset.page;
 
     const moduleLoaders = [];
-    if (document.querySelector('.hero-bg, .dynamic-article-heading')) {
+    if (document.querySelector('.hero-bg, [data-home-hero], .dynamic-article-heading')) {
       moduleLoaders.push(async () => (await import('./hero-intro.js')).initHeroIntro({ gsap, page }));
+    }
+    if (page === 'home' && document.querySelector('[data-home-hero]')) {
+      moduleLoaders.push(async () => (await import('./home-hero.js')).initHomeHero({ gsap }));
     }
     if (page === 'home' && document.querySelector('[data-count]')) {
       moduleLoaders.push(async () => (await import('./count-up.js')).initCountUp({ gsap }));

@@ -395,3 +395,59 @@ html { scroll-behavior: smooth; }
       .masonry-grid    { column-count: 1; }
       .testimoni-card  { padding: 32px 24px; }
     }
+
+    .program-detail-hero-copy { width:min(900px,100%); position:relative; z-index:1; padding:0 24px; }
+    .detail-breadcrumb { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-bottom:20px; color:rgba(255,255,255,.72); font-size:13px; }
+    .detail-breadcrumb a { color:#fff; text-decoration:none; }
+    .detail-breadcrumb a:hover { color:#40b8fd; }
+    .program-detail-hero-copy h1 { max-width:900px; margin:12px auto 18px; color:#fff; font-size:clamp(34px,5vw,58px); font-weight:800; line-height:1.1; }
+    .program-detail-hero-copy > p { max-width:700px; margin:0 auto; color:rgba(255,255,255,.78); font-size:14px; line-height:1.7; }
+    .program-detail-category { margin:0; }
+    .program-detail-summary { font-size:19px !important; font-weight:600; }
+    .program-detail-cover { display:block; width:100%; max-height:480px; margin:24px 0 28px; border-radius:18px; object-fit:cover; }
+    .program-detail-subtitle { margin:8px 0 18px; color:#1a1f2e; font-size:22px; font-weight:800; }
+    .program-detail-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:18px; }
+    .program-detail-facts > div { display:flex; flex-direction:column; gap:4px; padding:16px; border-radius:12px; background:#f0f7ff; }
+    .program-detail-facts span { color:#6b7280; font-size:12px; }
+    .program-detail-facts strong { color:#1a1f2e; font-size:15px; }
+    .mitra-list { padding:0; list-style:none; }
+    .mitra-list .mitra-item { margin:0; }
+    .program-detail-gallery-section .masonry-item { display:block; }
+    .program-detail-return { padding-top:36px; padding-bottom:50px; }
+    @media(max-width:767.98px) {
+      .program-detail-hero-copy h1 { font-size:clamp(32px,9vw,46px); }
+      .program-detail-hero-copy > p { font-size:15px; }
+      .program-detail-facts { grid-template-columns:1fr; }
+    }
+
+    body[data-page="program-detail"] .program-detail-hero {
+      min-height:50vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      isolation:isolate;
+      overflow:hidden;
+      padding:112px 0 70px;
+      background-image:url('../../img/hero/herobanner.png');
+      background-color:#26323b;
+      background-size:cover;
+      background-position:center;
+    }
+    body[data-page="program-detail"] .program-detail-hero::before { content:''; position:absolute; inset:0; z-index:0; background:rgba(11,20,28,.64); }
+    .program-detail-hero-copy { position:relative; z-index:1; }
+    .detail-breadcrumb { color:rgba(255,255,255,.82); }
+    .detail-breadcrumb a { color:#fff; }
+    .program-detail-category, .sidebar-prog-link { border-radius:3px; }
+    .program-detail-cover { aspect-ratio:1 / 1; max-height:620px; border-radius:4px; object-fit:cover; }
+    .program-detail-facts > div { border-radius:3px; background:#f1f3f4; }
+    .kegiatan-list li { border-radius:0; }
+    .sidebar-info, .sidebar-programs, .sidebar-sticky .btn-relawan { border-radius:4px; }
+    .sidebar-sticky .btn-relawan, .program-detail-return .prog-link { border-radius:3px; box-shadow:none; }
+    .program-detail-gallery-section .masonry-item { border-radius:3px; }
+    body[data-page="program-detail"] .nav-cta { border-radius:4px; box-shadow:0 4px 12px rgba(0,0,0,.15); }
+    @media(max-width:767.98px) {
+      body[data-page="program-detail"] .program-detail-hero { min-height:56vh; }
+      .program-detail-cover { max-height:none; }
+    }

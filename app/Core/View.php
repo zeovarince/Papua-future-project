@@ -21,6 +21,9 @@ final class View
         if ($layout === 'admin') {
             $data['admin'] ??= Session::get('admin', []);
         }
+        if ($layout === 'public') {
+            $data['seo'] = Seo::forPage($data);
+        }
         $__httpStatus = $status;
         unset($status);
         extract($data, EXTR_SKIP);

@@ -9,8 +9,9 @@ use App\Core\Logger;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\View;
-use App\Models\Batch;
+use App\Models\ApplicationFormSetting;
 use App\Models\ApplicationQuestion;
+use App\Models\Batch;
 use App\Services\ApplicationService;
 use App\Services\RateLimiter;
 use App\Validators\JoinApplicationValidator;
@@ -22,30 +23,91 @@ final class JoinController
 {
     public function index(): Response
     {
-        $oldValue = Flash::get('old', []);
-        $old = is_array($oldValue) ? $oldValue : [];
-        $oldBatchId = filter_var($old['batch_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-        $oldBatch = $oldBatchId === false ? null : Batch::find((int) $oldBatchId);
+        $types = [];
+        foreach (['internship' => 'INTERN', 'relawan' => 'VOLUNTEER'] as $slug => $type) {
+            $isActive = ApplicationFormSetting::isActive($type);
+            $batches = Batch::openByType($type);
+            $types[$slug] = [
+                'type' => $type,
+                'slug' => $slug,
+                'label' => $type === 'INTERN' ? 'Internship' : 'Relawan',
+                'is_active' => $isActive,
+                'batches' => $batches,
+                'is_open' => $isActive && $batches !== [],
+            ];
+        }
+
         return View::render('public/join/index', [
             'title' => 'Bergabung — Papua Future Project',
             'page' => 'join',
             'stylesheet' => 'css/pages/join.css',
-            'openInternBatches' => Batch::openByType('INTERN'),
-            'openVolunteerBatches' => Batch::openByType('VOLUNTEER'),
-            'questionsByType' => [
-                'INTERN' => ApplicationQuestion::activeByType('INTERN'),
-                'VOLUNTEER' => ApplicationQuestion::activeByType('VOLUNTEER'),
-            ],
-            'oldBatchType' => is_array($oldBatch) ? (string) $oldBatch['batch_type'] : null,
-            'script' => 'js/pages/join.js',
-            'errors' => Flash::get('errors', []),
-            'old' => $old,
+            'types' => $types,
             'flashError' => Flash::get('error'),
         ]);
     }
 
-    public function store(Request $request): Response
+    public function form(string $typeSlug, ?int $batchId = null): Response
     {
+        $type = $this->type($typeSlug);
+        if ($type === null) {
+            return View::render('public/errors/404', [
+                'title' => 'Halaman tidak ditemukan',
+                'page' => 'not-found',
+            ], 'public', 404);
+        }
+
+        $typeLabel = $type === 'INTERN' ? 'Internship' : 'Relawan';
+        $openBatches = Batch::openByType($type);
+        if ($batchId === null && count($openBatches) === 1) {
+            return Response::redirect('/bergabung/' . $typeSlug . '/' . (int) $openBatches[0]['id']);
+        }
+        if ($batchId === null && count($openBatches) > 1) {
+            Flash::set('error', 'Pilih batch yang ingin kamu ikuti dari halaman Bergabung.');
+            return Response::redirect('/bergabung#join-paths');
+        }
+        $batch = $batchId === null ? null : Batch::find($batchId);
+        if ($batch !== null && $batch['batch_type'] !== $type) {
+            return View::render('public/errors/404', [
+                'title' => 'Halaman tidak ditemukan',
+                'page' => 'not-found',
+            ], 'public', 404);
+        }
+        $old = Flash::get('old', []);
+        return View::render('public/join/form', [
+            'title' => 'Pendaftaran ' . $typeLabel . ' — Papua Future Project',
+            'page' => 'join-form',
+            'stylesheet' => 'css/pages/join.css',
+            'applicationType' => $type,
+            'typeSlug' => $typeSlug,
+            'typeLabel' => $typeLabel,
+            'isFormActive' => ApplicationFormSetting::isActive($type),
+            'batch' => $batch,
+            'questions' => ApplicationQuestion::activeByType($type),
+            'errors' => Flash::get('errors', []),
+            'old' => is_array($old) ? $old : [],
+            'flashError' => Flash::get('error'),
+        ]);
+    }
+
+    public function store(Request $request, string $typeSlug, ?int $batchId = null): Response
+    {
+        $type = $this->type($typeSlug);
+        if ($type === null) {
+            return Response::redirect('/bergabung');
+        }
+
+        if ($batchId === null) {
+            $postedBatchId = filter_var($request->post('batch_id'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+            $batchId = $postedBatchId === false ? null : (int) $postedBatchId;
+        }
+        $batch = $batchId === null ? null : Batch::find($batchId);
+        $validBatch = $batch !== null && $batch['batch_type'] === $type && (int) $batch['is_open'] === 1;
+        $formUrl = $validBatch ? '/bergabung/' . $typeSlug . '/' . $batchId . '#form-daftar' : '/bergabung#join-paths';
+        if (!ApplicationFormSetting::isActive($type) || !$validBatch) {
+            Flash::set('error', 'Batch pendaftaran tidak tersedia atau pendaftarannya sudah ditutup. Pilih batch yang masih dibuka.');
+            return Response::redirect($formUrl);
+        }
+
         $website = $request->post('website', '');
         if (is_scalar($website) && trim((string) $website) !== '') {
             Flash::set('application_submitted', true);
@@ -57,32 +119,52 @@ final class JoinController
         if ($limiter->isLimited('join', $identifier, 5, 3600)) {
             Flash::set('error', 'Batas pengiriman pendaftaran tercapai. Silakan coba lagi nanti.');
             Flash::set('old', $request->post());
-            return Response::redirect('/bergabung#form-daftar');
+            return Response::redirect($formUrl);
         }
         $limiter->hit('join', $identifier);
 
         [$values, $errors] = JoinApplicationValidator::validate(
-            $request->post(),
+            array_replace($request->post(), ['batch_id' => $batchId]),
             $request->file('photo'),
             $request->file('cv')
         );
+
+        $batchId = filter_var($values['batch_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        if ($batchId !== false) {
+            $batch = Batch::find((int) $batchId);
+            if ($batch !== null && $batch['batch_type'] !== $type) {
+                $errors['batch_id'] = 'Batch yang dipilih bukan untuk pendaftaran ' . ($type === 'INTERN' ? 'Internship.' : 'Relawan.');
+            }
+        }
+
         if ($errors !== []) {
             Flash::set('old', $values);
             Flash::set('errors', $errors);
             Flash::set('error', 'Periksa kembali data dan berkas pendaftaran.');
-            return Response::redirect('/bergabung#form-daftar');
+            return Response::redirect($formUrl);
         }
 
         try {
-            (new ApplicationService())->submit($values, $request->file('photo'), $request->file('cv'));
+            (new ApplicationService())->submit(
+                $values,
+                !empty($values['photo_enabled']) ? $request->file('photo') : null,
+                !empty($values['cv_enabled']) ? $request->file('cv') : null
+            );
             Flash::set('application_submitted', true);
             return Response::redirect('/bergabung/berhasil');
         } catch (PDOException $exception) {
             if ((int) ($exception->errorInfo[1] ?? 0) === 1062) {
-                Flash::set('errors', ['email' => 'Email ini sudah digunakan untuk mendaftar pada batch tersebut.']);
+                $emailErrorKey = 'email';
+                foreach (ApplicationQuestion::activeByType($type) as $question) {
+                    if (($question['field_key'] ?? null) === 'email') {
+                        $emailErrorKey = 'question_answers_' . (int) $question['id'];
+                        break;
+                    }
+                }
+                Flash::set('errors', [$emailErrorKey => 'Email ini sudah digunakan untuk mendaftar pada batch tersebut.']);
                 Flash::set('old', $values);
                 Flash::set('error', 'Email tersebut sudah terdaftar pada batch yang dipilih.');
-                return Response::redirect('/bergabung#form-daftar');
+                return Response::redirect($formUrl);
             }
             Logger::error($exception);
         } catch (RuntimeException $exception) {
@@ -91,7 +173,7 @@ final class JoinController
                 Flash::set('errors', ['batch_id' => $exception->getMessage()]);
                 Flash::set('old', $values);
                 Flash::set('error', 'Batch yang dipilih sudah ditutup saat pendaftaran dikirim.');
-                return Response::redirect('/bergabung#form-daftar');
+                return Response::redirect($formUrl);
             }
             Logger::error($exception);
         } catch (Throwable $exception) {
@@ -100,7 +182,7 @@ final class JoinController
 
         Flash::set('old', $values);
         Flash::set('error', 'Pendaftaran belum berhasil disimpan. Coba lagi atau hubungi tim Papua Future Project.');
-        return Response::redirect('/bergabung#form-daftar');
+        return Response::redirect($formUrl);
     }
 
     public function success(): Response
@@ -113,5 +195,14 @@ final class JoinController
             'page' => 'join-success',
             'stylesheet' => 'css/pages/join.css',
         ]);
+    }
+
+    private function type(string $slug): ?string
+    {
+        return match ($slug) {
+            'internship' => 'INTERN',
+            'relawan' => 'VOLUNTEER',
+            default => null,
+        };
     }
 }

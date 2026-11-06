@@ -91,17 +91,17 @@ final class Application
                 'occupation_status' => $values['occupation_status'],
                 'university' => $values['university'],
                 'duration' => $values['duration'],
-                'interest_areas' => json_encode($values['interest_areas'], JSON_THROW_ON_ERROR),
+                'interest_areas' => $values['interest_areas'] === null ? null : json_encode($values['interest_areas'], JSON_THROW_ON_ERROR),
                 'referral_source' => $values['referral_source'],
                 'motivation' => $values['motivation'],
                 'special_skills' => $values['special_skills'],
-                'photo_path' => $files['photo_path'],
-                'cv_path' => $files['cv_path'],
+                'photo_path' => $files['photo_path'] ?? null,
+                'cv_path' => $files['cv_path'] ?? null,
             ]);
             $id = (int) $pdo->lastInsertId();
 
             $questionStatement = $pdo->prepare(
-                'SELECT id, question, field_type, is_required FROM application_questions '
+                'SELECT id, question, field_type, is_required, field_key, is_system FROM application_questions '
                 . 'WHERE application_type = :application_type AND is_active = 1 ORDER BY sort_order, id FOR UPDATE'
             );
             $questionStatement->execute(['application_type' => $batchRow['batch_type']]);
@@ -111,18 +111,29 @@ final class Application
                 . 'VALUES (:application_id, :question_id, :question_label, :answer)'
             );
             $submittedAnswers = is_array($values['custom_answers'] ?? null) ? $values['custom_answers'] : [];
+            $systemAnswers = is_array($values['question_answers'] ?? null) ? $values['question_answers'] : [];
             foreach ($questions as $question) {
                 $questionId = (int) $question['id'];
-                $raw = $submittedAnswers[$questionId] ?? '';
-                if (is_array($raw)) {
-                    $raw = implode(', ', array_values(array_filter(array_map('trim', $raw), static fn($v) => $v !== '')));
+                $fieldKey = (string) ($question['field_key'] ?? '');
+                $isUpload = in_array($fieldKey, ['photo', 'cv'], true);
+                if ($isUpload) {
+                    // Keep the question label snapshot; the file itself is exposed
+                    // through the protected photo/CV endpoints, not this answer table.
+                    $answer = '';
+                    if ((int) $question['is_required'] === 1 && empty($files[$fieldKey . '_path'])) {
+                        throw new RuntimeException('Pertanyaan formulir berubah. Unggah berkas yang diminta lalu kirim kembali.');
+                    }
+                } else {
+                    $raw = $fieldKey !== ''
+                        ? ($systemAnswers[$questionId] ?? '')
+                        : ($submittedAnswers[$questionId] ?? '');
+                    if (is_array($raw)) {
+                        $raw = implode(', ', array_values(array_filter(array_map('trim', $raw), static fn($v) => $v !== '')));
+                    }
+                    $answer = trim((string) $raw);
                 }
-                $answer = trim((string) $raw);
-                if ($answer === '' && (int) $question['is_required'] === 1) {
+                if (!$isUpload && $answer === '' && (int) $question['is_required'] === 1) {
                     throw new RuntimeException('Pertanyaan formulir berubah. Muat ulang halaman dan isi kembali jawaban yang diminta.');
-                }
-                if ($answer === '') {
-                    continue;
                 }
                 $maxLength = $question['field_type'] === 'TEXT' ? 200 : 2000;
                 if (mb_strlen($answer) > $maxLength) {
@@ -195,19 +206,26 @@ final class Application
             $parameters[$key] = $id;
         }
         $statement = Database::connection()->prepare(
-            'SELECT application_id, question_label, answer FROM application_answers '
-            . 'WHERE application_id IN (' . implode(', ', $placeholders) . ') ORDER BY id ASC'
+            'SELECT aa.application_id, aa.question_label, aa.answer, aq.field_key, aq.is_system '
+            . 'FROM application_answers aa LEFT JOIN application_questions aq ON aq.id = aa.question_id '
+            . 'WHERE aa.application_id IN (' . implode(', ', $placeholders) . ') ORDER BY aa.id ASC'
         );
         $statement->execute($parameters);
         $answersByApplication = [];
         foreach ($statement->fetchAll(PDO::FETCH_ASSOC) as $answer) {
-            $answersByApplication[(int) $answer['application_id']][] = [
+            $answerRow = [
                 'question' => (string) $answer['question_label'],
                 'answer' => (string) $answer['answer'],
+                'field_key' => $answer['field_key'] === null ? null : (string) $answer['field_key'],
+                'is_system' => (int) ($answer['is_system'] ?? 0) === 1,
             ];
+            $answersByApplication[(int) $answer['application_id']][] = $answerRow;
         }
         foreach ($applications as &$application) {
-            $application['custom_answers'] = $answersByApplication[(int) $application['id']] ?? [];
+            $answers = $answersByApplication[(int) $application['id']] ?? [];
+            $application['form_answers'] = $answers;
+            $application['system_answers'] = array_values(array_filter($answers, static fn (array $answer): bool => $answer['is_system'] && !in_array($answer['field_key'], ['full_name', 'email', 'whatsapp'], true)));
+            $application['custom_answers'] = array_values(array_filter($answers, static fn (array $answer): bool => !$answer['is_system']));
         }
         unset($application);
         return $applications;

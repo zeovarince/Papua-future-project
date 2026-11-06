@@ -88,6 +88,7 @@ Tidak perlu menyembunyikan elemen dengan CSS. Konten dirender terlihat normal. M
 | Hero | Teks "Papua Future Project" | Fade in + slide up | Otomatis saat load | delay 0.2s, `y: MOTION.distance.sm` |
 | Hero | "Every Child Matters." | Fade in + slide up | Otomatis | delay 0.4s, `y: MOTION.distance.md` |
 | Hero | Subjudul | Fade in | Otomatis | delay 0.6s |
+| Hero | Foto dan keterangan | Crossfade; foto masuk zoom-in, foto sebelumnya zoom-out | Otomatis tiap 3,5 detik atau saat indikator dipilih | `home-hero.js`, hormati reduced motion |
 | Sekilas PFP | Foto kiri | Fade in + slide right | ScrollTrigger `top: 80%` | `x: -MOTION.distance.md` |
 | Sekilas PFP | Teks kanan (tag, judul, divider, body) | Stagger fade in + slide up | ScrollTrigger `top: 80%` | stagger `MOTION.stagger.normal` |
 | Founder | Foto | Fade in + scale (0.95 ke 1) | ScrollTrigger `top: 84%` | duration `MOTION.duration.normal` |

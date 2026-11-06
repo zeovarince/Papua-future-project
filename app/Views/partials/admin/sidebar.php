@@ -149,6 +149,14 @@ $adminInitial = mb_strtoupper(mb_substr($adminName, 0, 1));
                     </div>
                 </div>
                 <div class="flyout-profile-actions">
+                    <a href="<?= url('/admin/akun') ?>" class="flyout-action-btn" role="menuitem">
+                        <?= icon('users', '', 18) ?>
+                        <span>Pengelola Admin</span>
+                    </a>
+                    <a href="<?= url('/admin/akun/password') ?>" class="flyout-action-btn" role="menuitem">
+                        <?= icon('lock', '', 18) ?>
+                        <span>Ubah Kata Sandi</span>
+                    </a>
                     <a href="<?= url('/') ?>" target="_blank" rel="noopener noreferrer" class="flyout-action-btn" role="menuitem">
                         <?= icon('external-link', '', 18) ?>
                         <span>Lihat Website</span>

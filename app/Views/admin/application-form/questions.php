@@ -12,6 +12,10 @@ $primaryAction = [
 $totalQuestions = count($questions);
 ?>
 
+<p style="margin: 0 0 16px; color: var(--admin-text-muted);">
+    Pengaturan Internship dan Relawan terpisah. Edit tiap baris untuk mengubah teks pertanyaan, urutan, tampil/sembunyi, dan wajib/opsional. Pertanyaan bawaan seperti nama, email, WhatsApp, foto, CV, dan portofolio juga ada di daftar ini.
+</p>
+
 <!-- Tab Switcher between Internship and Relawan -->
 <div style="display: flex; gap: 8px; margin-bottom: 20px;">
     <a href="<?= url('/admin/pendaftaran/internship/pertanyaan') ?>" class="btn <?= $type === 'INTERN' ? 'btn-primary' : 'btn-secondary' ?> btn-sm">
@@ -27,7 +31,7 @@ $totalQuestions = count($questions);
 <div class="card">
     <div class="card-header">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <h2 class="card-title">Daftar Pertanyaan Khusus <?= e($typeLabel) ?></h2>
+            <h2 class="card-title">Daftar Pertanyaan Formulir <?= e($typeLabel) ?></h2>
             <span class="badge-pill"><?= $totalQuestions ?> pertanyaan</span>
         </div>
         <div class="card-filter-bar">
@@ -65,7 +69,10 @@ $totalQuestions = count($questions);
                         <?php $isActive = ((int) ($q['is_active'] ?? 0) === 1); ?>
                         <tr>
                             <td>
-                                <strong><?= e($q['question']) ?></strong>
+                                    <strong><?= e($q['question']) ?></strong>
+                                    <?php if ((int) ($q['is_system'] ?? 0) === 1): ?>
+                                    <small style="display: block; margin-top: 4px; color: var(--admin-text-muted);">Field bawaan · dapat diatur dari Admin</small>
+                                    <?php endif; ?>
                             </td>
                             <td>
                                 <?php
@@ -75,7 +82,13 @@ $totalQuestions = count($questions);
                                         'RADIO' => 'Pilihan Ganda',
                                         'CHECKBOX' => 'Kotak Centang',
                                         'SELECT' => 'Dropdown',
-                                        'FILE' => 'Unggah Berkas',
+                                        'FILE' => 'Tautan Website',
+                                        'EMAIL' => 'Email',
+                                        'TEL' => 'Nomor Telepon',
+                                        'DATE' => 'Tanggal',
+                                        'URL' => 'Tautan Website',
+                                        'IMAGE' => 'Unggah Foto',
+                                        'PDF' => 'Unggah PDF',
                                     ];
                                 ?>
                                 <span class="badge-pill"><?= e($typeBadgeLabels[$q['field_type']] ?? $q['field_type']) ?></span>
@@ -99,13 +112,15 @@ $totalQuestions = count($questions);
                                         <?= icon('edit', '', 13) ?>
                                         <span>Ubah</span>
                                     </a>
-                                    <form method="post" action="<?= url('/admin/pendaftaran/' . $typeSlug . '/pertanyaan/' . (int) $q['id'] . '/hapus') ?>" data-confirm="Hapus pertanyaan ini? Jawaban pada pendaftar lama tetap tersimpan.">
-                                        <?= csrf_field() ?>
-                                        <button type="submit" class="btn btn-soft-danger btn-xs">
-                                            <?= icon('trash-2', '', 13) ?>
-                                            <span>Hapus</span>
-                                        </button>
-                                    </form>
+                                    <?php if ((int) ($q['is_system'] ?? 0) !== 1): ?>
+                                        <form method="post" action="<?= url('/admin/pendaftaran/' . $typeSlug . '/pertanyaan/' . (int) $q['id'] . '/hapus') ?>" data-confirm="Hapus pertanyaan ini? Jawaban pada pendaftar lama tetap tersimpan.">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="btn btn-soft-danger btn-xs">
+                                                <?= icon('trash-2', '', 13) ?>
+                                                <span>Hapus</span>
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
@@ -114,7 +129,7 @@ $totalQuestions = count($questions);
             </table>
         </div>
         <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 12px; color: var(--admin-text-muted);">Menampilkan <?= $totalQuestions ?> pertanyaan tambahan</span>
+            <span style="font-size: 12px; color: var(--admin-text-muted);">Menampilkan <?= $totalQuestions ?> pertanyaan formulir, termasuk field bawaan</span>
         </div>
     <?php endif; ?>
 </div>

@@ -42,7 +42,7 @@ final class ApplicationQuestion
     public static function countByType(string $type): int
     {
         $statement = Database::connection()->prepare(
-            'SELECT COUNT(*) FROM application_questions WHERE application_type = :application_type'
+            'SELECT COUNT(*) FROM application_questions WHERE application_type = :application_type AND is_system = 0'
         );
         $statement->execute(['application_type' => $type]);
         return (int) $statement->fetchColumn();
@@ -82,7 +82,7 @@ final class ApplicationQuestion
     public static function delete(int $id, string $type): bool
     {
         $statement = Database::connection()->prepare(
-            'DELETE FROM application_questions WHERE id = :id AND application_type = :application_type'
+            'DELETE FROM application_questions WHERE id = :id AND application_type = :application_type AND is_system = 0'
         );
         $statement->execute(['id' => $id, 'application_type' => $type]);
         return $statement->rowCount() > 0;

@@ -62,8 +62,12 @@ erDiagram
     int id PK
     int batch_id FK
     char file_token UK
-    varchar full_name
-    varchar email
+    varchar full_name "NULL jika tidak diaktifkan/diisi"
+    date birth_date "NULL jika tidak diaktifkan/diisi"
+    varchar email "NULL jika tidak diaktifkan/diisi"
+    varchar whatsapp "NULL jika tidak diaktifkan/diisi"
+    varchar photo_path "NULL jika upload foto opsional/tidak aktif"
+    varchar cv_path "NULL jika upload CV opsional/tidak aktif"
     enum status "NEW, REVIEWED, ACCEPTED, REJECTED"
   }
   application_form_settings {
@@ -73,8 +77,10 @@ erDiagram
   application_questions {
     int id PK
     enum application_type "INTERN atau VOLUNTEER"
+    varchar field_key "NULL untuk pertanyaan tambahan"
+    tinyint is_system
     varchar question
-    enum field_type "TEXT atau TEXTAREA"
+    enum field_type "TEXT, TEXTAREA, RADIO, CHECKBOX, SELECT, EMAIL, TEL, DATE, URL, IMAGE, PDF"
     tinyint is_required
     tinyint is_active
     int sort_order
@@ -141,7 +147,7 @@ Tabel berdiri sendiri (tanpa relasi):
 | `posts` ke `post_photos` | Satu berita punya nol sampai banyak foto. Satu foto milik satu berita. | `post_photos.post_id` | `CASCADE` | Sama seperti program. |
 | `batches` ke `team_members` | Satu batch punya nol sampai banyak anggota. Satu anggota milik nol atau satu batch. | `team_members.batch_id` (boleh `NULL`) | `RESTRICT` (ditolak bila masih ada anggota) | Anggota grup `CORE` tidak punya batch. Anggota `INTERN` dan `VOLUNTEER` wajib punya batch dengan tipe yang cocok. Dijaga di Validator dan Model. |
 | `batches` ke `applications` | Satu batch menerima nol sampai banyak pendaftar. Satu pendaftar milik satu batch. | `applications.batch_id` | `RESTRICT` | Email unik per batch. Pendaftaran hanya bisa dibuat bila `batches.is_open = 1`. |
-| `applications` ke `application_answers` | Satu pendaftar punya nol sampai banyak jawaban tambahan. | `application_answers.application_id` | `CASCADE` | Jawaban ikut dihapus jika data pendaftar dihapus. |
+| `applications` ke `application_answers` | Satu pendaftar punya nol sampai banyak jawaban formulir. | `application_answers.application_id` | `CASCADE` | Menyimpan snapshot jawaban seluruh field aktif, termasuk field bawaan dan jawaban opsional yang kosong. Jawaban ikut dihapus jika data pendaftar dihapus. |
 | `application_questions` ke `application_answers` | Satu pertanyaan dapat memiliki banyak jawaban. Satu jawaban terhubung ke nol atau satu definisi pertanyaan. | `application_answers.question_id` (nullable) | `SET NULL` | Teks pertanyaan disalin ke `question_label`, jadi jawaban lama tetap bisa dibaca setelah definisi pertanyaan dihapus. |
 
 ## 4. Ringkasan tabel
@@ -161,8 +167,8 @@ Tabel berdiri sendiri (tanpa relasi):
 | `contact_messages` | Pesan dari form kontak. | Kontak, admin Pesan masuk. |
 | `applications` | Data pendaftar relawan dan intern, termasuk jalur file foto dan CV. | Bergabung, admin Pendaftar, ekspor. |
 | `application_form_settings` | Sakelar aktif/nonaktif formulir Internship dan Relawan secara terpisah. | Bergabung, admin Form Pendaftaran. |
-| `application_questions` | Pertanyaan tambahan, jenis jawaban, kewajiban, status tampil, dan urutan per jenis formulir. | Bergabung, admin Form Pendaftaran. |
-| `application_answers` | Snapshot pertanyaan dan jawaban tambahan dari pendaftar. | Detail admin Pendaftar, ekspor. |
+| `application_questions` | Pertanyaan bawaan dan tambahan, jenis jawaban, kewajiban, status tampil, pilihan, dan urutan per jenis formulir. | Bergabung, admin Form Pendaftaran. |
+| `application_answers` | Snapshot label dan jawaban semua pertanyaan aktif dari pendaftar. | Detail admin Pendaftar, ekspor. |
 
 Tabel pendukung `schema_migrations` dibuat oleh `bin/migrate.php` dan tidak termasuk diagram.
 

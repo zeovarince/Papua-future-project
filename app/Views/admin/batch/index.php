@@ -12,6 +12,12 @@ $primaryAction = [
 $totalBatches = count($batches);
 ?>
 
+<div class="card" style="margin-bottom: 16px; padding: 16px 20px; background: #fafbfc;">
+    <p style="margin: 0; color: var(--admin-text-muted); font-size: 13px; line-height: 1.65;">
+        Toggle di tabel ini mengatur <strong>batch yang dipilih saja</strong>. Agar pendaftaran tampil di website, sakelar jenis formulirnya juga harus aktif di <a href="<?= url('/admin/pendaftaran') ?>" style="color: var(--admin-primary); font-weight: 600;">Form Pendaftaran</a>. Internship dan Relawan dapat dibuka bersamaan; tutup setiap batch saat masa pendaftarannya selesai.
+    </p>
+</div>
+
 <div class="card">
     <div class="card-header">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -50,8 +56,8 @@ $totalBatches = count($batches);
                         <th>Tipe</th>
                         <th>Anggota</th>
                         <th>Pendaftar</th>
-                        <th>Status</th>
-                        <th>Toggle Pendaftaran</th>
+                        <th>Status Batch</th>
+                        <th>Buka / Tutup Batch</th>
                         <th style="text-align: right;">Aksi</th>
                     </tr>
                 </thead>
@@ -59,7 +65,7 @@ $totalBatches = count($batches);
                     <?php foreach ($batches as $b): ?>
                         <?php
                             $isOpen = ((int) ($b['is_open'] ?? 0) === 1);
-                            $typeLabel = $b['batch_type'] === 'INTERN' ? 'Intern' : 'Volunteer';
+                            $typeLabel = $b['batch_type'] === 'INTERN' ? 'Internship' : 'Relawan';
                         ?>
                         <tr class="batch-row" data-type="<?= e($b['batch_type']) ?>">
                             <td>
@@ -83,7 +89,7 @@ $totalBatches = count($batches);
                             <td>
                                 <form method="post" action="<?= url('/admin/batch/' . (int) $b['id'] . '/toggle') ?>">
                                     <?= csrf_field() ?>
-                                    <label class="toggle-switch" title="<?= $isOpen ? 'Tutup pendaftaran' : 'Buka pendaftaran' ?>">
+                                    <label class="toggle-switch" title="<?= $isOpen ? 'Tutup batch ini untuk pendaftaran' : 'Buka batch ini untuk pendaftaran' ?>">
                                         <input type="checkbox" class="toggle-switch-input" <?= $isOpen ? 'checked' : '' ?> data-auto-submit>
                                         <span class="toggle-switch-track"></span>
                                         <span class="toggle-switch-label" style="font-size: 12px; font-weight: 500;">

@@ -5,11 +5,12 @@ use App\Core\Flash;use App\Core\Request;use App\Core\Response;use App\Core\Secur
 final class PostController
 {
     public function index(): Response { return View::render('admin/post/index',['title'=>'Berita & Kegiatan','page'=>'post','breadcrumb'=>['Admin','Berita & Kegiatan'],'posts'=>Post::adminList()],'admin'); }
-    public function create(): Response { return $this->form(null); }
+    public function create(Request $request): Response { return $this->form(null, (string) $request->query('category', 'ACTIVITY')); }
     public function edit(int $id): Response { $p=Post::find($id);return $p===null?Response::redirect('/admin/berita'):$this->form($p); }
-    private function form(?array $post): Response
+    private function form(?array $post, string $defaultCategory = 'ACTIVITY'): Response
     {
-        $defaults=$post??['category'=>'ACTIVITY','author_name'=>'Tim Papua Future Project','is_published'=>1,'published_at'=>date('Y-m-d H:i:s')];
+        $defaultCategory = in_array(strtoupper($defaultCategory), ['ACTIVITY', 'UPDATE', 'MEDIA', 'AWARD'], true) ? strtoupper($defaultCategory) : 'ACTIVITY';
+        $defaults=$post??['category'=>$defaultCategory,'author_name'=>'Tim Papua Future Project','is_published'=>1,'published_at'=>date('Y-m-d H:i:s')];
         return View::render('admin/post/form',['title'=>$post===null?'Tambah Berita':'Ubah Berita','page'=>'post','breadcrumb'=>['Admin','Berita & Kegiatan',$post===null?'Tambah':'Ubah'],'post'=>$post,'photos'=>$post===null?[]:Post::photos((int)$post['id']),'values'=>Flash::get('old',$defaults),'errors'=>Flash::get('errors',[])],'admin');
     }
     public function store(Request $r): Response { return $this->save($r,null); }

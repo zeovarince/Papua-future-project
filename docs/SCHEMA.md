@@ -28,7 +28,8 @@ Satu file SQL per berkas di `database/migrations/`. Urutan mengikuti urutan peng
 | `0008_create_applications.sql` | `applications` | 9 |
 | `0009_seed_initial_programs.sql` | Lima data awal program untuk instalasi migrasi | 5 |
 | `0010_seed_news_and_faqs.sql` | Konten awal berita, penghargaan, liputan media, dan FAQ | 6 dan 7 |
-| `0011_create_application_forms.sql` | Status formulir per jenis, pertanyaan khusus per jenis, dan jawaban pendaftar | Pendaftaran |
+| `0011_create_application_forms.sql` | Status formulir per jenis, pertanyaan bawaan/kustom per jenis, dan jawaban pendaftar | Pendaftaran |
+| `0012_expand_application_questions.sql` | Mendukung tipe jawaban pertanyaan tambahan dan kolom pilihan | Pendaftaran |
 
 ## 3. Tabel infrastruktur migrasi
 
@@ -290,20 +291,20 @@ CREATE TABLE applications (
   id                INT UNSIGNED NOT NULL AUTO_INCREMENT,
   batch_id          INT UNSIGNED NOT NULL,
   file_token        CHAR(32) NOT NULL,
-  full_name         VARCHAR(100) NOT NULL,
-  birth_date        DATE NOT NULL,
-  email             VARCHAR(190) NOT NULL,
-  whatsapp          VARCHAR(20) NOT NULL,
-  domicile          VARCHAR(120) NOT NULL,
-  occupation_status ENUM('STUDENT','FRESH_GRADUATE','EMPLOYEE','ENTREPRENEUR','OTHER') NOT NULL,
+  full_name         VARCHAR(100) NULL,
+  birth_date        DATE NULL,
+  email             VARCHAR(190) NULL,
+  whatsapp          VARCHAR(20) NULL,
+  domicile          VARCHAR(120) NULL,
+  occupation_status ENUM('STUDENT','FRESH_GRADUATE','EMPLOYEE','ENTREPRENEUR','OTHER') NULL,
   university        VARCHAR(120) NULL,
-  duration          ENUM('TWO_WEEKS','ONE_MONTH','FLEXIBLE') NOT NULL,
-  interest_areas    JSON NOT NULL,
-  referral_source   ENUM('INSTAGRAM','FRIEND','ONLINE_ARTICLE','EVENT','OTHER') NOT NULL,
-  motivation        TEXT NOT NULL,
+  duration          ENUM('TWO_WEEKS','ONE_MONTH','FLEXIBLE') NULL,
+  interest_areas    JSON NULL,
+  referral_source   ENUM('INSTAGRAM','FRIEND','ONLINE_ARTICLE','EVENT','OTHER') NULL,
+  motivation        TEXT NULL,
   special_skills    TEXT NULL,
-  photo_path        VARCHAR(255) NOT NULL,
-  cv_path           VARCHAR(255) NOT NULL,
+  photo_path        VARCHAR(255) NULL,
+  cv_path           VARCHAR(255) NULL,
   status            ENUM('NEW','REVIEWED','ACCEPTED','REJECTED') NOT NULL DEFAULT 'NEW',
   created_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -322,7 +323,7 @@ Catatan kolom `applications`:
 
 - `file_token`: 32 karakter heksadesimal acak yang dibuat server sebelum file ditulis. Dipakai sebagai nama folder file pendaftar, sehingga jalur file tidak bisa ditebak dan tidak bergantung pada `id` yang baru ada setelah `INSERT`.
 - `photo_path` dan `cv_path`: jalur relatif terhadap `STORAGE_DIR`, contoh `applications/{file_token}/photo.webp` dan `applications/{file_token}/cv.pdf`.
-- `university`: kosong untuk pendaftar non-mahasiswa. Wajib bila `occupation_status` adalah `STUDENT` atau `FRESH_GRADUATE`.
+- `university`: boleh kosong; status wajib dapat diatur Admin di pertanyaan formulir.
 - `interest_areas`: larik JSON berisi satu atau lebih dari `LITERACY`, `HEALTH`, `CREATIVE`, `MEDIA`, `OTHER`.
 - Tipe pendaftar (Intern atau Relawan) tidak disimpan di sini. Tipe diambil dari `batches.batch_type`.
 
@@ -344,14 +345,17 @@ SELECT 'VOLUNTEER', EXISTS(SELECT 1 FROM batches WHERE batch_type = 'VOLUNTEER' 
 CREATE TABLE application_questions (
   id               INT UNSIGNED NOT NULL AUTO_INCREMENT,
   application_type ENUM('INTERN','VOLUNTEER') NOT NULL,
+  field_key        VARCHAR(40) NULL,
+  is_system        TINYINT(1) NOT NULL DEFAULT 0,
   question         VARCHAR(250) NOT NULL,
-  field_type       ENUM('TEXT','TEXTAREA') NOT NULL DEFAULT 'TEXTAREA',
+  field_type       ENUM('TEXT','TEXTAREA','RADIO','CHECKBOX','SELECT','FILE','EMAIL','TEL','DATE','URL','IMAGE','PDF') NOT NULL DEFAULT 'TEXTAREA',
   is_required      TINYINT(1) NOT NULL DEFAULT 1,
   is_active        TINYINT(1) NOT NULL DEFAULT 1,
   sort_order       INT NOT NULL DEFAULT 0,
   created_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
+  UNIQUE KEY uq_application_questions_type_field (application_type, field_key),
   KEY idx_application_questions_type_active_order (application_type, is_active, sort_order, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -372,7 +376,9 @@ CREATE TABLE application_answers (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-`application_form_settings` memiliki satu baris untuk masing-masing jenis. Status ini menjadi sakelar utama yang terpisah dari `batches.is_open`; formulir bisa dikirim hanya ketika keduanya aktif. `application_questions` menyimpan pertanyaan tambahan untuk satu jenis formulir. `application_answers.question_label` menyimpan snapshot teks pertanyaan agar jawaban lama tetap bermakna setelah pertanyaan diubah atau dihapus.
+`application_form_settings` memiliki satu baris untuk masing-masing jenis. Status ini menjadi sakelar utama yang terpisah dari `batches.is_open`; formulir bisa dikirim hanya ketika keduanya aktif. `application_questions` menyimpan pertanyaan bawaan (`is_system = 1`) dan pertanyaan tambahan untuk satu jenis formulir. Admin dapat mengubah teks, urutan, status tampil, status wajib, serta pilihan. Jenis jawaban field bawaan tetap karena terhubung ke penyimpanan data khusus; pertanyaan baru dapat memilih tipe jawaban yang tersedia. Kolom identitas dan jalur file pada `applications` boleh `NULL` karena Admin dapat menyembunyikan atau menjadikannya opsional. `application_answers.question_label` menyimpan snapshot teks dan jawaban (termasuk jawaban kosong) agar detail dan ekspor lama tetap bermakna setelah pertanyaan diubah atau disembunyikan.
+
+`database/pfp.sql` sudah menyertakan struktur terbaru beserta seed pertanyaan bawaan untuk Internship dan Relawan. Gunakan file tersebut hanya untuk database baru yang kosong. Database yang sudah berisi data memerlukan migrasi upgrade yang sesuai dengan versi skemanya; jangan impor ulang `pfp.sql` karena file itu membuat keseluruhan tabel dari awal.
 
 ## 5. Strategi indeks untuk query
 

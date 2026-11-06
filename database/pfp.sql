@@ -1,8 +1,10 @@
--- Papua Future Project: complete MySQL schema
--- Import this file into an already-created, empty database using phpMyAdmin.
+-- Papua Future Project: one-file database setup for a NEW, empty database.
+-- Create the empty database in phpMyAdmin, select it, then import this file.
+-- Includes all CREATE TABLE statements, indexes, initial content, and default
+-- Internship/Relawan questions (name, email, WhatsApp, photo, CV, portfolio, etc.).
 -- Compatible with MySQL 8+ and MariaDB 10.6+.
 -- Source of truth: docs/SCHEMA.md and docs/ERD.md.
--- The schema_migrations rows mark migrations 0001 through 0011 as applied so bin/migrate.php
+-- The schema_migrations rows mark migrations 0001 through 0012 as applied so bin/migrate.php
 -- will not try to recreate these tables after this complete schema is imported.
 
 SET NAMES utf8mb4;
@@ -188,20 +190,20 @@ CREATE TABLE applications (
   id                INT UNSIGNED NOT NULL AUTO_INCREMENT,
   batch_id          INT UNSIGNED NOT NULL,
   file_token        CHAR(32) NOT NULL,
-  full_name         VARCHAR(100) NOT NULL,
-  birth_date        DATE NOT NULL,
-  email             VARCHAR(190) NOT NULL,
-  whatsapp          VARCHAR(20) NOT NULL,
-  domicile          VARCHAR(120) NOT NULL,
-  occupation_status ENUM('STUDENT','FRESH_GRADUATE','EMPLOYEE','ENTREPRENEUR','OTHER') NOT NULL,
+  full_name         VARCHAR(100) NULL,
+  birth_date        DATE NULL,
+  email             VARCHAR(190) NULL,
+  whatsapp          VARCHAR(20) NULL,
+  domicile          VARCHAR(120) NULL,
+  occupation_status ENUM('STUDENT','FRESH_GRADUATE','EMPLOYEE','ENTREPRENEUR','OTHER') NULL,
   university        VARCHAR(120) NULL,
-  duration          ENUM('TWO_WEEKS','ONE_MONTH','FLEXIBLE') NOT NULL,
-  interest_areas    JSON NOT NULL,
-  referral_source   ENUM('INSTAGRAM','FRIEND','ONLINE_ARTICLE','EVENT','OTHER') NOT NULL,
-  motivation        TEXT NOT NULL,
+  duration          ENUM('TWO_WEEKS','ONE_MONTH','FLEXIBLE') NULL,
+  interest_areas    JSON NULL,
+  referral_source   ENUM('INSTAGRAM','FRIEND','ONLINE_ARTICLE','EVENT','OTHER') NULL,
+  motivation        TEXT NULL,
   special_skills    TEXT NULL,
-  photo_path        VARCHAR(255) NOT NULL,
-  cv_path           VARCHAR(255) NOT NULL,
+  photo_path        VARCHAR(255) NULL,
+  cv_path           VARCHAR(255) NULL,
   status            ENUM('NEW','REVIEWED','ACCEPTED','REJECTED') NOT NULL DEFAULT 'NEW',
   created_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -228,8 +230,10 @@ INSERT INTO application_form_settings (application_type, is_active) VALUES
 CREATE TABLE application_questions (
   id               INT UNSIGNED NOT NULL AUTO_INCREMENT,
   application_type ENUM('INTERN','VOLUNTEER') NOT NULL,
+  field_key        VARCHAR(40) NULL,
+  is_system        TINYINT(1) NOT NULL DEFAULT 0,
   question         VARCHAR(250) NOT NULL,
-  field_type       ENUM('TEXT','TEXTAREA','RADIO','CHECKBOX','SELECT','FILE') NOT NULL DEFAULT 'TEXTAREA',
+  field_type       ENUM('TEXT','TEXTAREA','RADIO','CHECKBOX','SELECT','FILE','EMAIL','TEL','DATE','URL','IMAGE','PDF') NOT NULL DEFAULT 'TEXTAREA',
   options          TEXT NULL,
   is_required      TINYINT(1) NOT NULL DEFAULT 1,
   is_active        TINYINT(1) NOT NULL DEFAULT 1,
@@ -237,8 +241,43 @@ CREATE TABLE application_questions (
   created_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
+  UNIQUE KEY uq_application_questions_type_field (application_type, field_key),
   KEY idx_application_questions_type_active_order (application_type, is_active, sort_order, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO application_questions
+  (application_type, field_key, is_system, question, field_type, options, is_required, is_active, sort_order)
+VALUES
+  ('INTERN', 'full_name', 1, 'Nama lengkap', 'TEXT', NULL, 1, 1, 10),
+  ('INTERN', 'birth_date', 1, 'Tanggal lahir', 'DATE', NULL, 1, 1, 20),
+  ('INTERN', 'email', 1, 'Email aktif', 'EMAIL', NULL, 1, 1, 30),
+  ('INTERN', 'whatsapp', 1, 'Nomor WhatsApp', 'TEL', NULL, 1, 1, 40),
+  ('INTERN', 'domicile', 1, 'Domisili saat ini', 'TEXT', NULL, 1, 1, 50),
+  ('INTERN', 'occupation_status', 1, 'Status saat ini', 'SELECT', CONCAT('Mahasiswa', CHAR(10), 'Fresh Graduate', CHAR(10), 'Karyawan / Profesional', CHAR(10), 'Wiraswasta', CHAR(10), 'Lainnya'), 1, 1, 60),
+  ('INTERN', 'university', 1, 'Universitas atau instansi', 'TEXT', NULL, 0, 1, 70),
+  ('INTERN', 'duration', 1, 'Durasi kontribusi', 'SELECT', CONCAT('2 minggu', CHAR(10), '1 bulan', CHAR(10), 'Fleksibel'), 1, 1, 80),
+  ('INTERN', 'interest_areas', 1, 'Bidang yang ingin dikontribusikan', 'CHECKBOX', CONCAT('Literasi & Bimbingan Belajar', CHAR(10), 'Edukasi Kesehatan & Gizi', CHAR(10), 'Kegiatan Kreatif (seni, olahraga, permainan)', CHAR(10), 'Dokumentasi & Media', CHAR(10), 'Lainnya / Sesuai kebutuhan tim'), 1, 1, 90),
+  ('INTERN', 'referral_source', 1, 'Dari mana kamu tahu tentang PFP?', 'SELECT', CONCAT('Instagram @papuafutureproject', CHAR(10), 'Diajak teman / kenalan', CHAR(10), 'Artikel atau berita online', CHAR(10), 'Event / seminar / pameran', CHAR(10), 'Lainnya'), 1, 1, 100),
+  ('INTERN', 'motivation', 1, 'Kenapa kamu ingin bergabung dengan PFP?', 'TEXTAREA', NULL, 1, 1, 110),
+  ('INTERN', 'special_skills', 1, 'Keahlian khusus', 'TEXTAREA', NULL, 0, 1, 120),
+  ('INTERN', 'portfolio_url', 1, 'Tautan portfolio (opsional)', 'URL', NULL, 0, 1, 130),
+  ('INTERN', 'photo', 1, 'Foto pendaftar', 'IMAGE', NULL, 1, 1, 140),
+  ('INTERN', 'cv', 1, 'CV dalam format PDF', 'PDF', NULL, 1, 1, 150),
+  ('VOLUNTEER', 'full_name', 1, 'Nama lengkap', 'TEXT', NULL, 1, 1, 10),
+  ('VOLUNTEER', 'birth_date', 1, 'Tanggal lahir', 'DATE', NULL, 1, 1, 20),
+  ('VOLUNTEER', 'email', 1, 'Email aktif', 'EMAIL', NULL, 1, 1, 30),
+  ('VOLUNTEER', 'whatsapp', 1, 'Nomor WhatsApp', 'TEL', NULL, 1, 1, 40),
+  ('VOLUNTEER', 'domicile', 1, 'Domisili saat ini', 'TEXT', NULL, 1, 1, 50),
+  ('VOLUNTEER', 'occupation_status', 1, 'Status saat ini', 'SELECT', CONCAT('Mahasiswa', CHAR(10), 'Fresh Graduate', CHAR(10), 'Karyawan / Profesional', CHAR(10), 'Wiraswasta', CHAR(10), 'Lainnya'), 1, 1, 60),
+  ('VOLUNTEER', 'university', 1, 'Universitas atau instansi', 'TEXT', NULL, 0, 1, 70),
+  ('VOLUNTEER', 'duration', 1, 'Durasi kontribusi', 'SELECT', CONCAT('2 minggu', CHAR(10), '1 bulan', CHAR(10), 'Fleksibel'), 1, 1, 80),
+  ('VOLUNTEER', 'interest_areas', 1, 'Bidang yang ingin dikontribusikan', 'CHECKBOX', CONCAT('Literasi & Bimbingan Belajar', CHAR(10), 'Edukasi Kesehatan & Gizi', CHAR(10), 'Kegiatan Kreatif (seni, olahraga, permainan)', CHAR(10), 'Dokumentasi & Media', CHAR(10), 'Lainnya / Sesuai kebutuhan tim'), 1, 1, 90),
+  ('VOLUNTEER', 'referral_source', 1, 'Dari mana kamu tahu tentang PFP?', 'SELECT', CONCAT('Instagram @papuafutureproject', CHAR(10), 'Diajak teman / kenalan', CHAR(10), 'Artikel atau berita online', CHAR(10), 'Event / seminar / pameran', CHAR(10), 'Lainnya'), 1, 1, 100),
+  ('VOLUNTEER', 'motivation', 1, 'Kenapa kamu ingin bergabung dengan PFP?', 'TEXTAREA', NULL, 1, 1, 110),
+  ('VOLUNTEER', 'special_skills', 1, 'Keahlian khusus', 'TEXTAREA', NULL, 0, 1, 120),
+  ('VOLUNTEER', 'portfolio_url', 1, 'Tautan portfolio (opsional)', 'URL', NULL, 0, 1, 130),
+  ('VOLUNTEER', 'photo', 1, 'Foto pendaftar', 'IMAGE', NULL, 1, 1, 140),
+  ('VOLUNTEER', 'cv', 1, 'CV dalam format PDF', 'PDF', NULL, 1, 1, 150);
 
 CREATE TABLE application_answers (
   id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -326,4 +365,5 @@ INSERT INTO faqs (question, answer, sort_order, is_published) VALUES
 
 INSERT INTO schema_migrations (migration) VALUES
   ('0010_seed_news_and_faqs.sql'),
-  ('0011_create_application_forms.sql');
+  ('0011_create_application_forms.sql'),
+  ('0012_expand_application_questions.sql');

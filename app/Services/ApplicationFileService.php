@@ -16,6 +16,11 @@ final class ApplicationFileService
         if (!preg_match('/^[a-f0-9]{32}$/', $token)) {
             throw new RuntimeException('Token penyimpanan berkas tidak valid.');
         }
+        $hasPhoto = $photo !== null && (int) ($photo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+        $hasCv = $cv !== null && (int) ($cv['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+        if (!$hasPhoto && !$hasCv) {
+            return ['photo_path' => null, 'cv_path' => null];
+        }
         $root = STORAGE_DIR . '/applications';
         if (!is_dir($root) && !mkdir($root, 0750, true) && !is_dir($root)) {
             throw new RuntimeException('Penyimpanan berkas pendaftar tidak dapat disiapkan.');
@@ -27,11 +32,15 @@ final class ApplicationFileService
         @chmod($directory, 0750);
 
         try {
-            $this->storePhoto($photo, $directory . '/photo.webp');
-            $this->storeCv($cv, $directory . '/cv.pdf');
+            if ($hasPhoto) {
+                $this->storePhoto($photo, $directory . '/photo.webp');
+            }
+            if ($hasCv) {
+                $this->storeCv($cv, $directory . '/cv.pdf');
+            }
             return [
-                'photo_path' => 'applications/' . $token . '/photo.webp',
-                'cv_path' => 'applications/' . $token . '/cv.pdf',
+                'photo_path' => $hasPhoto ? 'applications/' . $token . '/photo.webp' : null,
+                'cv_path' => $hasCv ? 'applications/' . $token . '/cv.pdf' : null,
             ];
         } catch (\Throwable $exception) {
             $this->deleteToken($token);

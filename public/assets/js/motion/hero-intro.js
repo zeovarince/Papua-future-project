@@ -3,8 +3,8 @@ import { MOTION, motionDistance } from './tokens.js';
 export function initHeroIntro({ gsap, page }) {
   const cleanupTargets = [];
   const context = gsap.context(() => {
-    const hero = document.querySelector('.hero-bg');
-    const content = hero?.querySelector('.relative.z-10') ?? hero?.firstElementChild;
+    const hero = document.querySelector('.hero-bg, [data-home-hero]');
+    const content = hero?.querySelector('.home-hero-content, .relative.z-10') ?? hero?.firstElementChild;
 
     if (content) {
       const paragraphs = [...content.querySelectorAll('p')];
@@ -12,12 +12,16 @@ export function initHeroIntro({ gsap, page }) {
       const title = content.querySelector('h1');
       const subtitle = paragraphs.at(-1) !== label ? paragraphs.at(-1) : null;
       const cta = [...content.querySelectorAll('a[href^="#"]')];
+      const controls = hero.matches('[data-home-hero]')
+        ? [hero.querySelector('.home-hero-indicators'), hero.querySelector('.home-hero-scroll')].filter(Boolean)
+        : [];
 
       const steps = [
         { target: label, y: motionDistance(MOTION.distance.sm), duration: MOTION.duration.normal, position: 0.15 },
         { target: title, y: motionDistance(MOTION.distance.md), duration: MOTION.duration.hero, position: 0.35 },
         { target: subtitle, y: motionDistance(MOTION.distance.sm), duration: MOTION.duration.normal, position: 0.65 },
         { target: cta, y: motionDistance(MOTION.distance.sm), duration: MOTION.duration.fast, position: 0.8 },
+        { target: controls, y: motionDistance(MOTION.distance.sm), duration: MOTION.duration.fast, position: 0.8 },
       ].filter((step) => step.target && (Array.isArray(step.target) ? step.target.length : true));
 
       const timeline = gsap.timeline({ defaults: { ease: MOTION.ease.out } });

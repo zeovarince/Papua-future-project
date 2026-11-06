@@ -1,15 +1,125 @@
-<?php declare(strict_types=1); $infoRows = json_decode((string) ($program['info_rows'] ?? '[]'), true) ?: []; ?>
-<section class="hero-bg relative flex min-h-[50vh] flex-col justify-center items-center text-center px-4 pt-20">
-  <div class="max-w-3xl relative z-10"><p><?= e($program['category_label']) ?></p><h1><?= e($program['title']) ?></h1><p><?= e($program['tagline']) ?></p></div>
-  <div class="wave-divider"><svg preserveAspectRatio="none" viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg"><path class="shape-fill" d="M321.39 56.44c58-10.79 114.16-30.13 172-41.86 82.39-16.72 168.19-17.73 250.45-.39C823.78 31 906.67 72 985.66 92.83c70.05 18.48 146.53 26.09 214.34 3V120H0V95.8C59.71 118.08 130.83 123.1 192.27 110.15 237.49 100.35 280.9 82.6 321.39 56.44Z"/></svg></div>
+<?php
+declare(strict_types=1);
+
+$infoRows = json_decode((string) ($program['info_rows'] ?? '[]'), true);
+$infoRows = is_array($infoRows) ? $infoRows : [];
+$activities = preg_split('/\R+/', trim((string) ($program['activities'] ?? ''))) ?: [];
+$activities = array_values(array_filter(array_map('trim', $activities), static fn (string $item): bool => $item !== ''));
+$partners = preg_split('/[,;\r\n]+/', trim((string) ($program['partners'] ?? ''))) ?: [];
+$partners = array_values(array_filter(array_map('trim', $partners), static fn (string $item): bool => $item !== ''));
+$gallery = $photos;
+if ($gallery === [] && !empty($program['cover_image'])) {
+    $gallery[] = ['file_path' => $program['cover_image'], 'caption' => $program['title']];
+}
+?>
+<section class="hero-mini program-detail-hero">
+    <div class="program-detail-hero-copy">
+        <h1><?= e($program['title']) ?></h1>
+        <p><?= e($program['tagline'] ?: $program['summary']) ?></p>
+    </div>
 </section>
-<section class="pfp-section"><div class="pfp-container program-detail-content">
-  <?php if (!empty($program['cover_image'])): ?><img class="program-detail-cover" src="<?= e(url('/uploads/' . $program['cover_image'])) ?>" alt="Dokumentasi <?= e($program['title']) ?>"><?php endif; ?>
-  <p class="pfp-body program-summary"><?= e($program['summary']) ?></p>
-  <div class="program-copy"><?php foreach (preg_split('/\R\s*\R/', trim((string) $program['body'])) ?: [] as $paragraph): if (trim($paragraph) !== ''): ?><p><?= nl2br(e(trim($paragraph))) ?></p><?php endif; endforeach; ?></div>
-  <?php if ($infoRows !== [] || !empty($program['stat1_value']) || !empty($program['stat2_value'])): ?><div class="program-facts"><?php foreach ($infoRows as $row): ?><p><strong><?= e($row['label'] ?? '') ?></strong> <?= e($row['value'] ?? '') ?></p><?php endforeach; ?><?php foreach (['1','2'] as $i): if (!empty($program['stat'.$i.'_value'])): ?><p><strong><?= e($program['stat'.$i.'_value']) ?></strong> <?= e($program['stat'.$i.'_label'] ?? '') ?></p><?php endif; endforeach; ?></div><?php endif; ?>
-  <?php if (!empty($program['activities'])): ?><h2>Kegiatan</h2><ul><?php foreach (preg_split('/\R/', (string)$program['activities']) ?: [] as $activity): if(trim($activity)!==''): ?><li><?= e(trim($activity)) ?></li><?php endif; endforeach; ?></ul><?php endif; ?>
-  <?php if (!empty($program['partners'])): ?><p><strong>Mitra:</strong> <?= e($program['partners']) ?></p><?php endif; ?>
-  <?php if ($photos !== []): ?><section class="program-gallery"><h2>Dokumentasi kegiatan</h2><div class="program-gallery-grid"><?php foreach ($photos as $photo): ?><figure><img src="<?= e(url('/uploads/' . $photo['file_path'])) ?>" alt="<?= e($photo['caption'] ?: 'Dokumentasi ' . $program['title']) ?>" loading="lazy"><?php if (!empty($photo['caption'])): ?><figcaption><?= e($photo['caption']) ?></figcaption><?php endif; ?></figure><?php endforeach; ?></div></section><?php endif; ?>
-  <a class="prog-link" href="<?= url('/program') ?>">← Kembali ke semua program</a>
-</div></section>
+
+<section class="pfp-section program-detail-main">
+    <div class="pfp-container">
+        <div class="content-grid">
+            <article class="detail-body">
+                <span class="pfp-tag">Tentang program</span>
+                <h2 class="pfp-title"><?= e($program['title']) ?></h2>
+                <div class="pfp-divider"></div>
+                <?php if (!empty($program['cover_image'])): ?>
+                    <img class="program-detail-cover" src="<?= e(url('/uploads/' . ltrim($program['cover_image'], '/'))) ?>" alt="Dokumentasi program <?= e($program['title']) ?>" fetchpriority="high">
+                <?php endif; ?>
+                <?php if (!empty($program['summary'])): ?><p class="program-detail-summary"><?= e($program['summary']) ?></p><?php endif; ?>
+                <?php foreach (preg_split('/\R\s*\R/', trim((string) ($program['body'] ?? ''))) ?: [] as $paragraph): ?>
+                    <?php if (trim($paragraph) !== ''): ?><p><?= nl2br(e(trim($paragraph))) ?></p><?php endif; ?>
+                <?php endforeach; ?>
+
+                <?php if ($activities !== []): ?>
+                    <hr class="section-sep">
+                    <span class="pfp-tag">Kegiatan dalam program</span>
+                    <h3 class="program-detail-subtitle">Apa yang kami lakukan</h3>
+                    <ul class="kegiatan-list">
+                        <?php foreach ($activities as $activity): ?>
+                            <li><span class="kegiatan-dot" aria-hidden="true"></span><span><?= e($activity) ?></span></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+
+                <?php if ($infoRows !== []): ?>
+                    <hr class="section-sep">
+                    <span class="pfp-tag">Informasi program</span>
+                    <div class="program-detail-facts">
+                        <?php foreach ($infoRows as $row): ?>
+                            <?php if (is_array($row) && (!empty($row['label']) || !empty($row['value']))): ?>
+                                <div><span><?= e($row['label'] ?? '') ?></span><strong><?= e($row['value'] ?? '') ?></strong></div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($partners !== []): ?>
+                    <hr class="section-sep">
+                    <span class="pfp-tag">Mitra kolaborasi</span>
+                    <h3 class="program-detail-subtitle">Bersama mereka program ini berjalan</h3>
+                    <ul class="mitra-list">
+                        <?php foreach ($partners as $partner): ?>
+                            <li class="mitra-item"><span class="mitra-icon" aria-hidden="true">✦</span><?= e($partner) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            </article>
+
+            <aside class="sidebar-sticky" aria-label="Informasi tambahan program">
+                <div class="sidebar-info">
+                    <h2 class="sidebar-info-title">Informasi program</h2>
+                    <div class="sidebar-info-row"><span class="sidebar-info-icon" aria-hidden="true">⌖</span><div><span class="sidebar-info-label">Wilayah kegiatan</span><span class="sidebar-info-value">Kabupaten Manokwari, Papua Barat</span></div></div>
+                    <div class="sidebar-info-row"><span class="sidebar-info-icon" aria-hidden="true">▧</span><div><span class="sidebar-info-label">Bidang</span><span class="sidebar-info-value"><?= e($program['category_label']) ?></span></div></div>
+                    <?php if (!empty($program['stat1_value'])): ?>
+                        <div class="sidebar-info-row"><span class="sidebar-info-icon" aria-hidden="true">◉</span><div><span class="sidebar-info-label"><?= e($program['stat1_label'] ?: 'Dampak program') ?></span><span class="sidebar-info-value"><?= e($program['stat1_value']) ?></span></div></div>
+                    <?php endif; ?>
+                    <?php if (!empty($program['stat2_value'])): ?>
+                        <div class="sidebar-info-row"><span class="sidebar-info-icon" aria-hidden="true">⌂</span><div><span class="sidebar-info-label"><?= e($program['stat2_label'] ?: 'Cakupan') ?></span><span class="sidebar-info-value"><?= e($program['stat2_value']) ?></span></div></div>
+                    <?php endif; ?>
+                </div>
+
+                <a class="btn-relawan" href="<?= url('/bergabung') ?>">Bergabung bersama kami</a>
+
+                <?php if ($otherPrograms !== []): ?>
+                    <div class="sidebar-programs">
+                        <h2 class="sidebar-programs-title">Program lainnya</h2>
+                        <?php foreach ($otherPrograms as $other): ?>
+                            <a class="sidebar-prog-link" href="<?= url('/program/' . rawurlencode($other['slug'])) ?>"><span aria-hidden="true">→</span><?= e($other['title']) ?></a>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </aside>
+        </div>
+    </div>
+</section>
+
+<?php if ($gallery !== []): ?>
+    <section class="pfp-section pfp-section-alt program-detail-gallery-section">
+        <div class="pfp-container">
+            <div class="program-gallery-heading">
+                <span class="pfp-tag">Dokumentasi</span>
+                <h2 class="pfp-title">Kegiatan program di lapangan.</h2>
+                <div class="pfp-divider"></div>
+            </div>
+            <div class="masonry-grid">
+                <?php foreach ($gallery as $index => $photo): ?>
+                    <figure class="masonry-item">
+                        <div class="program-masonry-media program-masonry-media-<?= $index % 4 ?>">
+                            <img src="<?= e(url('/uploads/' . ltrim($photo['file_path'], '/'))) ?>" alt="<?= e($photo['caption'] ?: 'Dokumentasi ' . $program['title']) ?>" loading="lazy">
+                        </div>
+                        <span class="masonry-overlay" aria-hidden="true"><span class="masonry-overlay-icon">⌕</span></span>
+                        <figcaption class="masonry-caption"><?= e($photo['caption'] ?: $program['title']) ?></figcaption>
+                    </figure>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+<?php endif; ?>
+
+<section class="pfp-section program-detail-return">
+    <div class="pfp-container"><a class="prog-link" href="<?= url('/program') ?>"><span aria-hidden="true">←</span> Kembali ke semua program</a></div>
+</section>

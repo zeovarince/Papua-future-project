@@ -4,7 +4,7 @@ Panduan visual untuk panel admin Papua Future Project. Layout memakai **rail iko
 
 > **Ringkasan perubahan dari versi sebelumnya**
 > - Sidebar lebar 260 px diganti **rail ikon 64 px berwarna biru terang** (Primary `#3770c1`). Label tidak lagi tampil permanen.
-> - Menu dikelompokkan menjadi 5 ikon utama. Saat di-hover, **flyout putih** muncul di sisi kanan rail berisi nama halaman, deskripsi singkat, dan sub-halaman.
+> - Menu dikelompokkan menjadi 6 ikon utama. Saat di-hover, **flyout putih** muncul di sisi kanan rail berisi nama halaman, deskripsi singkat, dan sub-halaman.
 > - Flyout menimpa konten (overlay), tidak mendorong layout.
 > - Tidak ada tema gelap di navigasi dan tidak ada emoji. Ikon memakai set ikon garis (misalnya Lucide).
 > - **Area isi ikut dirombak** mengikuti gambar referensi: kartu putih membulat 20 px di atas latar abu muda, tombol pill, tabel lebih ringan, dan pola halaman yang seragam (daftar, form, detail).
@@ -152,6 +152,8 @@ Persyaratan aksesibilitas: ikon memakai `aria-haspopup="menu"` dan `aria-expande
 | - | avatar | Profil | Nama admin, keterangan "Administrator", tautan **Lihat Website** (buka tab baru), dan **Keluar** | - |
 
 Ikon sub-halaman di flyout (Lucide): `user-check` (Tim Penggerak), `graduation-cap` (Internship), `hand-heart` (Volunteer), `layers` (Batch), `book-open` (Program), `newspaper` (Berita), `help-circle` (FAQ), `clipboard-list` (Pendaftar), `mail` (Pesan Masuk), `file-cog` (Form Pendaftaran).
+
+Grup **Pengaturan** menambahkan halaman **Pengelola Admin** (`/admin/akun`) untuk melihat akun admin dan membuat akun baru, serta **Ubah Kata Sandi** (`/admin/akun/password`) untuk memperbarui kata sandi akun yang sedang masuk. Kedua tautan juga tersedia di flyout avatar.
 
 - Lencana pada ikon grup Data adalah **jumlah gabungan** Pendaftar Baru + Pesan belum dibaca. Rinciannya muncul di baris flyout masing-masing.
 - Ikon Tim, Konten, dan Data aktif bila route saat ini berada di salah satu sub-halamannya, termasuk halaman tambah, ubah, dan detail.
@@ -477,8 +479,9 @@ Sama persis dengan Internship (termasuk tata letaknya), tetapi filter batch ke t
 - **Tata letak:** dua kartu berdampingan pada >= 1024 px, bertumpuk di bawahnya. Tiap kartu memuat toggle, tiga angka ringkas (status, batch dibuka, pertanyaan aktif), dan tombol "Atur pertanyaan".
 - Dua kartu terpisah untuk Internship dan Relawan; masing-masing menunjukkan status formulir, jumlah batch yang dibuka, dan jumlah pertanyaan aktif.
 - Tombol aktif/nonaktif bekerja terpisah per jenis dan tidak mengubah status batch. Pendaftaran publik hanya diterima jika jenis aktif serta batch terpilih dibuka.
-- Tombol "Atur pertanyaan" membuka daftar dan CRUD yang hanya berlaku untuk jenis itu. Pertanyaan bisa berupa jawaban singkat atau paragraf, wajib atau opsional, tampil atau disembunyikan, serta diurutkan.
-- Maksimal 25 pertanyaan tambahan per jenis. Jawaban tampil di detail pendaftar dan ikut ekspor. Teks pertanyaan disalin pada jawaban untuk mempertahankan riwayat setelah perubahan atau penghapusan.
+- Tombol "Atur pertanyaan" membuka daftar terpisah per jenis. Daftar berisi field bawaan (nama, email, WhatsApp, foto, CV, portofolio, dan lainnya) serta maksimal 25 pertanyaan tambahan.
+- Edit field bawaan: ubah label, pilihan jawaban, urutan, status wajib/opsional, dan tampil/sembunyi. Jenis input field khusus (email, telepon, foto, CV, dan sejenisnya) tetap agar validasi dan penyimpanan berjalan tepat. Pertanyaan tambahan dapat memakai tipe jawaban yang tersedia.
+- Jawaban aktif dan label pertanyaan saat pendaftaran disimpan sebagai snapshot. Detail dan ekspor mempertahankan teks pertanyaan meski Admin mengubah atau menyembunyikan pertanyaannya kemudian.
 
 ### 5.12 Pesan Masuk (`/admin/pesan`)
 

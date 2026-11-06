@@ -42,6 +42,8 @@ Peta halaman dan alur pengguna website Papua Future Project, untuk Public dan Ad
 /admin/pendaftar/{id}          Detail pendaftar
 /admin/pesan                   Pesan masuk dari form kontak
 /admin/pesan/{id}              Detail pesan
+/admin/akun                    Daftar akun admin dan buat admin baru
+/admin/akun/password           Ubah kata sandi akun sendiri
 ```
 
 ## 2. Alur Public 1: menjelajah situs
@@ -69,8 +71,9 @@ flowchart TD
   B --> C{"Jenis formulir aktif dan batch dibuka?"}
   C -- "Tidak" --> D["Tampil pesan pendaftaran belum dibuka dan tautan Instagram"]
   C -- "Ya" --> E["Pilih batch"]
-  E --> F["Isi data diri, ketersediaan dan minat, serta pertanyaan khusus jenis terpilih"]
-  F --> G["Unggah foto dan CV"]
+  E --> F["Buka formulir untuk batch yang dipilih; batch tidak dipilih ulang di dalam form"]
+  F --> F2["Isi pertanyaan aktif yang dikonfigurasi Admin untuk jenis ini"]
+  F2 --> G["Unggah foto/CV jika field file diaktifkan"]
   G --> H{"Validasi di layar lolos?"}
   H -- "Tidak" --> F
   H -- "Ya" --> I["Kirim"]
@@ -111,9 +114,16 @@ flowchart TD
   D -- "Ya" --> F["Kembali ke halaman yang dituju, atau /admin"]
   B -- "Sudah" --> F
   F --> G["Bekerja di panel lewat sidebar"]
-  G --> H["Keluar lewat sidebar"]
-  H --> C
+  G --> H{"Kelola akun?"}
+  H -- "Buat admin" --> I["/admin/akun: isi nama, email, dan kata sandi awal"]
+  I --> G
+  H -- "Ubah kata sandi sendiri" --> J["/admin/akun/password: verifikasi kata sandi saat ini"]
+  J --> G
+  H -- "Keluar" --> K["Keluar lewat sidebar"]
+  K --> C
 ```
+
+Admin baru dibuat dari halaman **Pengaturan → Pengelola Admin**. Kata sandi awal minimal 12 karakter dan hanya disimpan sebagai hash. Penggantian kata sandi memerlukan verifikasi kata sandi lama.
 
 ## 6. Alur Admin 2: mengelola konten
 
@@ -176,7 +186,9 @@ flowchart TD
   K --> L["/bergabung mengikuti kedua status: formulir jenis dan batch"]
 ```
 
-Saat pertanyaan dihapus, jawaban lama tetap tampil pada detail pendaftar karena sistem menyimpan salinan teks pertanyaan.
+Di halaman Bergabung, pengunjung memilih batch melalui tombol pada kartu jalur yang tersedia. Halaman formulir langsung terikat pada batch tersebut, jadi tidak menampilkan dropdown batch lagi.
+
+Di halaman Atur Pertanyaan, Admin mengelola pertanyaan bawaan (nama, email, WhatsApp, foto, CV, portofolio, dan isian lainnya) serta pertanyaan tambahan. Untuk setiap jenis, Admin dapat mengubah label, pilihan, urutan, status tampil, dan wajib/opsional. Tipe input field bawaan yang mengisi kolom khusus tidak dapat diganti. Jawaban lama tetap tampil pada detail dan ekspor karena label serta jawaban disalin saat pendaftaran.
 
 ## 9. Alur Admin 5: meninjau pendaftar
 

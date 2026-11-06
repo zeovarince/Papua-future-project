@@ -6,14 +6,15 @@ namespace App\Validators;
 
 final class ApplicationQuestionValidator
 {
-    public static function validate(array $input): array
+    public static function validate(array $input, ?array $current = null): array
     {
         $question = isset($input['question']) && is_scalar($input['question'])
             ? trim((string) $input['question'])
             : '';
-        $fieldType = isset($input['field_type']) && is_scalar($input['field_type'])
-            ? (string) $input['field_type']
-            : '';
+        $isSystem = (int) ($current['is_system'] ?? 0) === 1;
+        $fieldType = $isSystem
+            ? (string) $current['field_type']
+            : (isset($input['field_type']) && is_scalar($input['field_type']) ? (string) $input['field_type'] : '');
         $optionsRaw = isset($input['options']) && is_scalar($input['options'])
             ? trim((string) $input['options'])
             : '';
@@ -34,7 +35,10 @@ final class ApplicationQuestionValidator
         if ($question === '' || mb_strlen($question) > 250) {
             $errors['question'] = 'Pertanyaan wajib diisi, maksimal 250 karakter.';
         }
-        $validTypes = ['TEXT', 'TEXTAREA', 'RADIO', 'CHECKBOX', 'SELECT', 'FILE'];
+        $validTypes = ['TEXT', 'TEXTAREA', 'RADIO', 'CHECKBOX', 'SELECT', 'FILE', 'EMAIL', 'TEL', 'DATE', 'URL'];
+        if ($isSystem) {
+            $validTypes = [...$validTypes, 'IMAGE', 'PDF'];
+        }
         if (!in_array($fieldType, $validTypes, true)) {
             $errors['field_type'] = 'Pilih jenis jawaban yang valid.';
         }

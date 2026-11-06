@@ -189,7 +189,7 @@ final class ApplicationExportService
             ['key' => 'referral', 'label' => 'Sumber Informasi'],
             ['key' => 'motivation', 'label' => 'Motivasi'],
             ['key' => 'special_skills', 'label' => 'Keahlian Khusus'],
-            ['key' => 'custom_answers', 'label' => 'Jawaban Pertanyaan Tambahan'],
+            ['key' => 'custom_answers', 'label' => 'Jawaban Pertanyaan Formulir'],
             ['key' => 'status', 'label' => 'Status Pendaftaran'],
             ['key' => 'created_at', 'label' => 'Tanggal Daftar'],
             ['key' => 'photo_url', 'label' => 'Foto Pendaftar'],
@@ -205,8 +205,8 @@ final class ApplicationExportService
             $record['email'], $record['whatsapp'], $record['domicile'], $record['occupation'],
             $record['university'], $record['duration'], $record['interests'], $record['referral'],
             $record['motivation'], $record['special_skills'], $record['custom_answers_text'], $record['status'], $record['created_at'],
-            $this->absoluteUrl('/admin/berkas/' . (int) $application['id'] . '/foto'),
-            $this->absoluteUrl('/admin/berkas/' . (int) $application['id'] . '/cv'),
+            !empty($application['photo_path']) ? $this->absoluteUrl('/admin/berkas/' . (int) $application['id'] . '/foto') : '',
+            !empty($application['cv_path']) ? $this->absoluteUrl('/admin/berkas/' . (int) $application['id'] . '/cv') : '',
         ];
     }
 
@@ -221,26 +221,31 @@ final class ApplicationExportService
                 $interestText[] = $interestLabels[$key];
             }
         }
-        $customAnswers = is_array($application['custom_answers'] ?? null) ? $application['custom_answers'] : [];
+        $customAnswers = is_array($application['form_answers'] ?? null)
+            ? $application['form_answers']
+            : (is_array($application['custom_answers'] ?? null) ? $application['custom_answers'] : []);
         $customAnswerLines = [];
         foreach ($customAnswers as $answer) {
-            $customAnswerLines[] = (string) ($answer['question'] ?? '') . ': ' . (string) ($answer['answer'] ?? '');
+            if (in_array($answer['field_key'] ?? null, ['photo', 'cv'], true) || (string) ($answer['answer'] ?? '') === '') {
+                continue;
+            }
+            $customAnswerLines[] = (string) ($answer['question'] ?? '') . ': ' . (string) $answer['answer'];
         }
         return [
             'id' => (int) $application['id'],
             'type' => Labels::applicationTypes()[$application['batch_type']] ?? (string) $application['batch_type'],
             'batch_name' => (string) $application['batch_name'],
-            'full_name' => (string) $application['full_name'],
-            'birth_date' => (string) $application['birth_date'],
-            'email' => (string) $application['email'],
-            'whatsapp' => (string) $application['whatsapp'],
-            'domicile' => (string) $application['domicile'],
-            'occupation' => Labels::occupations()[$application['occupation_status']] ?? (string) $application['occupation_status'],
+            'full_name' => (string) ($application['full_name'] ?? ''),
+            'birth_date' => (string) ($application['birth_date'] ?? ''),
+            'email' => (string) ($application['email'] ?? ''),
+            'whatsapp' => (string) ($application['whatsapp'] ?? ''),
+            'domicile' => (string) ($application['domicile'] ?? ''),
+            'occupation' => Labels::occupations()[(string) ($application['occupation_status'] ?? '')] ?? (string) ($application['occupation_status'] ?? ''),
             'university' => (string) ($application['university'] ?? ''),
-            'duration' => Labels::durations()[$application['duration']] ?? (string) $application['duration'],
+            'duration' => Labels::durations()[(string) ($application['duration'] ?? '')] ?? (string) ($application['duration'] ?? ''),
             'interests' => implode(', ', $interestText),
-            'referral' => Labels::referralSources()[$application['referral_source']] ?? (string) $application['referral_source'],
-            'motivation' => (string) $application['motivation'],
+            'referral' => Labels::referralSources()[(string) ($application['referral_source'] ?? '')] ?? (string) ($application['referral_source'] ?? ''),
+            'motivation' => (string) ($application['motivation'] ?? ''),
             'special_skills' => (string) ($application['special_skills'] ?? ''),
             'custom_answers' => $customAnswers,
             'custom_answers_text' => implode("\n", $customAnswerLines),
