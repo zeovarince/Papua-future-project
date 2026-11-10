@@ -34,18 +34,16 @@ $dateLabel = static fn (array $post): string => !empty($post['published_at'])
             <h2 class="pfp-title">Berita &amp; aktivitas Papua Future Project.</h2>
             <div class="pfp-divider"></div>
             <a class="featured-card dynamic-featured-card" href="<?= url('/berita/' . rawurlencode($featured['slug'])) ?>">
-                <div class="featured-photo dynamic-featured-photo">
+                <div class="featured-photo dynamic-featured-photo<?= empty($featured['cover_image']) ? ' is-empty' : '' ?>">
                     <?php if (!empty($featured['cover_image'])): ?>
                         <img src="<?= e(url('/uploads/' . ltrim($featured['cover_image'], '/'))) ?>" alt="Dokumentasi <?= e($featured['title']) ?>" loading="lazy">
-                    <?php else: ?>
-                        <span class="featured-photo-caption">Foto belum diunggah</span>
                     <?php endif; ?>
                     <span class="badge <?= e($badgeClasses[$featured['category']] ?? 'badge-lapangan') ?>"><?= e($categoryLabels[$featured['category']] ?? 'Berita') ?></span>
                 </div>
                 <div class="featured-body">
                     <span class="badge <?= e($badgeClasses[$featured['category']] ?? 'badge-lapangan') ?>"><?= e($categoryLabels[$featured['category']] ?? 'Berita') ?></span>
                     <h2 class="feat-title"><?= e($featured['title']) ?></h2>
-                    <p class="feat-excerpt"><?= e($featured['excerpt']) ?></p>
+                    <?php if (trim((string) ($featured['excerpt'] ?? '')) !== ''): ?><p class="feat-excerpt"><?= e($featured['excerpt']) ?></p><?php endif; ?>
                     <div class="feat-meta"><time class="feat-meta-item" datetime="<?= e(date('Y-m-d', strtotime((string) $featured['published_at']))) ?>"><?= e($dateLabel($featured)) ?></time></div>
                     <span class="feat-link">Baca selengkapnya</span>
                 </div>
@@ -63,37 +61,33 @@ $dateLabel = static fn (array $post): string => !empty($post['published_at'])
             <?php foreach ($posts as $post): ?>
                 <article class="news-card">
                     <a class="news-card-link" href="<?= url('/berita/' . rawurlencode($post['slug'])) ?>">
-                        <div class="news-img news-img-placeholder dynamic-news-photo">
+                        <div class="news-img news-img-placeholder dynamic-news-photo<?= empty($post['cover_image']) ? ' is-empty' : '' ?>">
                             <?php if (!empty($post['cover_image'])): ?>
                                 <img src="<?= e(url('/uploads/' . ltrim($post['cover_image'], '/'))) ?>" alt="Dokumentasi <?= e($post['title']) ?>" loading="lazy">
-                            <?php else: ?>
-                                <span class="photo-pending">Foto belum diunggah</span>
                             <?php endif; ?>
                             <span class="badge <?= e($badgeClasses[$post['category']] ?? 'badge-lapangan') ?>"><?= e($categoryLabels[$post['category']] ?? 'Berita') ?></span>
                         </div>
                         <div class="news-body">
                             <time class="news-meta" datetime="<?= e(date('Y-m-d', strtotime((string) $post['published_at']))) ?>"><?= e($dateLabel($post)) ?></time>
                             <h3><?= e($post['title']) ?></h3>
-                            <p><?= e($post['excerpt']) ?></p>
+                            <?php if (trim((string) ($post['excerpt'] ?? '')) !== ''): ?><p><?= e($post['excerpt']) ?></p><?php endif; ?>
                             <span class="news-link">Baca selengkapnya</span>
                         </div>
                     </a>
                 </article>
             <?php endforeach; ?>
-            <?php if ($posts === [] && $featured === null): ?>
-                <p>Berita dan kegiatan terbaru akan segera tersedia.</p>
-            <?php endif; ?>
         </div>
     </div>
 </section>
 
+<?php if ($awards !== [] || $media !== []): ?>
 <section class="pfp-section news-recognition-section">
     <div class="pfp-container">
         <span class="pfp-tag">Penghargaan dan liputan</span>
         <h2 class="pfp-title">Catatan apresiasi dan cerita di media.</h2>
         <div class="pfp-divider"></div>
         <div class="award-media-grid">
-            <div class="recognition-column">
+            <?php if ($awards !== []): ?><div class="recognition-column">
                 <h3 class="news-recognition-title">Penghargaan</h3>
                 <?php foreach ($awards as $award): ?>
                     <?php
@@ -109,47 +103,42 @@ $dateLabel = static fn (array $post): string => !empty($post['published_at'])
                                         : null)));
                     ?>
                     <article class="award-item">
-                        <div class="award-logo">
-                            <?php if ($awardLogo !== null): ?>
+                        <?php if ($awardLogo !== null): ?><div class="award-logo">
                                 <img src="<?= e($awardLogo) ?>" alt="Logo <?= e($award['meta_label'] ?: $award['title']) ?>" loading="lazy">
-                            <?php else: ?>
-                                <span>Logo belum ditambahkan</span>
-                            <?php endif; ?>
-                        </div>
+                        </div><?php endif; ?>
                         <div class="recognition-copy">
                             <h4><?= e($award['meta_label'] ?: $award['title']) ?></h4>
-                            <p><?= e($award['excerpt']) ?></p>
+                            <?php if (trim((string) ($award['excerpt'] ?? '')) !== ''): ?><p><?= e($award['excerpt']) ?></p><?php endif; ?>
                             <a class="media-link" href="<?= url('/berita/' . rawurlencode($award['slug'])) ?>">Lihat detail</a>
                         </div>
                     </article>
                 <?php endforeach; ?>
-                <?php if ($awards === []): ?><p class="recognition-empty">Informasi penghargaan belum ditambahkan.</p><?php endif; ?>
-            </div>
+            </div><?php endif; ?>
 
-            <div class="recognition-column">
+            <?php if ($media !== []): ?><div class="recognition-column">
                 <h3 class="news-recognition-title">Liputan media</h3>
                 <?php foreach ($media as $item): ?>
                     <article class="media-item">
                         <div class="media-header">
-                            <div class="media-source">
+                            <?php if (!empty($item['cover_image']) || trim((string) ($item['source_name'] ?? '')) !== ''): ?><div class="media-source">
                                 <?php if (!empty($item['cover_image'])): ?>
-                                    <img src="<?= e(url('/uploads/' . ltrim($item['cover_image'], '/'))) ?>" alt="Logo <?= e($item['source_name'] ?: 'media') ?>" loading="lazy">
+                                    <img src="<?= e(url('/uploads/' . ltrim($item['cover_image'], '/'))) ?>" alt="<?= e($item['source_name'] ?? '') ?>" loading="lazy">
                                 <?php endif; ?>
-                                <span class="media-name"><?= e($item['source_name'] ?: 'Media') ?></span>
-                            </div>
+                                <?php if (trim((string) ($item['source_name'] ?? '')) !== ''): ?><span class="media-name"><?= e($item['source_name']) ?></span><?php endif; ?>
+                            </div><?php endif; ?>
                             <time class="media-date" datetime="<?= e(date('Y-m-d', strtotime((string) $item['published_at']))) ?>"><?= e($dateLabel($item)) ?></time>
                         </div>
                         <h4 class="media-title"><?= e($item['title']) ?></h4>
-                        <p><?= e($item['excerpt']) ?></p>
+                        <?php if (trim((string) ($item['excerpt'] ?? '')) !== ''): ?><p><?= e($item['excerpt']) ?></p><?php endif; ?>
                         <?php if (!empty($item['source_url'])): ?>
-                            <a class="media-link" href="<?= e($item['source_url']) ?>" target="_blank" rel="noopener noreferrer">Baca di <?= e($item['source_name'] ?: 'situs media') ?></a>
+                            <a class="media-link" href="<?= e($item['source_url']) ?>" target="_blank" rel="noopener noreferrer">Baca liputan</a>
                         <?php else: ?>
                             <a class="media-link" href="<?= url('/berita/' . rawurlencode($item['slug'])) ?>">Baca liputan</a>
                         <?php endif; ?>
                     </article>
                 <?php endforeach; ?>
-                <?php if ($media === []): ?><p class="recognition-empty">Liputan media belum ditambahkan.</p><?php endif; ?>
-            </div>
+            </div><?php endif; ?>
         </div>
     </div>
 </section>
+<?php endif; ?>

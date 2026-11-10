@@ -1,6 +1,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" sizes="192x192" href="<?= asset('img/favicon.png') ?>">
+<meta name="theme-color" content="#ffffff">
+<meta name="author" content="Papua Future Project">
 <meta name="description" content="<?= e($seo['description'] ?? '') ?>">
 <meta name="robots" content="<?= e($seo['robots'] ?? 'noindex,nofollow') ?>">
 <link rel="canonical" href="<?= e($seo['canonical'] ?? '') ?>">
@@ -11,12 +13,20 @@
 <meta property="og:description" content="<?= e($seo['description'] ?? '') ?>">
 <meta property="og:url" content="<?= e($seo['canonical'] ?? '') ?>">
 <meta property="og:image" content="<?= e($seo['image'] ?? '') ?>">
-<meta property="og:image:alt" content="Papua Future Project">
+<meta property="og:image:alt" content="<?= e($seo['imageAlt'] ?? 'Papua Future Project di Papua Barat') ?>">
+<?php if (($seo['type'] ?? '') === 'article' && !empty($seo['publishedAt'])): ?>
+<meta property="article:published_time" content="<?= e($seo['publishedAt']) ?>">
+<?php endif; ?>
+<?php if (($seo['type'] ?? '') === 'article' && !empty($seo['modifiedAt'])): ?>
+<meta property="article:modified_time" content="<?= e($seo['modifiedAt']) ?>">
+<?php endif; ?>
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="<?= e($seo['title'] ?? $title ?? 'Papua Future Project') ?>">
 <meta name="twitter:description" content="<?= e($seo['description'] ?? '') ?>">
 <meta name="twitter:image" content="<?= e($seo['image'] ?? '') ?>">
+<meta name="twitter:image:alt" content="<?= e($seo['imageAlt'] ?? 'Papua Future Project di Papua Barat') ?>">
 <title><?= e($seo['title'] ?? $title ?? 'Papua Future Project') ?></title>
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
 <?php foreach (($seo['schemas'] ?? []) as $schema): ?>
     <script type="application/ld+json"><?= json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
 <?php endforeach; ?>

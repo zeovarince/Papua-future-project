@@ -9,13 +9,13 @@ $partners = preg_split('/[,;\r\n]+/', trim((string) ($program['partners'] ?? '')
 $partners = array_values(array_filter(array_map('trim', $partners), static fn (string $item): bool => $item !== ''));
 $gallery = $photos;
 if ($gallery === [] && !empty($program['cover_image'])) {
-    $gallery[] = ['file_path' => $program['cover_image'], 'caption' => $program['title']];
+    $gallery[] = ['file_path' => $program['cover_image'], 'caption' => ''];
 }
 ?>
 <section class="hero-mini program-detail-hero">
     <div class="program-detail-hero-copy">
         <h1><?= e($program['title']) ?></h1>
-        <p><?= e($program['tagline'] ?: $program['summary']) ?></p>
+        <?php if (trim((string) ($program['tagline'] ?? '')) !== ''): ?><p><?= e($program['tagline']) ?></p><?php endif; ?>
     </div>
 </section>
 
@@ -50,8 +50,8 @@ if ($gallery === [] && !empty($program['cover_image'])) {
                     <span class="pfp-tag">Informasi program</span>
                     <div class="program-detail-facts">
                         <?php foreach ($infoRows as $row): ?>
-                            <?php if (is_array($row) && (!empty($row['label']) || !empty($row['value']))): ?>
-                                <div><span><?= e($row['label'] ?? '') ?></span><strong><?= e($row['value'] ?? '') ?></strong></div>
+                            <?php if (is_array($row) && trim((string) ($row['value'] ?? '')) !== ''): ?>
+                                <div><?php if (trim((string) ($row['label'] ?? '')) !== ''): ?><span><?= e($row['label']) ?></span><?php endif; ?><?php if (trim((string) ($row['value'] ?? '')) !== ''): ?><strong><?= e($row['value']) ?></strong><?php endif; ?></div>
                             <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
@@ -75,10 +75,10 @@ if ($gallery === [] && !empty($program['cover_image'])) {
                     <div class="sidebar-info-row"><span class="sidebar-info-icon" aria-hidden="true">⌖</span><div><span class="sidebar-info-label">Wilayah kegiatan</span><span class="sidebar-info-value">Kabupaten Manokwari, Papua Barat</span></div></div>
                     <div class="sidebar-info-row"><span class="sidebar-info-icon" aria-hidden="true">▧</span><div><span class="sidebar-info-label">Bidang</span><span class="sidebar-info-value"><?= e($program['category_label']) ?></span></div></div>
                     <?php if (!empty($program['stat1_value'])): ?>
-                        <div class="sidebar-info-row"><span class="sidebar-info-icon" aria-hidden="true">◉</span><div><span class="sidebar-info-label"><?= e($program['stat1_label'] ?: 'Dampak program') ?></span><span class="sidebar-info-value"><?= e($program['stat1_value']) ?></span></div></div>
+                        <div class="sidebar-info-row"><span class="sidebar-info-icon" aria-hidden="true">◉</span><div><?php if (trim((string) ($program['stat1_label'] ?? '')) !== ''): ?><span class="sidebar-info-label"><?= e($program['stat1_label']) ?></span><?php endif; ?><span class="sidebar-info-value"><?= e($program['stat1_value']) ?></span></div></div>
                     <?php endif; ?>
                     <?php if (!empty($program['stat2_value'])): ?>
-                        <div class="sidebar-info-row"><span class="sidebar-info-icon" aria-hidden="true">⌂</span><div><span class="sidebar-info-label"><?= e($program['stat2_label'] ?: 'Cakupan') ?></span><span class="sidebar-info-value"><?= e($program['stat2_value']) ?></span></div></div>
+                        <div class="sidebar-info-row"><span class="sidebar-info-icon" aria-hidden="true">⌂</span><div><?php if (trim((string) ($program['stat2_label'] ?? '')) !== ''): ?><span class="sidebar-info-label"><?= e($program['stat2_label']) ?></span><?php endif; ?><span class="sidebar-info-value"><?= e($program['stat2_value']) ?></span></div></div>
                     <?php endif; ?>
                 </div>
 
@@ -112,7 +112,7 @@ if ($gallery === [] && !empty($program['cover_image'])) {
                             <img src="<?= e(url('/uploads/' . ltrim($photo['file_path'], '/'))) ?>" alt="<?= e($photo['caption'] ?: 'Dokumentasi ' . $program['title']) ?>" loading="lazy">
                         </div>
                         <span class="masonry-overlay" aria-hidden="true"><span class="masonry-overlay-icon">⌕</span></span>
-                        <figcaption class="masonry-caption"><?= e($photo['caption'] ?: $program['title']) ?></figcaption>
+                        <?php if (trim((string) ($photo['caption'] ?? '')) !== ''): ?><figcaption class="masonry-caption"><?= e($photo['caption']) ?></figcaption><?php endif; ?>
                     </figure>
                 <?php endforeach; ?>
             </div>

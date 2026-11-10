@@ -1,8 +1,8 @@
 <section class="home-hero" id="beranda" data-home-hero data-home-interval="3500" aria-roledescription="carousel" aria-label="Cerita Papua Future Project">
     <div class="home-hero-slides" aria-hidden="true">
-        <img class="home-hero-slide is-active" data-home-slide data-caption="Bersama membuka akses pendidikan, kesehatan, dan kesempatan bagi anak-anak Papua Barat." src="<?= asset('img/hero/herobanner.png') ?>" alt="" fetchpriority="high">
-        <img class="home-hero-slide" data-home-slide data-caption="Dari pojok baca hingga ruang belajar, kami menumbuhkan semangat belajar bersama anak-anak dan komunitas Papua Barat." src="<?= asset('img/about/profilsingkat.png') ?>" alt="" loading="lazy">
-        <img class="home-hero-slide" data-home-slide data-caption="Berawal dari kepedulian, kami bergerak bersama generasi muda untuk membuka lebih banyak kesempatan bagi anak-anak Papua." src="<?= asset('img/team/Founder.jpg') ?>" alt="" loading="lazy">
+        <img class="home-hero-slide is-active" data-home-slide data-caption="Bersama membuka akses pendidikan, kesehatan, dan kesempatan bagi anak-anak Papua Barat." src="https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/herosectionbanner2" alt="" fetchpriority="high">
+        <img class="home-hero-slide" data-home-slide data-caption="Dari pojok baca hingga ruang belajar, kami menumbuhkan semangat belajar bersama anak-anak dan komunitas Papua Barat." src="https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/herobanner3" alt="" loading="lazy">
+        <img class="home-hero-slide" data-home-slide data-caption="Bersama masyarakat, kami menjaga cinta lingkungan dengan mewariskan tradisi Sasi kepada generasi berikutnya." src="https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/Bersama_tong_cinta_lingkungan_dengan_mewariskan_Sasi_sebagai_sebuah_tradisi" alt="" loading="lazy">
     </div>
     <div class="home-hero-shade" aria-hidden="true"></div>
 

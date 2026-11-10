@@ -4,9 +4,9 @@ Dokumen ini menjadi pintu masuk bagi AI agent yang membantu mengembangkan websit
 
 ## Tujuan proyek
 
-Membangun ulang situs publik PFP dan panel admin agar konten dapat dikelola melalui browser. Stack yang disepakati adalah **PHP 8.4 atau lebih baru, PHP native dengan pola MVC, MySQL/MariaDB melalui PDO, CSS dan JavaScript biasa, dan shared hosting cPanel**. Proyek tidak memakai Laravel, CodeIgniter, VPS, maupun Node.js sebagai syarat runtime.
+Membangun ulang situs publik PFP dan panel admin agar konten dapat dikelola melalui browser. Stack yang disepakati adalah **PHP 8.4 atau lebih baru, PHP native dengan pola MVC, MySQL/MariaDB melalui PDO, CSS dan JavaScript biasa, dan shared hosting DirectAdmin**. Proyek tidak memakai Laravel, CodeIgniter, VPS, maupun Node.js sebagai syarat runtime.
 
-Situs publik berisi Beranda, Tentang Kami, Program dan detail program, Berita & Kegiatan dan detail artikel, Bergabung, serta Kontak. Foto dokumentasi ditampilkan pada detail program atau artikel masing-masing; tidak ada halaman Galeri tersendiri. Panel admin menggunakan sidebar, bukan navbar atas, dan mengelola konten serta pendaftar intern dan relawan.
+Situs publik berisi Beranda, Tentang Kami, Program dan detail program, Berita & Kegiatan dan detail artikel, Bergabung, serta Kontak. Foto dokumentasi ditampilkan pada detail program atau artikel masing-masing; tidak ada halaman Galeri tersendiri. Panel admin menggunakan sidebar, bukan navbar atas, dan mengelola konten, batch pendaftaran, serta pesan kontak.
 
 ## Baca dokumen sesuai urutan
 
@@ -33,9 +33,10 @@ Situs publik berisi Beranda, Tentang Kami, Program dan detail program, Berita & 
 ## Batasan produk yang harus dijaga
 
 - Role v1 hanya Public dan satu Admin/Product Owner.
-- Pendaftaran intern dan relawan memakai batch. Formulir utama Internship dan Relawan memiliki toggle aktif/nonaktif terpisah; setiap batch juga punya status buka/tutup sendiri. Form hanya dapat menerima pendaftaran jika kedua status aktif.
-- Pertanyaan tambahan Internship dan Relawan dikelola terpisah. Jawaban baru harus divalidasi server dan disimpan dengan snapshot teks pertanyaan agar riwayat terbaca setelah pertanyaan diedit atau dihapus.
-- Foto dan CV pendaftar disimpan di lokasi privat dan hanya disajikan setelah pemeriksaan sesi admin. Foto dokumentasi program/berita adalah data terpisah.
+- Pendaftaran Internship dan Relawan dilakukan lewat layanan formulir eksternal pilihan Admin. Simpan URL di `batches.google_form_url`; setiap batch punya sakelar `batches.is_open` yang diatur dari halaman Batch.
+- Link publik hanya tersedia jika URL web valid tersimpan dan batch itu dibuka. Terima URL absolut dengan skema `http` atau `https` dari domain mana pun, tanpa username/password di URL. Beberapa batch boleh dibuka bersamaan.
+- Website tidak mengumpulkan jawaban baru, foto, atau CV pendaftar. Tabel aplikasi dan file lama tetap dipertahankan agar data dari versi sebelumnya tidak hilang.
+- Pertanyaan serta jawaban dikelola di layanan formulir yang ditautkan. Jangan membuat CRUD pertanyaan di Admin website kecuali ada perubahan keputusan produk.
 - Foto dokumentasi berada di dalam detail program atau berita/kegiatan; jangan menambahkan halaman galeri mandiri.
 - Konten yang ditetapkan statis di PRD tetap berada di `config/site.php` untuk v1; jangan membuat CMS umum tanpa perubahan ruang lingkup.
 - Ikuti ERD dan DDL untuk bentuk data. Jangan menambah/menghapus kolom diam-diam.
@@ -45,8 +46,8 @@ Situs publik berisi Beranda, Tentang Kami, Program dan detail program, Berita & 
 ## Keputusan teknis utama
 
 - PHP minimum **8.4**, MySQL atau MariaDB yang disediakan paket hosting, PDO prepared statements.
-- Shared hosting cPanel adalah target; seluruh fitur operasional harus bisa berjalan tanpa akses root atau proses server yang menetap.
-- Composer dipakai untuk autoload dan pustaka ekspor. GSAP disajikan lokal. Tidak ada build frontend yang wajib di server.
+- DirectAdmin adalah target hosting saat ini; akun yang ditunjukkan tidak mencantumkan SSH, jadi proses deployment harus bisa dilakukan dengan File Manager/FTP dan phpMyAdmin. Seluruh fitur operasional harus bisa berjalan tanpa akses root atau proses server yang menetap.
+- Composer dipakai untuk autoload dan pustaka yang digunakan aplikasi. GSAP disajikan lokal. Tidak ada build frontend yang wajib di server.
 - Folder aplikasi, `.env`, log, dan dokumen pendaftar berada di luar web root bila konfigurasi hosting memungkinkan. Hanya `public/` yang dapat diakses langsung.
 - Deployment harus menjaga `.env`, `vendor/`, file unggahan, dan penyimpanan privat. Jangan memakai perintah sinkronisasi yang menghapus data runtime.
 

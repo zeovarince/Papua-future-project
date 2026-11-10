@@ -44,7 +44,7 @@ Aturan wajib untuk semua kode di proyek Papua Future Project. Berlaku untuk manu
 
 ### 2.4 Service
 
-- Logika yang menyentuh lebih dari satu Model, atau menyentuh file system: upload, gambar, galeri, pendaftaran, ekspor, autentikasi.
+- Logika yang menyentuh lebih dari satu Model, atau menyentuh file system: upload gambar, galeri, dan autentikasi.
 - Tidak membaca superglobal PHP langsung.
 
 ### 2.5 Validator
@@ -93,25 +93,26 @@ Dokumen ini menetapkan aturan dasar. Untuk konfigurasi hosting, pemantauan integ
 - Rate limit login: 5 percobaan gagal per 15 menit per kombinasi IP+email.
 - Identifier pembatas laju dibuat dengan HMAC-SHA256 dan `APP_KEY`; jangan menyimpan IP mentah sebagai identifier.
 - Di production, akses admin memakai jalur acak `ADMIN_PATH`. Jalur default `/admin` menjawab 404; semua route admin tetap wajib memakai middleware autentikasi.
-- Catat login, ekspor, perubahan status, dan penghapusan ke `storage/logs/security.log` tanpa kata sandi, email, isi form, token, atau data pribadi.
-- Jawaban pertanyaan pendaftaran adalah data pendaftar: hanya tampil kepada admin terautentikasi, selalu di-escape saat dirender, dan tidak dimasukkan ke security log.
-- Untuk menyimpan pendaftaran, periksa status formulir jenis dan status batch di dalam transaksi; jangan hanya mengandalkan status toggle di tampilan.
+- Catat login, perubahan batch, dan penghapusan ke `storage/logs/security.log` tanpa kata sandi, email, isi form kontak, token, atau data pribadi.
+- Link pendaftaran divalidasi di server sebagai URL absolut dengan skema `http` atau `https`, host valid, tanpa username/password, dan panjang maksimal 500 karakter. Domain layanan tidak dibatasi. Jangan menerima skema lain seperti `javascript:` atau `data:`.
+- Link pendaftaran tersedia hanya jika URL valid tersimpan dan sakelar batch terbuka. Setiap batch berdiri sendiri; beberapa batch dapat dibuka bersamaan. Periksa status dan URL di server sebelum mengarahkan pengunjung.
+- Jawaban, unggahan, dan data pendaftar baru dikelola oleh layanan formulir pada tautan batch. Jangan menerima atau menyimpan POST pendaftaran lokal. Tabel aplikasi website hanya arsip versi sebelumnya.
 
 ### 3.5 Upload File
 
 - Periksa `UPLOAD_ERR_OK` lebih dulu.
-- Ukuran: foto 2 MB (pendaftar), 8 MB (galeri), CV 5 MB. Foto pendaftar maksimal 16 megapiksel dan 8.000 piksel pada tiap sisi agar pemrosesan GD sesuai batas memori shared hosting.
+- Ukuran foto galeri: maksimal 8 MB sebelum diproses, 30 foto per item, dan 20 file per unggahan. Data foto/CV pendaftar dari versi lama tidak diunggah atau disajikan oleh fitur aktif.
 - Tipe diperiksa dari isi file (`finfo_file`), bukan dari ekstensi atau Content-Type browser.
-- Foto: `getimagesize()` harus berhasil. CV: awalan `%PDF-`.
-- Nama file dibuat sistem. Berkas pendaftar memakai token direktori acak dari `random_bytes(16)` dan nama file tetap di dalam direktori tersebut.
+- Foto harus lolos `getimagesize()`. Pemeriksaan PDF tidak diperlukan untuk pendaftaran baru karena berkas dikumpulkan melalui layanan formulir eksternal.
+- Nama file gambar yang diunggah dibuat sistem; nama asli dari pengguna tidak dipakai pada jalur berkas.
 - Gambar disimpan ulang lewat GD (menghapus EXIF, termasuk GPS).
-- File pendaftar disimpan di `STORAGE_DIR/applications/` (di luar `public/`) dan akses langsung folder ditolak oleh `.htaccess`.
+- Jika arsip foto/CV pendaftar lama masih ada di `STORAGE_DIR/applications/`, pertahankan di luar `public/` dan jangan sajikan lewat URL publik.
 - `public/uploads/.htaccess` memblokir eksekusi PHP.
 
 ### 3.6 Rate Limiting
 
 - Form kontak: 5 per jam per IP.
-- Form pendaftaran: 5 per jam per IP.
+- Batas kiriman pendaftaran baru diterapkan oleh layanan formulir eksternal, bukan aplikasi PFP.
 - Login: 5 gagal per 15 menit per IP+email.
 - Disimpan di tabel `rate_limits`, dibersihkan oleh cron harian.
 
@@ -132,8 +133,8 @@ Panel admin juga mengirim `X-Robots-Tag: noindex, nofollow` dan `Cache-Control: 
 - Timezone sesi MySQL diset `Asia/Jayapura` (WIT) saat koneksi dibuka.
 - Engine: InnoDB untuk semua tabel (mendukung transaksi dan foreign key).
 - Foreign key dipakai di mana ada relasi (lihat ERD.md).
-- `ON DELETE CASCADE` untuk foto (ikut terhapus). `ON DELETE RESTRICT` untuk batch (ditolak jika ada data).
-- Transaksi dipakai untuk operasi yang melibatkan banyak tabel (contoh: insert pendaftar + file).
+- `ON DELETE CASCADE` untuk foto terkait konten. Batch dengan anggota tim tidak boleh dihapus; arsip aplikasi lama dilepas dari batch dengan `ON DELETE SET NULL`.
+- Transaksi dipakai untuk operasi aktif yang melibatkan beberapa perubahan database, seperti menetapkan satu founder atau menyimpan konten beserta urutannya.
 
 ## 5. Naming convention route
 
@@ -174,7 +175,7 @@ Tipe:
 Contoh:
 ```
 feat: tambah CRUD program dengan upload foto
-fix: validasi email pendaftar case-insensitive
+fix: validasi tautan pendaftaran web per batch
 refactor: pindahkan logika upload ke UploadService
 docs: tambah GSAP.md
 ```
@@ -238,15 +239,15 @@ node_modules/
 
 ## 11. File dan folder
 
-- Folder baru yang perlu writable: `storage/logs/`, `storage/applications/`, `storage/cache/`, `public/uploads/programs/`, `public/uploads/posts/`, `public/uploads/team/`.
-- Permission: folder 0755, file 0644, folder upload privat (`storage/applications/`) 0750.
+- Folder writable: `storage/logs/`, `storage/cache/`, `public/uploads/programs/`, `public/uploads/posts/`, `public/uploads/team/`. `storage/applications/` hanya dipertahankan bila masih ada arsip pendaftar lama.
+- Permission: folder 0755, file 0644, arsip privat (`storage/applications/`) 0750.
 - Folder upload punya `.gitkeep` agar masuk Git, tapi isinya di-ignore.
 
 ## 12. Dependency management
 
 - Gunakan Composer untuk autoloading dan library.
 - `composer.json` berisi autoload PSR-4: `App\\` → `app/`.
-- Hanya dua library eksternal: `phpoffice/phpspreadsheet` dan `dompdf/dompdf`.
+- Gunakan hanya library eksternal yang masih dipakai fitur aktif; library ekspor lama tidak diperlukan.
 - Tidak menambah library baru tanpa alasan tertulis dan persetujuan.
 - `composer install --no-dev` di production.
 
@@ -254,5 +255,5 @@ node_modules/
 
 - Validasi: unit test untuk setiap Validator (input valid, input invalid, edge case).
 - Model: unit test untuk query kritis (insert, unique constraint, cascade delete).
-- Alur E2E: test pendaftaran (termasuk upload), login admin, CRUD minimal.
+- Alur E2E: periksa halaman Bergabung dan pengalihan ke tautan eksternal, login admin, toggle batch, dan CRUD konten.
 - Jalankan: `./vendor/bin/phpunit`.

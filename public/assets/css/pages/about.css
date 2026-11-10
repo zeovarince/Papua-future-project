@@ -3,7 +3,7 @@ html { scroll-behavior: smooth; }
     /* ── HERO ── */
     .hero-bg {
       background: linear-gradient(180deg, rgba(15,23,42,0.45) 0%, rgba(15,23,42,0.85) 100%),
-                  url('../../img/hero/herobanner.png') center/cover no-repeat;
+                  url('https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/herobanner') center/cover no-repeat;
     }
     .wave-divider {
       position: absolute;
@@ -131,20 +131,33 @@ html { scroll-behavior: smooth; }
 
     /* ── MASONRY FOTO ── */
     .masonry-grid {
-      column-count: 3;
-      column-gap: 12px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .masonry-column {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+      gap: 12px;
     }
     .masonry-item {
-      break-inside: avoid;
-      margin-bottom: 12px;
       border-radius: 12px;
       overflow: hidden;
       position: relative;
       cursor: pointer;
     }
+    .masonry-photo-frame { width: 100%; overflow: hidden; }
+    .masonry-photo-frame--landscape { aspect-ratio: 4 / 3; }
+    .masonry-photo-frame--portrait { aspect-ratio: 3 / 4; }
+    .masonry-photo-frame--portrait-short { aspect-ratio: 4 / 5; }
+    .masonry-photo-frame--wide { aspect-ratio: 16 / 9; }
+    .masonry-photo-frame--square { aspect-ratio: 1 / 1; }
     .masonry-photo {
       display: block;
       width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     .masonry-overlay {
       position: absolute;
@@ -180,6 +193,7 @@ html { scroll-behavior: smooth; }
       max-width: 960px;
       margin: 0 auto;
     }
+    .visimisi-grid-single { grid-template-columns: minmax(0, 1fr); }
     .visi-card {
       background: #3770c1;
       border-radius: 20px;
@@ -236,9 +250,6 @@ html { scroll-behavior: smooth; }
       overflow: hidden;
     }
     .team-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
-    .team-avatar-initial {
-      font-size: 22px; font-weight: 700; color: white;
-    }
     .team-name { font-size: 16px; font-weight: 700; color: #1a1f2e; margin-bottom: 8px; }
     .team-role {
       display: inline-block;
@@ -251,9 +262,158 @@ html { scroll-behavior: smooth; }
       margin-bottom: 12px;
     }
     .team-desc { font-size: 13px; color: #6b7280; line-height: 1.6; }
-    .team-batches-section .team-batch-group { margin-top: 34px; }
-    .team-batch-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid #dbe6f2; padding-bottom: 12px; margin-bottom: 4px; }
-    .team-batch-heading h3 { margin: 0; color: #1a1f2e; font-size: 22px; }
+    .team-batches-section .team-batch-group { margin-top: 26px; }
+    .team-batch-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid #dbe6f2; padding-bottom: 12px; margin-bottom: 0; }
+    .team-batch-heading h3 {
+      margin: 0;
+      color: #173b64;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(27px, 3.2vw, 34px);
+      font-weight: 600;
+      letter-spacing: -0.045em;
+      line-height: 1.12;
+    }
+    .team-batch-heading .team-role {
+      margin: 0;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      color: #70829a;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .team-member-university {
+      margin: 0 0 8px;
+      color: #6b7280;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .team-member-bio {
+      margin: 0 0 4px;
+      color: #56677c;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .team-member-division {
+      position: relative;
+      display: inline-block;
+      padding-top: 10px;
+      color: #285f9f;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      line-height: 1.45;
+    }
+    .team-member-division::before {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 28px;
+      height: 2px;
+      background: #8fc8ef;
+      content: '';
+      transform: translateX(-50%);
+    }
+    .team-core-role {
+      margin: 0 0 10px;
+      padding-top: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .team-core-role::before { width: 22px; }
+    #tim .pfp-divider { margin-bottom: 20px; }
+    .team-core-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      align-items: end;
+      gap: 18px;
+      margin-top: 0;
+    }
+    .team-batches-section .team-grid { margin-top: 6px; }
+    .team-profile-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 0;
+      padding: 0 8px;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .team-profile-card:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    .team-profile-photo {
+      position: relative;
+      width: min(100%, 320px);
+      height: clamp(360px, 34vw, 460px);
+      flex: 0 0 auto;
+      margin: 0 auto 6px;
+      overflow: hidden;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      -webkit-mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 76%, transparent 100%);
+    }
+    .team-profile-photo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center bottom;
+      transform: scale(1.12);
+      transform-origin: center bottom;
+    }
+    .team-profile-photo-empty { opacity: .2; }
+    .team-profile-name {
+      margin: 0 0 4px;
+      font-size: 15px;
+      line-height: 1.35;
+      text-wrap: balance;
+    }
+    .team-profile-role {
+      margin: 0 0 8px;
+      color: #556b83;
+      font-size: 13px;
+      line-height: 1.4;
+      text-wrap: balance;
+    }
+    .team-profile-card .team-member-university {
+      margin: 0 0 4px;
+      color: #75849a;
+      font-size: 12px;
+      line-height: 1.4;
+      text-wrap: balance;
+    }
+    .team-profile-card .team-profile-role::before { display: none; }
+    .team-profile-card .team-member-bio,
+    .team-profile-card .team-desc:not(.team-member-university):not(.team-member-bio) {
+      max-width: 250px;
+      margin: 2px 0 0;
+      font-size: 12px;
+    }
+    .team-batches-section .team-profile-photo {
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 2 / 3;
+      margin-bottom: 10px;
+    }
+    .team-batches-section .team-profile-photo img {
+      height: 100%;
+      object-fit: cover;
+      transform: none;
+    }
+    .team-batches-section .team-profile-photo-empty {
+      width: min(100%, 320px);
+      height: auto;
+      aspect-ratio: 2 / 3;
+    }
+    .team-profile-card-internship .team-profile-role { margin-top: 2px; }
     .about-section-heading { text-align: center; margin-bottom: 28px; }
     .vision-label, .mission-label { color: #3770c1; font-size: 14px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
 
@@ -273,13 +433,20 @@ html { scroll-behavior: smooth; }
       .pfp-container  { padding: 0 24px; }
       .pfp-section    { padding: 56px 0; }
       .history-grid   { grid-template-columns: 1fr; gap: 40px; }
-      .masonry-grid   { column-count: 2; }
+      .masonry-grid   { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .masonry-column { display: contents; }
+      .masonry-item { order: var(--gallery-order); }
       .visimisi-grid  { grid-template-columns: 1fr; }
       .team-grid      { grid-template-columns: repeat(2, 1fr); }
+      .team-profile-photo { height: clamp(300px, 38vw, 400px); }
     }
     @media (max-width: 479.98px) {
       .pfp-title      { font-size: 26px; }
-      .masonry-grid   { column-count: 1; }
-      .team-grid      { grid-template-columns: 1fr; }
+      .masonry-grid   { grid-template-columns: 1fr; }
+      .team-grid      { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .team-profile-card { padding: 0 2px; }
+      .team-profile-photo { width: 100%; height: clamp(245px, 66vw, 285px); }
+      .team-profile-name { font-size: 13px; }
+      .team-profile-role { font-size: 11px; }
       .team-batch-heading { align-items: flex-start; flex-direction: column; }
     }

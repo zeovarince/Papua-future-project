@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 $isCore = ($group === 'penggerak');
 $groupTitles = [
-    'penggerak' => 'Tim Penggerak',
+    'penggerak' => 'Core Team',
     'internship' => 'Internship',
     'volunteer' => 'Volunteer',
 ];
@@ -28,12 +28,12 @@ if (!$isCore) {
 ?>
 
 <?php if ($isCore): ?>
-    <!-- Tim Penggerak: Pola Daftar Standar (DESIGN-ADMIN.md section 5.3) -->
+    <!-- Core Team -->
     <div class="card">
         <div class="card-header">
             <div style="display: flex; align-items: center; gap: 10px;">
-                <h2 class="card-title">Daftar Tim Penggerak</h2>
-                <span class="badge-pill"><?= count($members) ?> pengurus</span>
+                <h2 class="card-title">Daftar Core Team</h2>
+                <span class="badge-pill"><?= count($members) ?> anggota</span>
             </div>
             <div class="card-filter-bar">
                 <div class="search-pill-wrap">
@@ -46,8 +46,8 @@ if (!$isCore) {
         <?php if ($members === []): ?>
             <?php
                 $icon = 'user-check';
-                $emptyTitle = 'Belum ada Tim Penggerak';
-                $description = 'Tambahkan profil pengurus inti lembaga agar tampil di halaman Tentang Kami.';
+                $emptyTitle = 'Belum ada anggota Core Team';
+                $description = 'Tambahkan profil anggota Core Team agar tampil di halaman Tentang Kami.';
                 $actionUrl = url('/admin/tim/penggerak/tambah');
                 $actionLabel = 'Tambah Anggota';
                 require APP_ROOT . '/app/Views/partials/admin/empty-state.php';
@@ -145,27 +145,14 @@ if (!$isCore) {
                 <?php
                     $bid = (int) $batch['id'];
                     $bMembers = $membersByBatch[$bid] ?? [];
-                    $isOpen = ((int) ($batch['is_open'] ?? 0) === 1);
                 ?>
                 <div class="card">
                     <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
                         <div style="display: flex; align-items: center; gap: 12px;">
                             <h2 class="card-title"><?= e($batch['name']) ?></h2>
-                            <?php $status = $isOpen ? 'open' : 'closed'; require APP_ROOT . '/app/Views/partials/admin/status-pill.php'; ?>
                             <span class="badge-pill"><?= count($bMembers) ?> anggota</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 12px; margin-left: auto;">
-                            <!-- Toggle Buka / Tutup -->
-                            <form method="post" action="<?= url('/admin/batch/' . $bid . '/toggle') ?>">
-                                <?= csrf_field() ?>
-                                <label class="toggle-switch" title="<?= $isOpen ? 'Tutup pendaftaran' : 'Buka pendaftaran' ?>">
-                                    <input type="checkbox" class="toggle-switch-input" <?= $isOpen ? 'checked' : '' ?> data-auto-submit>
-                                    <span class="toggle-switch-track"></span>
-                                    <span class="toggle-switch-label" style="font-size: 12px; font-weight: 500;">
-                                        <?= $isOpen ? 'Pendaftaran dibuka' : 'Pendaftaran ditutup' ?>
-                                    </span>
-                                </label>
-                            </form>
                             <a href="<?= url('/admin/tim/' . $group . '/tambah?batch_id=' . $bid) ?>" class="btn btn-primary btn-sm">
                                 <?= icon('plus', '', 16) ?>
                                 <span>Tambah Anggota</span>

@@ -46,7 +46,7 @@ final class TeamMemberValidator
 
         if ($memberGroup === 'CORE') {
             if ($batchValue !== '') {
-                $errors['batch_id'] = 'Tim Penggerak tidak menggunakan batch.';
+                $errors['batch_id'] = 'Core Team tidak menggunakan batch.';
             }
             $batchId = null;
         } else {
@@ -70,6 +70,7 @@ final class TeamMemberValidator
             'university' => $university !== '' ? $university : null,
             'bio' => $bio !== '' ? $bio : null,
             'long_bio' => $longBio !== '' ? $longBio : null,
+            'home_photo_path' => null,
             'is_founder' => $memberGroup === 'CORE' && !empty($input['is_founder']),
             'sort_order' => $sortOrder === false ? 0 : (int) $sortOrder,
             'is_published' => !isset($input['is_published']) || !empty($input['is_published']),

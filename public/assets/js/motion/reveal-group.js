@@ -44,8 +44,12 @@ const PAGE_GROUPS = {
     ['.dynamic-related .news-grid', '.news-card', 'fade-up', true],
   ],
   join: [
+    ['.join-benefits-section .join-section-heading', ':scope > *', 'fade-up'],
     ['.benefit-grid', '.benefit-card', 'fade-up', true],
+    ['.join-process-section .join-section-heading', ':scope > *', 'fade-up'],
     ['.timeline-wrap', '.timeline-item', 'fade-up', true],
+    ['.join-path-section .join-section-heading', ':scope > *', 'fade-up'],
+    ['.join-path-grid', '.join-path-card', 'fade-up', true],
     ['#form-daftar .form-wrap-join', ':scope > *', 'fade-up'],
   ],
   'join-success': [

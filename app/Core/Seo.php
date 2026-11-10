@@ -6,7 +6,8 @@ namespace App\Core;
 
 final class Seo
 {
-    private const NO_INDEX_PAGES = ['join-success', 'not-found', 'error'];
+    private const NO_INDEX_PAGES = ['join-form', 'join-success', 'not-found', 'error'];
+    private const DEFAULT_SOCIAL_IMAGE = 'https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/herosectionbanner2';
 
     public static function forPage(array $data): array
     {
@@ -15,20 +16,24 @@ final class Seo
         $description = self::description($data, $page);
         $path = self::currentPath();
         $canonical = self::absoluteUrl($path);
-        $isJoinFormPage = $page === 'join' && $path !== '/bergabung';
-        $joinFormIsOpen = !empty($data['isFormActive']) && !empty($data['openBatches']);
-        $imagePath = '/assets/img/hero/herobanner.png';
+        $image = self::DEFAULT_SOCIAL_IMAGE;
 
         if ($page === 'program-detail' && !empty($data['program']['cover_image'])) {
-            $imagePath = '/uploads/' . ltrim((string) $data['program']['cover_image'], '/');
+            $image = self::absoluteUrl('/uploads/' . ltrim((string) $data['program']['cover_image'], '/'));
         } elseif ($page === 'news-detail' && !empty($data['post']['cover_image'])) {
-            $imagePath = '/uploads/' . ltrim((string) $data['post']['cover_image'], '/');
+            $image = self::absoluteUrl('/uploads/' . ltrim((string) $data['post']['cover_image'], '/'));
         }
 
         $organization = self::organizationSchema();
+        $schemaPageType = match ($page) {
+            'about' => 'AboutPage',
+            'contact' => 'ContactPage',
+            'program', 'news' => 'CollectionPage',
+            default => 'WebPage',
+        };
         $schemas = [[
             '@context' => 'https://schema.org',
-            '@type' => 'WebPage',
+            '@type' => $schemaPageType,
             'name' => $title,
             'description' => $description,
             'url' => $canonical,
@@ -74,9 +79,7 @@ final class Seo
                     $article['dateModified'] = $modified;
                 }
             }
-            if (!empty($post['cover_image'])) {
-                $article['image'] = self::absoluteUrl($imagePath);
-            }
+            $article['image'] = $image;
             $schemas[] = $article;
             $schemas[] = self::breadcrumbSchema([
                 ['name' => 'Beranda', 'path' => '/'],
@@ -96,10 +99,12 @@ final class Seo
             'title' => $title,
             'description' => $description,
             'canonical' => $canonical,
-            'image' => self::absoluteUrl($imagePath),
+            'image' => $image,
+            'imageAlt' => self::imageAlt($page, $data),
+            'publishedAt' => $page === 'news-detail' ? self::isoDate((string) ($data['post']['published_at'] ?? '')) : null,
+            'modifiedAt' => $page === 'news-detail' ? self::isoDate((string) ($data['post']['updated_at'] ?? '')) : null,
             'robots' => getenv('APP_ENV') === 'production'
                 && !in_array($page, self::NO_INDEX_PAGES, true)
-                && (!$isJoinFormPage || $joinFormIsOpen)
                 ? 'index,follow,max-image-preview:large'
                 : 'noindex,nofollow',
             'type' => $page === 'news-detail' ? 'article' : 'website',
@@ -147,6 +152,15 @@ final class Seo
         }
 
         return $text;
+    }
+
+    private static function imageAlt(string $page, array $data): string
+    {
+        return match ($page) {
+            'program-detail' => (string) (($data['program']['title'] ?? '') ?: 'Dokumentasi program Papua Future Project'),
+            'news-detail' => (string) (($data['post']['title'] ?? '') ?: 'Berita Papua Future Project'),
+            default => 'Anak-anak dan relawan Papua Future Project di Papua Barat',
+        };
     }
 
     private static function currentPath(): string

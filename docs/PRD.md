@@ -18,9 +18,9 @@ Karena itu proyek ini punya dua pekerjaan: memindahkan UI publik ke PHP native M
 ## 2. Tujuan
 
 1. Publik memahami siapa PFP, apa programnya, dan seberapa jauh dampaknya, lengkap dengan foto dokumentasi lapangan.
-2. Calon relawan dan intern bisa mendaftar online, lengkap dengan foto dan CV.
+2. Calon relawan dan intern dapat memilih batch yang dibuka lalu melanjutkan pendaftaran melalui formulir eksternal yang ditautkan Admin.
 3. Pengunjung bisa menghubungi PFP lewat form kontak.
-4. Admin (Product Owner) bisa memperbarui konten, mengelola tim, membuka atau menutup pendaftaran per batch, meninjau pendaftar, dan mengekspor data tanpa menyentuh kode.
+4. Admin (Product Owner) bisa memperbarui konten, mengelola tim, mengatur link pendaftaran dan status per batch, serta membaca pesan masuk tanpa menyentuh kode.
 
 ## 3. Di luar cakupan v1
 
@@ -35,8 +35,8 @@ Karena itu proyek ini punya dua pekerjaan: memindahkan UI publik ke PHP native M
 
 | Peran | Akses |
 | --- | --- |
-| Public | Melihat semua halaman publik, mengirim pesan lewat form kontak, dan mengisi form pendaftaran saat ada batch yang dibuka. Tanpa login. |
-| Admin / Product Owner | Login ke panel admin. Mengelola konten, tim, batch, pendaftar, dan pesan masuk. |
+| Public | Melihat semua halaman publik, mengirim pesan lewat form kontak, dan membuka formulir eksternal saat batch tersedia. Tanpa login. |
+| Admin / Product Owner | Login ke panel admin. Mengelola konten, tim, batch dan link pendaftaran, serta pesan masuk. |
 
 ## 5. Daftar fitur yang disepakati
 
@@ -46,20 +46,19 @@ Public:
 - Tentang Kami: cerita Jordy, visi dan misi, Tim Penggerak, Internship per batch, Volunteer per batch.
 - Program: daftar dan detail per program, dengan foto dokumentasi.
 - Berita dan Kegiatan: daftar dan detail per artikel, dengan foto dokumentasi.
-- Bergabung: form relawan (dibuka atau ditutup oleh admin).
+- Bergabung: daftar batch pendaftaran; tombol Daftar membuka formulir dari link batch yang sedang dibuka.
 - Kontak: lokasi, sosial media, form kontak, FAQ, peta, dan logo mitra.
 
 Admin:
 
 - CRUD Tentang Kami: cerita, visi dan misi, Tim Penggerak, data intern per batch, data volunteer per batch.
-- Toggle buka atau tutup pendaftaran intern per batch.
-- Toggle buka atau tutup pendaftaran relawan per batch.
+- Kelola link pendaftaran dan toggle buka atau tutup pendaftaran di halaman Batch, per batch.
 - CRUD Program, termasuk foto dokumentasi.
 - CRUD Berita dan Kegiatan, termasuk foto dokumentasi.
 - CRUD FAQ.
-- Lihat dan kelola pendaftar (detail, ekspor PDF dan Excel).
+- Pendaftaran baru dan jawaban dikelola oleh layanan eksternal pada link batch; tidak ada daftar pendaftar atau ekspor jawaban di panel admin website.
 
-Tambahan kecil di luar daftar di atas, perlu persetujuan (lihat A6): halaman admin Pesan masuk untuk membaca isi form kontak, dan halaman Ringkasan di dashboard.
+Tambahan kecil di luar daftar di atas, perlu persetujuan (lihat A6): halaman admin Pesan masuk untuk membaca isi form kontak, dan Ringkasan sebagai halaman awal admin. Ringkasan hanya menampilkan statistik konten/pesan dan pesan terbaru; pengaturan pendaftaran tetap hanya di Batch.
 
 ## 6. Kebutuhan Public
 
@@ -114,10 +113,10 @@ Lima program awal: Bimbingan Belajar dan Literasi, Literasi Digital, Pojok Baca 
 
 | ID | Kebutuhan | Sumber |
 | --- | --- | --- |
-| PUB-40 | Hero ajakan dan tombol Daftar Sekarang yang menuju form. | Statis |
+| PUB-40 | Hero ajakan ke halaman Bergabung. | Statis |
 | PUB-41 | Manfaat menjadi relawan (tiga poin) dan langkah bergabung (empat langkah dengan perkiraan waktu). | Statis |
-| PUB-42 | Form pendaftaran hanya tampil bila jenis formulir aktif dan ada batch jenis itu yang dibuka. Pengunjung memilih batch dari kartu jalur sebelum formulir terbuka; form tidak meminta pilihan batch kedua kali. Internship dan Relawan memiliki konfigurasi pertanyaan terpisah; upload hanya tampil jika field file aktif. | DB: status formulir, batch, dan pertanyaan |
-| PUB-43 | Setelah berhasil, tampil halaman konfirmasi (`/bergabung/berhasil`). | Statis |
+| PUB-42 | Tampilkan batch yang sedang dibuka. Tombol Daftar membuka link pendaftaran pada batch tersebut di tab baru. Beberapa batch Internship dan Relawan dapat dibuka bersamaan. | DB: status batch dan URL pendaftaran |
+| PUB-43 | Pengiriman dan halaman konfirmasi dikelola oleh layanan pada link yang dipilih. Website PFP tidak menerima jawaban pendaftaran langsung. | Layanan formulir eksternal |
 
 ### 6.6 Kontak (`/kontak`)
 
@@ -139,55 +138,39 @@ Lima program awal: Bimbingan Belajar dan Literasi, Literasi Digital, Pojok Baca 
 
 | ID | Kebutuhan |
 | --- | --- |
-| ADM-01 | Login admin. Semua halaman `/admin` dan semua file pendaftar hanya bisa diakses setelah login. |
+| ADM-01 | Login admin. Semua halaman `/admin` hanya bisa diakses setelah login. |
 | ADM-02 | CRUD Tentang Kami: ubah cerita, visi, dan misi. |
 | ADM-03 | CRUD Tim Penggerak: tambah, ubah, hapus, atur urutan, tandai founder. |
 | ADM-04 | CRUD data Intern, dikelompokkan per batch. |
 | ADM-05 | CRUD data Relawan (Volunteer), dikelompokkan per batch. |
-| ADM-06 | Batch: buat, ubah, hapus. Toggle buka atau tutup pendaftaran per batch, baik untuk intern maupun relawan. Toggle tersedia di halaman Batch dan di header tiap kelompok batch pada halaman Internship dan Volunteer. |
+| ADM-06 | Batch: buat, ubah, hapus. Daftar Batch menjadi satu-satunya tempat mengubah status buka/tutup; halaman Internship dan Volunteer hanya mengelola anggota tim. |
 | ADM-07 | CRUD Program: semua isian detail program (bagian 6.3), tandai unggulan, atur urutan, dan kelola foto dokumentasi. |
 | ADM-08 | CRUD Berita dan Kegiatan: judul, kategori, tanggal terbit, ringkasan, isi, gambar sampul, penulis, keterangan khusus (untuk Penghargaan dan Liputan Media), dan kelola foto dokumentasi. Terbitkan atau simpan sebagai draf. |
 | ADM-09 | CRUD FAQ: tambah, ubah, hapus, atur urutan, terbitkan atau sembunyikan. |
-| ADM-10 | Daftar pendaftar dengan filter tipe, batch, dan status, serta pencarian nama. Halaman detail menampilkan semua data, foto inline, tombol "Lihat CV" (tab baru) dan "Download CV". Admin mengubah status: Baru, Ditinjau, Diterima, Ditolak. |
-| ADM-11 | Ekspor data pendaftar ke Excel/CSV dan PDF (bagian 10). |
+| ADM-10 | Pengaturan pendaftaran dibuat sederhana per batch: Admin mengisi link formulir apa pun saat membuat/mengubah batch dan membuka atau menutup pendaftaran langsung dari daftar Batch. |
 | ADM-12 | (Tambahan, A6) Pesan masuk: daftar pesan dari form kontak, detail, tanda sudah dibaca, hapus. |
-| ADM-13 | (Tambahan) Ringkasan: jumlah pendaftar baru, pesan belum dibaca, batch yang sedang dibuka, dan berita terakhir. |
-| ADM-14 | Status aktif formulir Internship dan Relawan dapat diubah secara terpisah. Pendaftaran publik hanya diterima bila formulir jenis tersebut aktif dan batch yang dipilih terbuka. |
-| ADM-15 | Kelola pertanyaan bawaan (nama, tanggal lahir, email, WhatsApp, domisili, status, universitas, ketersediaan/minat, motivasi, portofolio, foto, CV) dan pertanyaan tambahan secara terpisah untuk Internship dan Relawan. Admin dapat mengubah teks, pilihan, urutan, status wajib/opsional, dan tampil/sembunyi; tipe input field bawaan yang terkait penyimpanan khusus tetap. Jawaban tersimpan bersama pendaftar, tampil di detail, dan ikut ekspor. |
+| ADM-13 | Ringkasan sebagai halaman awal menampilkan jumlah pesan belum dibaca, berita terbit, dan pesan terbaru. Tidak ada pengaturan pendaftaran di Ringkasan. |
 
 | ADM-16 | Admin yang sudah masuk dapat membuat akun admin tambahan melalui panel tanpa menjalankan perintah atau mengedit kode. Setiap admin dapat mengganti kata sandi sendiri dengan verifikasi kata sandi saat ini. Semua akun memiliki satu tingkat akses Admin. |
 
 ## 8. Pendaftaran Relawan dan Intern
 
-Internship dan Relawan memiliki form serta konfigurasi pertanyaan masing-masing. Tipe pendaftaran ditentukan oleh halaman dan batch yang dipilih. Tabel berikut adalah isian bawaan saat database dibuat; Admin dapat menyembunyikan atau menjadikannya opsional, serta mengubah label/pilihan yang tersedia. Field upload memiliki format khusus dan hanya muncul saat diaktifkan.
+Form pendaftaran Internship dan Relawan dibuat serta dikelola melalui layanan eksternal pilihan Admin (misalnya Google Forms). Setiap batch menyimpan tautan formnya sendiri dan status buka/tutupnya. Admin mengatur tautan melalui Ubah Batch dan status langsung di daftar Batch. Pengunjung memilih batch yang tersedia di website, lalu tombol Daftar membuka form batch itu pada tab baru. Pertanyaan, unggahan, penerimaan jawaban, dan konfirmasi dikelola oleh layanan pada tautan tersebut; jawaban baru tidak masuk ke database website. Halaman pendaftar dan pengaturan form lokal versi lama tidak lagi menjadi fitur admin; tabel lama dipertahankan di database agar data yang sudah ada tidak terhapus saat pembaruan.
 
-| Kelompok | Field | Wajib | Aturan |
-| --- | --- | --- | --- |
-| Batch | Batch | Ya | Hanya batch yang sedang dibuka yang bisa dipilih. Nama batch menyebut tipenya. |
-| Data diri | Nama lengkap | Ya | Maksimal 100 karakter. |
-| | Tanggal lahir | Ya | Tanggal valid. Usia minimal 17 tahun (usulan, A7). |
-| | Email aktif | Ya | Format valid, disimpan dalam huruf kecil. |
-| | Nomor WhatsApp | Ya | Nomor Indonesia, diawali 08 atau +62. |
-| | Domisili saat ini | Ya | Maksimal 120 karakter. |
-| | Pekerjaan atau status saat ini | Ya | Pilihan: Mahasiswa, Fresh Graduate, Karyawan atau Profesional, Wiraswasta, Lainnya. |
-| | Asal universitas atau instansi | Tidak (bawaan) | Admin dapat menjadikannya wajib atau menyembunyikannya. |
-| Ketersediaan dan minat | Durasi penugasan | Ya | Pilihan: 2 minggu, 1 bulan, Fleksibel. |
-| | Bidang yang ingin dikontribusikan | Ya | Pilih satu atau lebih: Literasi dan Bimbingan Belajar, Edukasi Kesehatan dan Gizi, Kegiatan Kreatif (seni, olahraga, permainan), Dokumentasi dan Media, Lainnya atau sesuai kebutuhan tim. |
-| | Dari mana tahu PFP | Ya | Pilihan: Instagram @papuafutureproject, Diajak teman atau kenalan, Artikel atau berita online, Event atau seminar atau pameran, Lainnya. |
-| Motivasi | Kenapa ingin bergabung | Ya | 50 sampai 1000 karakter. |
-| | Keahlian khusus | Tidak | Maksimal 500 karakter. |
-| Berkas | Foto | Ya | JPG, PNG, atau WebP. Maksimal 2 MB, 16 megapiksel, dan 8.000 piksel pada tiap sisi. |
-| | CV | Ya | PDF. Maksimal 5 MB. |
+| Pengaturan | Data | Aturan |
+| --- | --- | --- |
+| Link pendaftaran | URL layanan formulir pilihan Admin pada setiap batch | URL absolut valid dengan skema `http` atau `https`, dari domain apa pun; diisi pada halaman Ubah Batch. |
+| Keterbukaan | Status per batch | Tombol publik tampil hanya bila batch dibuka dan URL valid tersedia. |
+| Jawaban pendaftar | Pertanyaan, dokumen, dan konfirmasi | Dikelola sepenuhnya oleh layanan eksternal pada link; bukan disimpan pada database website. |
 
 Aturan bisnis:
 
-1. Satu email hanya bisa mendaftar satu kali per batch.
-2. Jenis formulir Internship dan Relawan memiliki toggle aktif/nonaktif terpisah. Form hanya bisa dikirim jika jenis formulir aktif dan batch terpilih juga terbuka.
-3. Pertanyaan bawaan dan tambahan diatur terpisah per jenis; hanya pertanyaan aktif untuk jenis yang dipilih ditampilkan dan divalidasi. Admin dapat memilih wajib atau opsional. Jawaban serta label pertanyaan disalin saat pendaftaran agar riwayat tetap terbaca jika admin mengubah atau menyembunyikan pertanyaan.
-4. Bila formulir atau batch ditutup saat pengunjung mengisi, pengiriman ditolak dengan pesan yang jelas dan isian teks tidak hilang.
-5. File disimpan di server di luar folder publik. Foto dan CV hanya bisa dibuka admin yang sedang login.
-6. Batch yang sudah punya pendaftar atau anggota tim tidak bisa dihapus. Admin cukup menutupnya.
-7. Setelah berhasil, pengunjung melihat halaman konfirmasi yang menyebut bahwa tim PFP akan menghubungi lewat WhatsApp atau email dalam 3 sampai 5 hari kerja.
+1. Setiap batch Internship dan Relawan memiliki URL pendaftaran dan sakelar aktif sendiri.
+2. Link Daftar hanya ditampilkan jika URL valid tersedia dan batch terkait dibuka.
+3. URL disimpan setelah validasi URL absolut HTTP/HTTPS yang valid. Domain tidak dibatasi agar Admin dapat memakai layanan apa pun.
+4. Menghapus URL otomatis menutup pendaftaran batch tersebut. Menutup batch tidak menghapus data pada layanan formulir.
+5. Jawaban baru, foto, CV, seleksi, dan pesan konfirmasi disimpan/dikelola oleh layanan yang ditautkan; data tersebut tidak tersedia di panel Pendaftar website.
+6. Batch yang sudah memiliki anggota tim tetap mengikuti aturan hapus batch yang berlaku; Admin dapat menutupnya kapan saja.
 
 ## 9. Form kontak
 
@@ -209,14 +192,11 @@ Pesan disimpan di database (A6) dan muncul di halaman admin Pesan masuk. Form di
 5. Halaman detail menampilkan galeri di bagian Dokumentasi. Halaman daftar Program menampilkan enam foto terbaru lintas program di bagian "Dari Lapangan".
 6. Menghapus program atau berita ikut menghapus foto beserta file-nya.
 
-## 11. Ekspor data pendaftar
+## 11. Data pendaftaran
 
-| Format | Isi |
-| --- | --- |
-| Excel (XLSX) dan CSV | Semua kolom teks (tipe, batch, nama lengkap, tanggal lahir, email, WhatsApp, domisili, status pekerjaan, asal universitas atau instansi, durasi, bidang kontribusi, sumber informasi, motivasi, keahlian khusus, status, tanggal daftar) ditambah tautan langsung ke foto dan CV di server. Di XLSX tautan berupa hyperlink sel. Tautan terbuka selama admin masih login di browser yang sama. |
-| PDF | Laporan formal dan rapi dengan foto pendaftar tampil inline dan tautan CV yang bisa diklik. |
+Pendaftaran baru sepenuhnya berlangsung di layanan formulir eksternal yang dipilih Admin. Admin mengatur URL dan status aktif per batch melalui halaman Batch; jawaban, file, proses seleksi, dan ekspor dikelola oleh layanan tersebut. Website tidak menampilkan dashboard pendaftar atau menyediakan ekspor data pendaftaran.
 
-Kedua format diunduh langsung dari panel admin dan mengikuti filter yang sedang aktif di daftar pendaftar.
+Tabel aplikasi dan jawaban dari formulir website versi lama masih ada di `database/pfp.sql` sebagai arsip kompatibilitas agar pembaruan tidak menghapus data historis. Tabel tersebut bukan bagian fitur aktif dan tidak dipakai untuk pendaftaran baru.
 
 ## 12. Kebutuhan non-fungsional
 
@@ -233,7 +213,7 @@ Kedua format diunduh langsung dari panel admin dan mengikuti filter yang sedang 
 Dari pembacaan UI di GitHub Pages, ada selisih antara UI dan kebutuhan di atas. Perubahan ini dikerjakan di [STEP.md](STEP.md).
 
 1. Tentang Kami belum punya section Internship dan Volunteer per batch. Ditambahkan dengan tampilan card yang sama dengan Tim Penggerak.
-2. Form Jadi Relawan belum punya Batch, Asal universitas, Foto, dan CV. Ditambahkan. Keadaan "pendaftaran ditutup" juga perlu dirancang.
+2. Pendaftaran Internship dan Relawan memakai link formulir pilihan Admin per batch; website menampilkan status ditutup bila tidak ada batch aktif.
 3. Label kategori berita di Beranda (Pendidikan, Kesehatan, Pemuda) berbeda dengan di halaman Berita (Kegiatan Lapangan, Update Program, Liputan Media, Penghargaan). Setelah migrasi, keduanya memakai satu kategori dari database.
 4. Judul dan teks card program di Beranda sedikit berbeda dengan di halaman Program. Setelah migrasi, Beranda memakai judul dan ringkasan program dari database. Samakan data seed.
 5. Detail program (lima file `program-*.html`) dan detail berita (`berita-detail.html`) menjadi satu template View masing-masing dengan data dari database.
@@ -247,25 +227,24 @@ Dokumen ini memakai asumsi di bawah sampai ada keputusan lain. Ubah di sini lebi
 
 | ID | Pertanyaan | Asumsi sementara | Dokumen terdampak |
 | --- | --- | --- | --- |
-| A1 | Satu form atau dua form untuk intern dan relawan? | Satu form. Tipe mengikuti batch. | ERD, SCHEMA, USERFLOW |
-| A2 | Card Intern dan Relawan diinput manual atau otomatis dari pendaftar? | Manual lewat CRUD. Tidak ada relasi otomatis ke pendaftar. | ERD, SCHEMA |
-| A3 | Bagaimana file pendaftar disimpan? | Privat di luar folder publik, dibuka lewat controller yang memeriksa sesi admin. | ARCHITECTURE |
+| A1 | Bagaimana pendaftaran Internship dan Relawan? | Setiap batch menyimpan link pendaftaran pilihan Admin dan sakelar aktifnya sendiri. | ARCHITECTURE, SCHEMA, USERFLOW |
+| A2 | Bagaimana anggota Internship dan Relawan muncul di Tentang Kami? | Admin mengelola anggota secara manual di menu Tim; tidak disinkronkan dari formulir eksternal. | ERD, SCHEMA |
 | A4 | Konten statis (hero, sekilas, angka impact, peta, logo mitra, Perjalanan kami, manfaat dan langkah bergabung, kontak) bisa diedit admin? | Tidak di v1. Ditulis di `config/site.php` dan View. Bisa ditambah di fase lanjut. | ARCHITECTURE, DESIGN-ADMIN |
 | A5 | Dari mana blok Penghargaan dan Liputan Media? | Dari berita berkategori Penghargaan dan Liputan Media. | ERD, SCHEMA |
 | A6 | Ke mana pesan form kontak pergi? | Disimpan di tabel `contact_messages` dan dibaca di halaman admin Pesan masuk. Halaman ini tambahan di luar daftar fix. Bila tidak diinginkan, ganti dengan pengiriman email dan hapus tabelnya. | ERD, SCHEMA, DESIGN-ADMIN |
-| A7 | Aturan khusus form pendaftaran | Usia minimal 17 tahun. Asal universitas wajib hanya untuk Mahasiswa dan Fresh Graduate. | SCHEMA, RULES |
+| A7 | Form pendaftaran lokal lama | Tidak digunakan. Jawaban baru dikelola layanan pada link batch; tabel lama dipertahankan sebagai arsip saja. | ARCHITECTURE, SCHEMA |
 | A8 | Batas galeri | Maksimal 30 foto per item, 8 MB per foto. Foto dikelola di halaman ubah. | ARCHITECTURE |
 | A9 | Slug detail program dan berita | Dibuat otomatis dari judul. | SCHEMA |
-| A10 | Stack dan hosting | PHP 8.4 atau lebih baru, MySQL atau MariaDB, Composer tersedia, shared hosting cPanel dengan Git Version Control. Ketersediaan versi, ekstensi, Terminal/SSH, cron, dan batas resource diverifikasi pada paket akun yang dipilih. | ARCHITECTURE, README |
+| A10 | Stack dan hosting | PHP 8.4 atau lebih baru, MySQL atau MariaDB, Composer (dependensi dipasang lokal bila SSH tidak tersedia), shared hosting DirectAdmin. Akun saat ini menggunakan DirectAdmin dan tidak mencantumkan SSH; cPanel tetap menjadi alternatif. Ketersediaan ekstensi, cron, rewrite, SSL, dan batas resource diverifikasi pada paket akun. | ARCHITECTURE, README, DEPLOY-DIRECTADMIN |
 
 ## 15. Kriteria penerimaan
 
 1. Semua halaman publik tampil sama seperti UI statis pada lebar 360 px dan 1280 px, dengan data dari database.
-2. Pengunjung tanpa login yang membuka URL `/admin` atau URL file pendaftar diarahkan ke login dan tidak menerima file apa pun.
-3. Saat admin menutup batch, batch itu langsung hilang dari pilihan di form publik. Bila tidak ada batch terbuka, form tidak tampil.
-4. Pendaftar dengan email yang sudah terdaftar di batch yang sama ditolak dengan pesan yang jelas.
-5. Detail pendaftar menampilkan foto inline. "Lihat CV" membuka tab baru dan "Download CV" mengunduh file.
-6. Ekspor XLSX dan CSV memuat semua kolom dan tautan foto serta CV. Ekspor PDF memuat foto inline dan tautan CV.
+2. Pengunjung tanpa login yang membuka URL `/admin` diarahkan ke login.
+3. Saat admin menutup batch, tombol Daftar batch itu tidak tampil di halaman Bergabung. Bila tidak ada batch terbuka, website menampilkan status pendaftaran ditutup.
+4. Tombol Daftar membuka URL yang sudah diatur untuk batch terpilih di tab baru.
+5. Link atau status yang belum lengkap tidak pernah menampilkan tombol Daftar; membuka batch mensyaratkan URL HTTP/HTTPS yang valid.
+6. Pengaturan Internship dan Relawan tersedia per batch di halaman Batch dan tidak muncul sebagai pengaturan terpisah di Ringkasan.
 7. Foto yang diunggah di galeri program atau berita tampil di bagian Dokumentasi halaman detailnya, dan foto terbaru program tampil di "Dari Lapangan".
 8. Perubahan oleh admin (program, berita, FAQ, tim, visi misi) tampil di halaman publik tanpa deploy ulang.
 9. Pesan dari form kontak muncul di Pesan masuk dan ditandai belum dibaca.
@@ -279,5 +258,5 @@ Urutan kerja rinci ada di [STEP.md](STEP.md). Ringkasnya:
 | --- | --- |
 | 1 | Migrasi HTML ke PHP MVC dan pemisahan CSS serta JS (Step 1 dan 2). |
 | 2 | Fondasi admin dan konten: database, login, Tentang Kami, Program, Berita, FAQ, Kontak (Step 3 sampai 7). |
-| 3 | Batch, tim, pendaftaran, dan ekspor (Step 8 sampai 10). |
+| 3 | Batch, tim, dan tautan pendaftaran eksternal (Step 8 sampai 10). |
 | 4 | Animasi, keamanan dan pengujian, deployment (Step 11 sampai 13). |

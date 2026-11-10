@@ -38,116 +38,43 @@
 </div>
 </div>
 </div>
+<?php
+$galleryPhotos = [
+    ['order' => 1, 'src' => 'https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/tentangkami1', 'caption' => 'Belajar bersama anak-anak', 'ratio' => 'landscape'],
+    ['order' => 2, 'src' => 'https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/tentangkami2', 'caption' => 'Kegiatan relawan di lapangan', 'ratio' => 'portrait'],
+    ['order' => 3, 'src' => 'https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/tentangkami3', 'caption' => 'Aksi lingkungan di lapangan', 'ratio' => 'landscape'],
+    ['order' => 4, 'src' => 'https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/tentangkami4', 'caption' => 'Relawan bersama anak-anak', 'ratio' => 'portrait'],
+    ['order' => 5, 'src' => 'https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/tentangkami5', 'caption' => 'Kegiatan belajar di kampung', 'ratio' => 'wide'],
+    ['order' => 6, 'src' => 'https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/tentangkami6', 'caption' => 'Nonton bersama anak-anak', 'ratio' => 'square'],
+    ['order' => 7, 'src' => 'https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/tenatangkami7', 'caption' => 'Kebersamaan para relawan', 'ratio' => 'landscape'],
+    ['order' => 8, 'src' => 'https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/tentangkami8', 'caption' => 'Membaca bersama anak-anak', 'ratio' => 'portrait-short'],
+    ['order' => 9, 'src' => 'https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/tentangkami9', 'caption' => 'Foto bersama di pesisir', 'ratio' => 'landscape'],
+];
+$galleryColumns = [
+    [$galleryPhotos[0], $galleryPhotos[3], $galleryPhotos[6]],
+    [$galleryPhotos[1], $galleryPhotos[4], $galleryPhotos[7]],
+    [$galleryPhotos[2], $galleryPhotos[5], $galleryPhotos[8]],
+];
+?>
 <!-- Sub B: Masonry Foto Grid -->
 <div class="masonry-grid">
-<!-- Foto 1: 4:3 -->
-<div class="masonry-item" data-caption="Bimbingan belajar Mansinam" data-src="<?= asset('img/about/profilsingkat.png') ?>">
-<div data-inline-style="about-17">
-<img alt="Bimbingan belajar Mansinam" data-inline-style="about-18" src="<?= asset('img/about/profilsingkat.png') ?>"/>
-</div>
-<div class="masonry-overlay">
-<div class="masonry-overlay-icon">
-<svg data-inline-style="about-19" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-<div class="masonry-caption">Bimbingan belajar Mansinam</div>
-</div>
-<!-- Foto 2: 3:4 -->
-<div class="masonry-item" data-caption="Relawan mengajar" data-src="<?= asset('img/about/profilsingkat.png') ?>">
-<div data-inline-style="about-20">
-<img alt="Relawan mengajar" data-inline-style="about-21" src="<?= asset('img/about/profilsingkat.png') ?>"/>
-</div>
-<div class="masonry-overlay">
-<div class="masonry-overlay-icon">
-<svg data-inline-style="about-22" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-<div class="masonry-caption">Relawan mengajar</div>
-</div>
-<!-- Foto 3: 1:1 -->
-<div class="masonry-item" data-caption="Pojok baca" data-src="<?= asset('img/about/profilsingkat.png') ?>">
-<div data-inline-style="about-23">
-<img alt="Pojok baca" data-inline-style="about-24" src="<?= asset('img/about/profilsingkat.png') ?>"/>
-</div>
-<div class="masonry-overlay">
-<div class="masonry-overlay-icon">
-<svg data-inline-style="about-25" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-<div class="masonry-caption">Pojok baca</div>
-</div>
-<!-- Foto 4: 1:1 -->
-<div class="masonry-item" data-caption="Imunisasi bersama UNICEF" data-src="<?= asset('img/about/profilsingkat.png') ?>">
-<div data-inline-style="about-26">
-<img alt="Imunisasi bersama UNICEF" data-inline-style="about-27" src="<?= asset('img/hero/herobanner.png') ?>"/>
-</div>
-<div class="masonry-overlay">
-<div class="masonry-overlay-icon">
-<svg data-inline-style="about-28" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-<div class="masonry-caption">Imunisasi bersama UNICEF</div>
-</div>
-<!-- Foto 5: 16:9 -->
-<div class="masonry-item" data-caption="Bersama warga kampung" data-src="<?= asset('img/about/profilsingkat.png') ?>">
-<div data-inline-style="about-29">
-<img alt="Bersama warga kampung" data-inline-style="about-30" src="<?= asset('img/about/profilsingkat.png') ?>"/>
-</div>
-<div class="masonry-overlay">
-<div class="masonry-overlay-icon">
-<svg data-inline-style="about-31" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-<div class="masonry-caption">Bersama warga kampung</div>
-</div>
-<!-- Foto 6: 3:4 -->
-<div class="masonry-item" data-caption="Pelatihan pemuda lokal" data-src="<?= asset('img/about/profilsingkat.png') ?>">
-<div data-inline-style="about-32">
-<img alt="Pelatihan pemuda lokal" data-inline-style="about-33" src="<?= asset('img/hero/herobanner.png') ?>"/>
-</div>
-<div class="masonry-overlay">
-<div class="masonry-overlay-icon">
-<svg data-inline-style="about-34" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-<div class="masonry-caption">Pelatihan pemuda lokal</div>
-</div>
-<!-- Foto 7: 4:3 -->
-<div class="masonry-item" data-caption="Kegiatan lapangan" data-src="<?= asset('img/about/profilsingkat.png') ?>">
-<div data-inline-style="about-35">
-<img alt="Kegiatan lapangan" data-inline-style="about-36" src="<?= asset('img/about/profilsingkat.png') ?>"/>
-</div>
-<div class="masonry-overlay">
-<div class="masonry-overlay-icon">
-<svg data-inline-style="about-37" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-<div class="masonry-caption">Kegiatan lapangan</div>
-</div>
-<!-- Foto 8: 1:1 -->
-<div class="masonry-item" data-caption="Foto bersama relawan" data-src="<?= asset('img/about/profilsingkat.png') ?>">
-<div data-inline-style="about-38">
-<img alt="Foto bersama relawan" data-inline-style="about-39" src="<?= asset('img/about/profilsingkat.png') ?>"/>
-</div>
-<div class="masonry-overlay">
-<div class="masonry-overlay-icon">
-<svg data-inline-style="about-40" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-<div class="masonry-caption">Foto bersama relawan</div>
-</div>
-<!-- Foto 9: 3:4 -->
-<div class="masonry-item" data-caption="Kegiatan Papua Future Project" data-src="<?= asset('img/about/profilsingkat.png') ?>">
-<div data-inline-style="about-41">
-<img alt="Kegiatan Papua Future Project" data-inline-style="about-42" src="<?= asset('img/about/profilsingkat.png') ?>"/>
-</div>
-<div class="masonry-overlay">
-<div class="masonry-overlay-icon">
-<svg data-inline-style="about-43" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
-</div>
-</div>
-<div class="masonry-caption">Kegiatan Papua Future Project</div>
-</div>
+    <?php foreach ($galleryColumns as $column): ?>
+    <div class="masonry-column">
+        <?php foreach ($column as $photo): ?>
+        <div class="masonry-item" data-order="<?= (int) $photo['order'] ?>" style="--gallery-order: <?= (int) $photo['order'] ?>" data-caption="<?= e($photo['caption']) ?>" data-src="<?= e($photo['src']) ?>">
+            <div class="masonry-photo-frame masonry-photo-frame--<?= e($photo['ratio']) ?>">
+                <img class="masonry-photo" src="<?= e($photo['src']) ?>" alt="<?= e($photo['caption']) ?>" loading="lazy" decoding="async" />
+            </div>
+            <div class="masonry-overlay" aria-hidden="true">
+                <div class="masonry-overlay-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                </div>
+            </div>
+            <div class="masonry-caption"><?= e($photo['caption']) ?></div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endforeach; ?>
 </div><!-- /masonry-grid -->
 <!-- LIGHTBOX -->
 <div data-inline-style="about-44" id="lightbox">

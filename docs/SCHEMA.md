@@ -1,6 +1,6 @@
 # SCHEMA: DDL MySQL
 
-DDL lengkap semua tabel, siap dijalankan di MySQL 8 atau MariaDB 10.6 ke atas. Untuk impor sekaligus lewat phpMyAdmin, gunakan [`../database/pfp.sql`](../database/pfp.sql) setelah membuat dan memilih database kosong. Diagram dan penjelasan relasi ada di [ERD.md](ERD.md). Kebutuhan produk ada di [PRD.md](PRD.md).
+DDL lengkap semua tabel, siap dijalankan di MySQL 8 atau MariaDB 10.6 ke atas. Untuk impor lewat phpMyAdmin, gunakan satu file [`../database/pfp.sql`](../database/pfp.sql). File ini membuat skema baru atau memperbarui kolom form PFP versi sebelumnya tanpa menghapus data yang ada. Diagram dan penjelasan relasi ada di [ERD.md](ERD.md). Kebutuhan produk ada di [PRD.md](PRD.md).
 
 ## 1. Aturan penamaan
 
@@ -14,7 +14,7 @@ DDL lengkap semua tabel, siap dijalankan di MySQL 8 atau MariaDB 10.6 ke atas. U
 
 ## 2. Urutan migrasi
 
-Satu file SQL per berkas di `database/migrations/`. Urutan mengikuti urutan pengerjaan di [STEP.md](STEP.md).
+File di `database/migrations/` adalah riwayat internal untuk `bin/migrate.php`. Untuk pengaturan database melalui phpMyAdmin, gunakan satu file `database/pfp.sql`; tidak perlu mengimpor berkas migrasi satu per satu.
 
 | File | Isi | Dipakai di step |
 | --- | --- | --- |
@@ -25,11 +25,13 @@ Satu file SQL per berkas di `database/migrations/`. Urutan mengikuti urutan peng
 | `0005_create_programs_and_photos.sql` | `programs`, `program_photos` | 5 |
 | `0006_create_posts_and_photos.sql` | `posts`, `post_photos` | 6 |
 | `0007_create_faqs_and_contact_messages.sql` | `faqs`, `contact_messages` | 7 |
-| `0008_create_applications.sql` | `applications` | 9 |
+| `0008_create_applications.sql` | `applications` (skema formulir lokal versi lama; arsip saja) | Arsip |
 | `0009_seed_initial_programs.sql` | Lima data awal program untuk instalasi migrasi | 5 |
 | `0010_seed_news_and_faqs.sql` | Konten awal berita, penghargaan, liputan media, dan FAQ | 6 dan 7 |
-| `0011_create_application_forms.sql` | Status formulir per jenis, pertanyaan bawaan/kustom per jenis, dan jawaban pendaftar | Pendaftaran |
-| `0012_expand_application_questions.sql` | Mendukung tipe jawaban pertanyaan tambahan dan kolom pilihan | Pendaftaran |
+| `0011_create_application_forms.sql` | Tabel formulir lokal versi lama (arsip saja) | Arsip |
+| `0012_expand_application_questions.sql` | Melengkapi skema pertanyaan formulir lokal versi lama (arsip saja) | Arsip |
+| `0015_add_google_form_url.sql` | URL Google Form per jenis versi lama; dipertahankan untuk migrasi data | Arsip |
+| `0016_google_forms_per_batch.sql` | Menyimpan URL dan status buka/tutup per batch; URL lama dipindahkan ke batch terbaru per jenis | Batch |
 
 ## 3. Tabel infrastruktur migrasi
 
@@ -99,6 +101,7 @@ CREATE TABLE batches (
   id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
   batch_type ENUM('INTERN','VOLUNTEER') NOT NULL,
   name       VARCHAR(60) NOT NULL,
+  google_form_url VARCHAR(500) NULL,
   is_open    TINYINT(1) NOT NULL DEFAULT 0,
   opened_at  DATETIME NULL,
   closed_at  DATETIME NULL,
@@ -121,6 +124,7 @@ CREATE TABLE team_members (
   bio          VARCHAR(400) NULL,
   long_bio     TEXT NULL,
   photo_path   VARCHAR(255) NULL,
+  home_photo_path VARCHAR(255) NULL,
   is_founder   TINYINT(1) NOT NULL DEFAULT 0,
   sort_order   INT NOT NULL DEFAULT 0,
   is_published TINYINT(1) NOT NULL DEFAULT 1,
@@ -139,8 +143,9 @@ Catatan kolom `team_members`:
 - `role`: jabatan untuk grup `CORE` (contoh "Founder & Ketua"), peran atau bidang untuk intern dan relawan.
 - `bio`: deskripsi singkat untuk card.
 - `long_bio`: profil panjang, dipakai untuk profil founder di Beranda. Diisi hanya untuk founder.
-- `photo_path`: kosong berarti card menampilkan inisial nama.
-- `is_founder`: dipakai untuk profil founder di Beranda.
+- `photo_path`: foto profil anggota; pada founder dipakai di Core Team/Tentang Kami.
+- `home_photo_path`: foto founder khusus Beranda. Jika `NULL`, Beranda memakai `photo_path`.
+- `is_founder`: menandai satu profil founder yang konten dan fotonya dipakai di Beranda.
 
 ### 0005_create_programs_and_photos.sql
 
@@ -284,12 +289,14 @@ CREATE TABLE contact_messages (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 0008_create_applications.sql
+### Arsip: `applications` dari formulir website versi lama
+
+Tabel berikut hanya menampung data lama. Aplikasi saat ini mengarahkan pendaftar ke layanan formulir eksternal dari link batch dan tidak membaca atau menulis tabel ini.
 
 ```sql
 CREATE TABLE applications (
   id                INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  batch_id          INT UNSIGNED NOT NULL,
+  batch_id          INT UNSIGNED NULL,
   file_token        CHAR(32) NOT NULL,
   full_name         VARCHAR(100) NULL,
   birth_date        DATE NULL,
@@ -315,17 +322,11 @@ CREATE TABLE applications (
   KEY idx_applications_created (created_at),
   KEY idx_applications_status_created (status, created_at),
   CONSTRAINT fk_applications_batch
-    FOREIGN KEY (batch_id) REFERENCES batches (id) ON DELETE RESTRICT
+    FOREIGN KEY (batch_id) REFERENCES batches (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-Catatan kolom `applications`:
-
-- `file_token`: 32 karakter heksadesimal acak yang dibuat server sebelum file ditulis. Dipakai sebagai nama folder file pendaftar, sehingga jalur file tidak bisa ditebak dan tidak bergantung pada `id` yang baru ada setelah `INSERT`.
-- `photo_path` dan `cv_path`: jalur relatif terhadap `STORAGE_DIR`, contoh `applications/{file_token}/photo.webp` dan `applications/{file_token}/cv.pdf`.
-- `university`: boleh kosong; status wajib dapat diatur Admin di pertanyaan formulir.
-- `interest_areas`: larik JSON berisi satu atau lebih dari `LITERACY`, `HEALTH`, `CREATIVE`, `MEDIA`, `OTHER`.
-- Tipe pendaftar (Intern atau Relawan) tidak disimpan di sini. Tipe diambil dari `batches.batch_type`.
+Kolom pribadi dan file di tabel ini berasal dari formulir website lama dan hanya dipertahankan sebagai arsip. Tidak ada halaman admin untuk menampilkan atau mengekspornya. `batch_id` boleh `NULL`; jika batch tanpa anggota tim dihapus, data arsip tetap tersimpan tanpa relasi batch.
 
 ### 0011_create_application_forms.sql
 
@@ -333,6 +334,7 @@ Catatan kolom `applications`:
 CREATE TABLE application_form_settings (
   application_type ENUM('INTERN','VOLUNTEER') NOT NULL,
   is_active        TINYINT(1) NOT NULL DEFAULT 0,
+  google_form_url  VARCHAR(500) NULL,
   updated_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (application_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -376,9 +378,9 @@ CREATE TABLE application_answers (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-`application_form_settings` memiliki satu baris untuk masing-masing jenis. Status ini menjadi sakelar utama yang terpisah dari `batches.is_open`; formulir bisa dikirim hanya ketika keduanya aktif. `application_questions` menyimpan pertanyaan bawaan (`is_system = 1`) dan pertanyaan tambahan untuk satu jenis formulir. Admin dapat mengubah teks, urutan, status tampil, status wajib, serta pilihan. Jenis jawaban field bawaan tetap karena terhubung ke penyimpanan data khusus; pertanyaan baru dapat memilih tipe jawaban yang tersedia. Kolom identitas dan jalur file pada `applications` boleh `NULL` karena Admin dapat menyembunyikan atau menjadikannya opsional. `application_answers.question_label` menyimpan snapshot teks dan jawaban (termasuk jawaban kosong) agar detail dan ekspor lama tetap bermakna setelah pertanyaan diubah atau disembunyikan.
+Pendaftaran publik sekarang diatur langsung per baris `batches`: kolom kompatibilitas `google_form_url` menyimpan tautan pendaftaran dari layanan apa pun, sedangkan `is_open` menjadi sakelar buka/tutup. Admin mengelola nama dan tautan pada halaman Ubah Batch, lalu mengubah status dari daftar Batch. Jika database lama memiliki tautan di `application_form_settings`, `pfp.sql` memindahkannya ke batch terbaru dengan tipe yang sama. Tabel `application_form_settings`, `application_questions`, `application_answers`, dan `applications` masih disimpan sebagai arsip kompatibilitas; halaman admin pendaftar lama dan pengaturan pertanyaan tidak lagi digunakan.
 
-`database/pfp.sql` sudah menyertakan struktur terbaru beserta seed pertanyaan bawaan untuk Internship dan Relawan. Gunakan file tersebut hanya untuk database baru yang kosong. Database yang sudah berisi data memerlukan migrasi upgrade yang sesuai dengan versi skemanya; jangan impor ulang `pfp.sql` karena file itu membuat keseluruhan tabel dari awal.
+`database/pfp.sql` adalah file SQL kanonis untuk membuat database baru atau memperbarui skema PFP lama. File itu menambahkan `batches.google_form_url` bila belum ada, memindahkan tautan pendaftaran lama ke batch yang sesuai, dan mempertahankan data yang sudah tersimpan.
 
 ## 5. Strategi indeks untuk query
 
@@ -393,12 +395,10 @@ Indeks disusun dari kolom yang dipakai untuk filter, join, dan pengurutan oleh M
 | `programs(is_published, is_featured, sort_order, title)` | Preview program unggulan di Beranda. |
 | `posts(is_published, published_at)` | Daftar berita terbaru, berita terbit, dan jumlah berita terbit. |
 | `posts(category, is_published, published_at)` | Berita terkait dan filter daftar per kategori. |
-| `applications(batch_id, status, created_at)` dan `applications(status, created_at)` | Filter daftar pendaftar, pengurutan terbaru, dan hitung pendaftar baru. |
-| `application_questions(application_type, is_active, sort_order, id)` | Mengambil pertanyaan aktif berurutan untuk Internship atau Relawan. |
-| `application_answers(application_id, question_id)` | Mengambil jawaban tambahan pada detail dan ekspor pendaftar. |
+| Indeks pada tabel `applications`, `application_form_settings`, `application_questions`, dan `application_answers` | Struktur lama yang dipertahankan untuk arsip/relasi historis; tidak dipakai halaman pendaftaran aktif. |
 | `program_photos(program_id, sort_order)` dan `post_photos(post_id, sort_order)` | Foto dokumentasi per konten sesuai urutan. |
 
-Kolom isi panjang `MEDIUMTEXT` tidak ikut diambil pada query kartu program/berita dan daftar admin. Pencarian nama pendaftar memakai `LIKE '%kata%'`, sehingga indeks B-tree tidak dapat mempercepat pencarian parsial tersebut.
+Kolom isi panjang `MEDIUMTEXT` tidak ikut diambil pada query kartu program/berita dan daftar admin.
 
 ## 6. Pemetaan nilai enum ke label antarmuka
 
@@ -406,13 +406,9 @@ Kolom isi panjang `MEDIUMTEXT` tidak ikut diambil pada query kartu program/berit
 | --- | --- |
 | `batches.batch_type` | `INTERN` Intern, `VOLUNTEER` Relawan |
 | `team_members.member_group` | `CORE` Tim Penggerak, `INTERN` Internship, `VOLUNTEER` Volunteer |
-| `applications.status` | `NEW` Baru, `REVIEWED` Ditinjau, `ACCEPTED` Diterima, `REJECTED` Ditolak |
-| `applications.occupation_status` | `STUDENT` Mahasiswa, `FRESH_GRADUATE` Fresh Graduate, `EMPLOYEE` Karyawan atau Profesional, `ENTREPRENEUR` Wiraswasta, `OTHER` Lainnya |
-| `applications.duration` | `TWO_WEEKS` 2 minggu, `ONE_MONTH` 1 bulan, `FLEXIBLE` Fleksibel |
-| `applications.referral_source` | `INSTAGRAM` Instagram @papuafutureproject, `FRIEND` Diajak teman atau kenalan, `ONLINE_ARTICLE` Artikel atau berita online, `EVENT` Event, seminar, atau pameran, `OTHER` Lainnya |
-| `applications.interest_areas` (isi larik) | `LITERACY` Literasi dan Bimbingan Belajar, `HEALTH` Edukasi Kesehatan dan Gizi, `CREATIVE` Kegiatan Kreatif, `MEDIA` Dokumentasi dan Media, `OTHER` Lainnya atau sesuai kebutuhan tim |
+| `applications.*` | Nilai enum di tabel ini hanya menjelaskan arsip jawaban formulir lokal versi lama; bukan daftar pilihan di fitur aktif. |
 
-Pemetaan ini ditulis sekali sebagai konstanta di kelas `App\Support\Labels` dan dipakai oleh View, Validator, dan ekspor.
+Label yang masih dipakai di aplikasi ditulis sekali sebagai konstanta di kelas `App\Support\Labels`.
 
 ## 7. Aturan integritas data
 
@@ -420,12 +416,11 @@ Beberapa aturan tidak bisa dijaga MySQL sendiri, jadi dijaga di Validator, Model
 
 1. `member_group = 'CORE'` wajib punya `batch_id` kosong. `INTERN` dan `VOLUNTEER` wajib punya `batch_id`, dan `batches.batch_type` harus sama dengan `member_group`. Dijaga di `TeamMemberValidator` dan Model `TeamMember`. Tidak dibuat sebagai `CHECK` karena MySQL membatasi `CHECK` pada kolom yang dipakai kunci asing, dan aturan ini melibatkan tabel lain.
 2. Hanya satu `team_members` yang boleh punya `is_founder = 1`. Model menurunkan flag anggota lain dalam transaksi yang sama saat flag baru dinyalakan.
-3. `batches` tidak bisa dihapus bila masih punya `team_members` atau `applications` (`ON DELETE RESTRICT`). Controller menghitung keduanya lebih dulu, lalu menampilkan pesan yang menyebut jumlahnya dan menawarkan "Tutup batch". Galat kunci asing dari database (kode 23000) hanya jaring pengaman.
-4. `applications.email` diubah ke huruf kecil dan dipangkas spasinya sebelum disimpan atau dibandingkan. Keunikan dijaga oleh `uq_applications_batch_email`. Controller menangkap galat duplikat (kode 1062) dan menampilkan pesan yang jelas.
-5. `applications` hanya boleh dibuat bila `application_form_settings.is_active = 1` dan `batches.is_open = 1` pada saat penyimpanan. Keduanya dikunci dan diperiksa dengan `SELECT ... FOR UPDATE` dalam transaksi yang sama dengan `INSERT`.
-6. Jawaban tambahan harus berasal dari pertanyaan aktif milik jenis batch yang dipilih. Server memvalidasi ulang kewajiban dan panjang jawaban, lalu menyimpan teks pertanyaan sebagai snapshot.
-7. Saat batch dibuka, `opened_at` diisi dan `closed_at` dikosongkan. Saat ditutup, `closed_at` diisi.
-8. `about_content` hanya punya satu baris. Tidak ada aksi buat atau hapus, hanya ubah.
+3. Batch tidak bisa dihapus bila masih punya `team_members`. Jika ada arsip pendaftar formulir website lama, `applications.batch_id` menjadi `NULL` (`ON DELETE SET NULL`), sehingga arsip tetap tersimpan tanpa menghalangi penghapusan batch yang tidak memiliki anggota.
+4. Link pendaftaran batch menerima URL absolut valid dengan skema `http` atau `https` dari domain apa pun. Username/password di dalam URL tidak diterima. Batch hanya dapat dibuka bila URL valid sudah disimpan.
+5. Menghapus link pendaftaran menutup batch tersebut. Status buka/tutup tiap batch berdiri sendiri.
+6. Tabel `applications`, `application_form_settings`, `application_questions`, dan `application_answers` hanya dipertahankan untuk arsip versi sebelumnya; tidak ada alur pendaftaran baru yang menulis ke tabel tersebut.
+7. `about_content` hanya punya satu baris. Tidak ada aksi buat atau hapus, hanya ubah.
 8. Menghapus `programs` atau `posts` menghapus baris foto lewat `CASCADE`, tetapi file fisiknya harus dihapus lebih dulu oleh `GalleryService`. Hal yang sama berlaku untuk `team_members.photo_path` dan `cover_image`.
 9. Satu `programs` atau `posts` maksimal punya 30 foto. Dijaga di `GalleryService` sebelum `INSERT`.
 10. `slug` dibuat dari judul dengan huruf kecil dan tanda hubung. Bila bentrok, tambahkan angka di belakangnya. Slug tidak berubah saat judul diubah, supaya tautan lama tetap berlaku.
@@ -442,7 +437,7 @@ Beberapa aturan tidak bisa dijaga MySQL sendiri, jadi dijaga di Validator, Model
 
 | Jenis | Lokasi | Akses |
 | --- | --- | --- |
-| Foto dan CV pendaftar | `STORAGE_DIR/applications/{file_token}/photo.webp` dan `cv.pdf` | Privat. `STORAGE_DIR` berada di luar folder `public/`. Hanya lewat controller yang memeriksa sesi admin. |
+| Berkas formulir website lama | Jika masih ada di `STORAGE_DIR/applications/`, tetap privat dan tidak disajikan oleh halaman admin aktif. Jangan hapus saat deploy tanpa keputusan retensi data. |
 | Foto galeri program dan berita, gambar sampul | `public/uploads/programs/{program_id}/` dan `public/uploads/posts/{post_id}/` | Publik. |
 | Foto Tim Penggerak, intern, relawan | `public/uploads/team/` | Publik. |
 

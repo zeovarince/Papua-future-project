@@ -8,7 +8,7 @@ Panduan visual untuk panel admin Papua Future Project. Layout memakai **rail iko
 > - Flyout menimpa konten (overlay), tidak mendorong layout.
 > - Tidak ada tema gelap di navigasi dan tidak ada emoji. Ikon memakai set ikon garis (misalnya Lucide).
 > - **Area isi ikut dirombak** mengikuti gambar referensi: kartu putih membulat 20 px di atas latar abu muda, tombol pill, tabel lebih ringan, dan pola halaman yang seragam (daftar, form, detail).
-> - Ringkasan dibuat ulang: sapaan polos, 4 kartu metrik, kartu tren pendaftar dengan legenda, kartu aksi cepat berlatar gradient biru, dan daftar aktivitas terbaru.
+> - Ringkasan hanya menampilkan pesan belum dibaca, berita terbit, dan pesan terbaru. Link pendaftaran dan buka/tutup pendaftaran diatur dari halaman Batch.
 > - Inkonsistensi lama diselesaikan: bagian 3.3 menyebut sidebar tablet 76 px, sedangkan bagian 7 menyebut hamburger di 768-1023 px. Sekarang rail berlaku di semua layar >= 768 px.
 
 ## 1. Prinsip desain
@@ -78,7 +78,7 @@ Keterangan diagram: PF = logo, Rg = Ringkasan, Tk = Tentang Kami, Tm = Tim, Kn =
 - **Tengah:** ikon menu. Tiap item berupa kotak 44x44 px, border-radius 12 px, ikon garis 20 px berwarna `--admin-sidebar-text`, jarak antar item 8 px.
   - Hover atau fokus: latar `--admin-sidebar-hover`, ikon putih.
   - Aktif (halaman saat ini berada di dalam grup ini): latar putih `--admin-sidebar-active`, ikon `--admin-sidebar-text-active` (#3770c1). Kotak putih ini penanda utama item aktif.
-  - Lencana angka (pendaftar baru, pesan belum dibaca): bulatan kecil di pojok kanan atas ikon, latar `--admin-danger`, teks putih 10 px, dengan border 2 px `--admin-sidebar` supaya terpisah dari ikon.
+  - Lencana angka untuk pesan belum dibaca: bulatan kecil di pojok kanan atas ikon, latar `--admin-danger`, teks putih 10 px, dengan border 2 px `--admin-sidebar` supaya terpisah dari ikon.
   - Fokus keyboard: outline 2 px putih dengan offset 2 px.
 - **Bawah:** garis pemisah, lalu avatar admin: lingkaran putih 36 px, inisial `--admin-primary` tebal, ring 2 px `--admin-secondary`. Hover pada avatar membuka flyout profil.
 - Tidak ada label teks di rail. Setiap item wajib punya `aria-label`.
@@ -112,7 +112,7 @@ Tanda "[ ]" adalah tempat ikon garis. Tanda "|" di kiri baris adalah penanda hal
 3. **Daftar sub-halaman:** tiap baris berisi ikon 18 px `--admin-text-muted`, nama halaman (13 px, semi-bold, `--admin-text`), deskripsi satu baris (11 px, `--admin-text-muted`), dan lencana jika ada. Tinggi baris minimal 48 px, padding 8 px 10 px, border-radius 10 px.
    - Hover baris: latar `--admin-flyout-hover`, ikon dan nama `--admin-primary`.
    - Baris halaman aktif: latar `--admin-flyout-active`, garis kiri 3 px `--admin-primary`, ikon dan nama `--admin-primary`.
-4. **Grup dengan satu halaman** (Ringkasan, Tentang Kami): kartu hanya berisi header, deskripsi, dan satu baris info singkat (opsional, misalnya "3 pendaftar baru, 2 pesan belum dibaca" untuk Ringkasan).
+4. **Grup dengan satu halaman** (Ringkasan, Tentang Kami): kartu hanya berisi header, deskripsi, dan satu baris info singkat (opsional, misalnya jumlah pesan belum dibaca untuk Ringkasan).
 
 **Tampilan**
 
@@ -148,14 +148,14 @@ Persyaratan aksesibilitas: ikon memakai `aria-haspopup="menu"` dan `aria-expande
 | 2 | `info` | Tentang Kami | `/admin/tentang`: "Cerita, visi, dan misi organisasi." | - |
 | 3 | `users` | Tim | **Tim Penggerak** `/admin/tim/penggerak`: "Pengurus dan founder." **Internship** `/admin/tim/internship`: "Anggota magang per batch." **Volunteer** `/admin/tim/volunteer`: "Relawan per batch." **Batch** `/admin/batch`: "Periode Intern dan Volunteer." | - |
 | 4 | `newspaper` | Konten | **Program** `/admin/program`: "Program, kegiatan, dan foto dokumentasi." **Berita** `/admin/berita`: "Berita, liputan, dan penghargaan." **FAQ** `/admin/faq`: "Pertanyaan yang sering diajukan." | - |
-| 5 | `inbox` | Data | **Pendaftar** `/admin/pendaftar`: "Tinjau dan ubah status pendaftar." **Pesan Masuk** `/admin/pesan`: "Pesan dari formulir kontak." **Form Pendaftaran** `/admin/pendaftaran`: "Buka atau tutup form dan atur pertanyaan." | Pendaftar: jumlah status Baru. Pesan Masuk: jumlah belum dibaca |
+| 5 | `inbox` | Data | **Pesan Masuk** `/admin/pesan`: "Pesan dari formulir kontak." | Pesan belum dibaca |
 | - | avatar | Profil | Nama admin, keterangan "Administrator", tautan **Lihat Website** (buka tab baru), dan **Keluar** | - |
 
-Ikon sub-halaman di flyout (Lucide): `user-check` (Tim Penggerak), `graduation-cap` (Internship), `hand-heart` (Volunteer), `layers` (Batch), `book-open` (Program), `newspaper` (Berita), `help-circle` (FAQ), `clipboard-list` (Pendaftar), `mail` (Pesan Masuk), `file-cog` (Form Pendaftaran).
+Ikon sub-halaman di flyout (Lucide): `user-check` (Tim Penggerak), `graduation-cap` (Internship), `hand-heart` (Volunteer), `layers` (Batch), `book-open` (Program), `newspaper` (Berita), `help-circle` (FAQ), `mail` (Pesan Masuk).
 
 Grup **Pengaturan** menambahkan halaman **Pengelola Admin** (`/admin/akun`) untuk melihat akun admin dan membuat akun baru, serta **Ubah Kata Sandi** (`/admin/akun/password`) untuk memperbarui kata sandi akun yang sedang masuk. Kedua tautan juga tersedia di flyout avatar.
 
-- Lencana pada ikon grup Data adalah **jumlah gabungan** Pendaftar Baru + Pesan belum dibaca. Rinciannya muncul di baris flyout masing-masing.
+- Lencana pada ikon grup Data menunjukkan jumlah Pesan Masuk yang belum dibaca.
 - Ikon Tim, Konten, dan Data aktif bila route saat ini berada di salah satu sub-halamannya, termasuk halaman tambah, ubah, dan detail.
 
 ### 3.5 Aksi cepat "+" (opsional)
@@ -309,29 +309,16 @@ Komponen navigasi. Spesifikasi lengkap ada di bagian 3.2 dan 3.3. Ringkasnya: ka
 - Grafik mini (sparkline) opsional di kanan bawah kartu: garis `--admin-primary` 2 px, lebar 80 px, tinggi 32 px, tanpa sumbu. Hanya tampil bila datanya ada.
 - Kartu bisa diklik menuju daftar terkait (aturan hover ada di 4.1).
 
-### 4.13 Kartu tren (grafik area)
-
-- Kartu lebar dengan header: judul "Tren Pendaftar", angka total periode (28 px, extra-bold) di bawahnya, dan teks bantu periode (contoh: "30 hari terakhir").
-- Di kanan header: legenda berupa pill kecil dengan titik warna, label, dan angka. Warna titik mengikuti status pill: Baru (kuning), Ditinjau (biru), Diterima (hijau), Ditolak (merah).
-- Grafik: area dengan garis `--admin-primary` 2 px, isi gradient `--admin-primary` 20% ke transparan, garis grid horizontal putus-putus `--admin-border`, sumbu X berupa tanggal atau bulan, tinggi 220 px. Tooltip saat hover titik menampilkan tanggal dan jumlah. Titik data terakhir diberi penanda bulat.
-- Kosong: teks "Belum ada pendaftar pada periode ini." di tengah area grafik.
-
-### 4.14 Kartu aksi cepat
-
-- Kartu 20 px radius berlatar gradient `--admin-primary` ke `--admin-secondary` (135 derajat), tanpa border, teks putih. Teks ditempatkan di sisi kiri atas yang lebih gelap agar kontrasnya terjaga.
-- Isi: label kecil "Perlu ditinjau" (12 px, putih 85%), angka besar (28 px, extra-bold) berisi jumlah pendaftar status Baru, subteks "pendaftar menunggu tinjauan".
-- Dua tombol pill di bawah: "Tinjau Pendaftar" (latar putih, teks `--admin-primary`) dan "Pesan Masuk" (latar putih 20%, teks putih).
-
-### 4.15 Daftar aktivitas
+### 4.13 Daftar aktivitas
 
 - Di dalam kartu "Aktivitas Terbaru" dengan teks bantu "Pembaruan terkini".
 - Tiap entri: ikon bulat 36 px (latar `--admin-primary` 10%, ikon garis `--admin-primary`), satu baris teks 13 px dengan nama atau judul tebal, dan waktu relatif 11 px `--admin-text-muted` ("2 jam lalu"). Jarak antar entri 4 px, padding entri 8 px, hover latar `#f8fafc` dengan radius 12 px.
-- Ikon: `user-plus` untuk pendaftar baru, `mail` untuk pesan masuk.
-- Maksimal 6 entri. Tautan "Lihat semua" di dasar kartu menuju Pendaftar.
+- Ikon: `mail` untuk pesan masuk.
+- Maksimal 6 entri. Tautan "Lihat semua" di dasar kartu menuju Pesan Masuk.
 
 ### 4.16 Pola halaman
 
-**Pola Daftar** (Program, Berita, FAQ, Batch, Tim, Pendaftar, Pesan):
+**Pola Daftar** (Program, Berita, FAQ, Batch, Tim, Pesan):
 1. Page Header (3.7).
 2. Satu kartu besar. Header kartu: judul + jumlah data (pill abu "24 data") di kiri; kolom cari pill, filter, dan tombol ekspor atau tambah di kanan.
 3. Tabel (4.2), lalu footer kartu berisi pagination (4.9).
@@ -344,7 +331,7 @@ Komponen navigasi. Spesifikasi lengkap ada di bagian 3.2 dan 3.3. Ringkasnya: ka
 4. **Bilah aksi** menempel di bawah layar (sticky): latar putih, border atas 1 px, padding 12 px 24 px, tombol "Batal" (Secondary) dan "Simpan" (Primary) rata kanan. Mulai di kanan rail (offset kiri 64 px) dan z-index 30 (di bawah flyout).
 5. Form sederhana (Batch, FAQ, Tentang Kami) memakai satu kolom dalam satu kartu selebar maksimal 720 px.
 
-**Pola Detail** (Pendaftar, Pesan):
+**Pola Detail** (Pesan):
 1. Page Header dengan breadcrumb.
 2. Grid yang sama dengan Pola Form: kolom utama (data lengkap atau isi pesan) dan kolom samping (kartu status, berkas, atau aksi).
 
@@ -353,37 +340,23 @@ Komponen navigasi. Spesifikasi lengkap ada di bagian 3.2 dan 3.3. Ringkasnya: ka
 ### 5.1 Ringkasan (`/admin`)
 
 ```
-Selamat malam, Nama                      [30 hari v]  [Lihat Website]
-Ringkasan aktivitas Papua Future Project.
+Selamat datang kembali, Admin               [Lihat Website]
+Semoga harimu menyenangkan.
 
-┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐
-│ Pendaftar  │ │ Pesan      │ │ Batch      │ │ Berita     │
-│ baru       │ │ belum      │ │ sedang     │ │ terbit     │
-│ 12         │ │ dibaca  3  │ │ dibuka  2  │ │ 18         │
-└────────────┘ └────────────┘ └────────────┘ └────────────┘
-┌──────────────────────────────┐ ┌──────────────────────────┐
-│ Tren Pendaftar               │ │ Kartu aksi cepat         │
-│ 87      (grafik area)        │ │ (gradient biru)          │
-└──────────────────────────────┘ └──────────────────────────┘
-┌──────────────────────────────┐ ┌──────────────────────────┐
-│ Pendaftar Terbaru (tabel)    │ │ Aktivitas Terbaru        │
-└──────────────────────────────┘ │ (daftar)                 │
-┌──────────────────────────────┐ │                          │
-│ Pesan Terbaru (tabel)        │ │                          │
-└──────────────────────────────┘ └──────────────────────────┘
+┌──────────────────────────┐ ┌──────────────────────────┐
+│ Pesan belum dibaca       │ │ Berita terbit            │
+└──────────────────────────┘ └──────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│ Pesan Terbaru                                                   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-- **Sapaan:** "Selamat [pagi/siang/sore/malam], [nama]" (h1) dan subjudul "Ringkasan aktivitas Papua Future Project." Kata sapaan mengikuti jam lokal pengguna. Tanpa banner.
-- **Dropdown periode** (pill, di kanan atas): "30 hari" (default), "90 hari", "12 bulan". Hanya memengaruhi kartu Tren Pendaftar dan angka di legendanya. Kartu metrik selalu menunjukkan kondisi saat ini.
-- **Baris 1, empat kartu metrik** (4.12), empat kolom di desktop:
-  - Pendaftar baru: jumlah status Baru, badge "Perlu ditinjau" bila lebih dari 0, subteks "status Baru". Klik menuju daftar Pendaftar terfilter status Baru.
-  - Pesan belum dibaca: jumlah, subteks "dari [total] pesan". Klik menuju Pesan Masuk.
-  - Batch sedang dibuka: jumlah, subteks "Intern [n], Volunteer [n]".
-  - Berita terbit: jumlah, subteks "[n] draf".
-- **Kolom kiri** (8 dari 12 kolom): kartu Tren Pendaftar (4.13), kartu "Pendaftar Terbaru" (5 baris terakhir; kolom: nama, batch, tipe, status, tanggal, tombol Soft "Lihat"), kartu "Pesan Terbaru" (3 baris terakhir; kolom: nama, email, ringkasan pesan, tanggal, sudah dibaca?). Header tiap kartu tabel punya tautan "Lihat semua".
-- **Kolom kanan** (4 dari 12 kolom): kartu aksi cepat (4.14), lalu kartu Aktivitas Terbaru (4.15).
-- **Data:** Tren Pendaftar dan Aktivitas Terbaru dihitung dari data pendaftar dan pesan yang sudah ada (agregat per tanggal dan gabungan terbaru), tanpa perubahan skema. Jika salah satunya belum bisa dibuat, sembunyikan kartu itu dan biarkan kartu lain mengisi ruangnya.
-- **Responsif:** di bawah 1280 px menjadi satu kolom dengan urutan: metrik (2x2 di tablet, satu kolom di mobile), kartu aksi cepat, Tren Pendaftar, Pendaftar Terbaru, Pesan Terbaru, Aktivitas Terbaru.
+- **Sapaan:** "Selamat datang kembali, [nama]" dan subjudul "Semoga harimu menyenangkan." Tidak ada pemilih rentang waktu.
+- **Kartu ringkas:** pesan belum dibaca dan berita terbit beserta jumlah draf.
+- **Pesan Terbaru** menampilkan pesan kontak terkini dan tautan menuju daftar Pesan Masuk.
+- Ringkasan adalah halaman awal admin, bukan tempat mengelola pendaftaran. Semua link pendaftaran dan status buka/tutup hanya dikelola di halaman Batch.
+- Tidak menampilkan jumlah, grafik, daftar, detail, status seleksi, atau ekspor pendaftar lokal lama.
+- **Responsif:** kartu bertumpuk pada layar sempit; daftar Batch dapat digulir horizontal bila diperlukan.
 
 ### 5.2 Tentang Kami (`/admin/tentang`)
 
@@ -404,22 +377,23 @@ Ringkasan aktivitas Papua Future Project.
 
 ### 5.4 Internship (`/admin/tim/internship`)
 
-- **Tata letak:** tiap batch berupa satu kartu (4.1). Header kartu berisi nama batch, pill status, toggle, dan tombol "+ Tambah Anggota", dengan tabel di dalamnya. Form anggota memakai Pola Form.
-- Dikelompokkan per batch. Tiap kelompok punya header: nama batch, pill status (Dibuka/Ditutup), toggle, tombol "+ Tambah Anggota".
+- **Tata letak:** tiap batch berupa satu kartu (4.1). Header kartu berisi nama batch dan tombol "+ Tambah Anggota", dengan tabel di dalamnya. Form anggota memakai Pola Form.
+- Dikelompokkan per batch. Status pendaftaran dan URL dikelola hanya dari halaman Batch.
 - Tabel per batch: foto (lingkaran 40 px), nama, universitas, peran, urutan, "Ubah", "Hapus".
 - Bila belum ada batch bertipe Intern, tampilkan ajakan: "Buat batch Intern lebih dulu di halaman Batch."
 - Form tambah/ubah anggota: batch (auto-fill), nama, universitas, peran/bidang, foto, urutan.
 
 ### 5.5 Volunteer (`/admin/tim/volunteer`)
 
-Sama persis dengan Internship (termasuk tata letaknya), tetapi filter batch ke tipe `VOLUNTEER`.
+Sama persis dengan Internship (termasuk tata letaknya), tetapi filter batch ke tipe `VOLUNTEER`. Status pendaftaran dan URL dikelola hanya dari halaman Batch.
 
 ### 5.6 Batch (`/admin/batch`)
 
-- **Tata letak:** Pola Daftar (4.16). Form satu kolom dalam satu kartu.
-- Tabel: nama batch, tipe (pill: Intern/Volunteer), status (pill: Dibuka/Ditutup), jumlah anggota, jumlah pendaftar, tanggal dibuat, toggle, "Ubah", "Hapus".
-- Hapus ditolak jika ada anggota atau pendaftar (pesan galat dengan jumlah).
-- Form tambah/ubah: nama, tipe (pilih Intern atau Volunteer, tidak bisa diubah setelah ada data), deskripsi (opsional).
+- **Tata letak:** Pola Daftar (4.16). Ini satu-satunya halaman untuk mengatur link dan status pendaftaran.
+- Tabel: nama batch, jenis (Internship/Relawan), status pendaftaran, sakelar buka/tutup, "Ubah", dan "Hapus".
+- Sakelar hanya dapat dibuka setelah link pendaftaran HTTP/HTTPS valid disimpan. Status terbuka tampil di website sebagai tombol Daftar.
+- Hapus ditolak hanya jika batch masih memiliki anggota tim. Arsip pendaftar formulir lokal lama tetap tersimpan dan dilepas dari batch yang dihapus.
+- Form tambah/ubah: nama, jenis, dan link pendaftaran apa pun (opsional). Link kosong membuat batch tetap tertutup.
 
 ### 5.7 Program (`/admin/program`)
 
@@ -462,26 +436,9 @@ Sama persis dengan Internship (termasuk tata letaknya), tetapi filter batch ke t
 - Tabel: pertanyaan (dipotong 60 karakter), urutan, status (pill: Terbit/Sembunyi), "Ubah", "Hapus".
 - Form tambah/ubah: pertanyaan (input teks), jawaban (textarea), nomor urut, checkbox "Tampilkan".
 
-### 5.10 Pendaftar (`/admin/pendaftar`)
+### 5.10 Pendaftar dan Form Pendaftaran
 
-- **Tata letak:** daftar memakai Pola Daftar. Bar filter berada di header kartu tabel. Detail memakai Pola Detail: kolom utama berisi kartu data lengkap; kolom samping berisi kartu "Status" (dropdown dan tombol Simpan Status), kartu "Foto", dan kartu "Berkas" (tombol CV).
-- Bar filter: tipe (Semua/Intern/Relawan), batch (dropdown), status (dropdown), pencarian nama.
-- Tombol "Ekspor data" (dropdown: Excel, CSV, PDF).
-- Tabel: nama, email, batch (pill), tipe (pill), status (pill warna), tanggal daftar, "Lihat".
-- Halaman detail (`/admin/pendaftar/{id}`):
-  - Kartu data lengkap: semua field teks dalam tata letak dua kolom.
-  - Foto inline: gambar pendaftar maks 200 px, border-radius 12 px.
-  - CV: tombol "Lihat CV" (buka tab baru) dan "Download CV".
-  - Dropdown ubah status: Baru -> Ditinjau -> Diterima / Ditolak. Tombol "Simpan Status".
-
-### 5.11 Form Pendaftaran (`/admin/pendaftaran`)
-
-- **Tata letak:** dua kartu berdampingan pada >= 1024 px, bertumpuk di bawahnya. Tiap kartu memuat toggle, tiga angka ringkas (status, batch dibuka, pertanyaan aktif), dan tombol "Atur pertanyaan".
-- Dua kartu terpisah untuk Internship dan Relawan; masing-masing menunjukkan status formulir, jumlah batch yang dibuka, dan jumlah pertanyaan aktif.
-- Tombol aktif/nonaktif bekerja terpisah per jenis dan tidak mengubah status batch. Pendaftaran publik hanya diterima jika jenis aktif serta batch terpilih dibuka.
-- Tombol "Atur pertanyaan" membuka daftar terpisah per jenis. Daftar berisi field bawaan (nama, email, WhatsApp, foto, CV, portofolio, dan lainnya) serta maksimal 25 pertanyaan tambahan.
-- Edit field bawaan: ubah label, pilihan jawaban, urutan, status wajib/opsional, dan tampil/sembunyi. Jenis input field khusus (email, telepon, foto, CV, dan sejenisnya) tetap agar validasi dan penyimpanan berjalan tepat. Pertanyaan tambahan dapat memakai tipe jawaban yang tersedia.
-- Jawaban aktif dan label pertanyaan saat pendaftaran disimpan sebagai snapshot. Detail dan ekspor mempertahankan teks pertanyaan meski Admin mengubah atau menyembunyikan pertanyaannya kemudian.
+Kedua halaman ini sudah dihapus dari panel. Admin tidak mengelola pertanyaan, jawaban, status seleksi, atau ekspor pendaftar melalui website. Pengaturan link formulir dan buka/tutup pendaftaran cukup dilakukan per batch pada halaman Batch; jawaban baru dikelola oleh layanan pada link tersebut.
 
 ### 5.12 Pesan Masuk (`/admin/pesan`)
 

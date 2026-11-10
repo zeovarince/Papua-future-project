@@ -1,6 +1,7 @@
 // ── 1. Sticky Navbar ──
     // ── 3. Lightbox ──
-    const items     = Array.from(document.querySelectorAll('.masonry-item'));
+    const items     = Array.from(document.querySelectorAll('.masonry-item'))
+      .sort((a, b) => Number(a.dataset.order) - Number(b.dataset.order));
     const lightbox  = document.getElementById('lightbox');
     const lbImg     = document.getElementById('lb-img');
     const lbCaption = document.getElementById('lb-caption');

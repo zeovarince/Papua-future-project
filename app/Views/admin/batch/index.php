@@ -12,11 +12,15 @@ $primaryAction = [
 $totalBatches = count($batches);
 ?>
 
-<div class="card" style="margin-bottom: 16px; padding: 16px 20px; background: #fafbfc;">
-    <p style="margin: 0; color: var(--admin-text-muted); font-size: 13px; line-height: 1.65;">
-        Toggle di tabel ini mengatur <strong>batch yang dipilih saja</strong>. Agar pendaftaran tampil di website, sakelar jenis formulirnya juga harus aktif di <a href="<?= url('/admin/pendaftaran') ?>" style="color: var(--admin-primary); font-weight: 600;">Form Pendaftaran</a>. Internship dan Relawan dapat dibuka bersamaan; tutup setiap batch saat masa pendaftarannya selesai.
-    </p>
-</div>
+<?php if (!empty($errors)): ?>
+    <div class="alert alert-danger" role="alert">
+        <?= e(implode(' ', array_map('strval', $errors))) ?>
+    </div>
+<?php endif; ?>
+
+<p class="page-description" style="margin: 0 0 18px; color: var(--admin-text-muted);">
+    Atur pendaftaran di sini: masukkan link formulir apa pun lewat <strong>Ubah</strong>, lalu buka atau tutup dengan sakelar. Setiap batch memiliki link dan status sendiri.
+</p>
 
 <div class="card">
     <div class="card-header">
@@ -42,7 +46,7 @@ $totalBatches = count($batches);
         <?php
             $icon = 'layers';
             $emptyTitle = 'Belum ada batch';
-            $description = 'Tambahkan batch Intern atau Volunteer untuk mulai mengelola anggota dan pendaftaran.';
+            $description = 'Tambahkan batch Internship atau Relawan untuk mengelompokkan anggota tim.';
             $actionUrl = url('/admin/batch/tambah');
             $actionLabel = 'Tambah Batch';
             require APP_ROOT . '/app/Views/partials/admin/empty-state.php';
@@ -54,17 +58,13 @@ $totalBatches = count($batches);
                     <tr>
                         <th>Nama Batch</th>
                         <th>Tipe</th>
-                        <th>Anggota</th>
-                        <th>Pendaftar</th>
-                        <th>Status Batch</th>
-                        <th>Buka / Tutup Batch</th>
+                        <th>Status Pendaftaran</th>
                         <th style="text-align: right;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($batches as $b): ?>
                         <?php
-                            $isOpen = ((int) ($b['is_open'] ?? 0) === 1);
                             $typeLabel = $b['batch_type'] === 'INTERN' ? 'Internship' : 'Relawan';
                         ?>
                         <tr class="batch-row" data-type="<?= e($b['batch_type']) ?>">
@@ -78,25 +78,19 @@ $totalBatches = count($batches);
                                 <span class="badge-pill"><?= e($typeLabel) ?></span>
                             </td>
                             <td>
-                                <span style="font-weight: 600;"><?= (int) $b['member_count'] ?></span>
-                            </td>
-                            <td>
-                                <span style="font-weight: 600;"><?= (int) $b['application_count'] ?></span>
-                            </td>
-                            <td>
-                                <?php $status = $isOpen ? 'open' : 'closed'; require APP_ROOT . '/app/Views/partials/admin/status-pill.php'; ?>
-                            </td>
-                            <td>
-                                <form method="post" action="<?= url('/admin/batch/' . (int) $b['id'] . '/toggle') ?>">
-                                    <?= csrf_field() ?>
-                                    <label class="toggle-switch" title="<?= $isOpen ? 'Tutup batch ini untuk pendaftaran' : 'Buka batch ini untuk pendaftaran' ?>">
-                                        <input type="checkbox" class="toggle-switch-input" <?= $isOpen ? 'checked' : '' ?> data-auto-submit>
-                                        <span class="toggle-switch-track"></span>
-                                        <span class="toggle-switch-label" style="font-size: 12px; font-weight: 500;">
-                                            <?= $isOpen ? 'Dibuka' : 'Ditutup' ?>
-                                        </span>
-                                    </label>
-                                </form>
+                                <?php $hasFormUrl = trim((string) ($b['google_form_url'] ?? '')) !== ''; ?>
+                                <?php if ($hasFormUrl): ?>
+                                    <form method="post" action="<?= url('/admin/batch/' . (int) $b['id'] . '/toggle') ?>" style="display: inline-flex; align-items: center;">
+                                        <?= csrf_field() ?>
+                                        <label class="toggle-switch" title="<?= (int) $b['is_open'] === 1 ? 'Tutup pendaftaran' : 'Buka pendaftaran' ?>">
+                                            <input type="checkbox" class="toggle-switch-input" <?= (int) $b['is_open'] === 1 ? 'checked' : '' ?> data-auto-submit aria-label="<?= (int) $b['is_open'] === 1 ? 'Tutup' : 'Buka' ?> pendaftaran <?= e($b['name']) ?>">
+                                            <span class="toggle-switch-track"></span>
+                                            <span class="toggle-switch-label"><?= (int) $b['is_open'] === 1 ? 'Dibuka' : 'Ditutup' ?></span>
+                                        </label>
+                                    </form>
+                                <?php else: ?>
+                                    <span class="toggle-switch-label" title="Isi link pendaftaran melalui Ubah Batch">Ditutup · link belum diisi</span>
+                                <?php endif; ?>
                             </td>
                             <td style="text-align: right;">
                                 <div class="table-actions" style="justify-content: flex-end;">
@@ -104,7 +98,8 @@ $totalBatches = count($batches);
                                         <?= icon('edit', '', 13) ?>
                                         <span>Ubah</span>
                                     </a>
-                                    <form method="post" action="<?= url('/admin/batch/' . (int) $b['id'] . '/hapus') ?>" data-confirm="Hapus batch &quot;<?= e($b['name']) ?>&quot;? Batch yang sudah memiliki anggota atau pendaftar tidak dapat dihapus.">
+                                    <?php $deletePrompt = 'Hapus batch "' . (string) $b['name'] . '"? Batch yang sudah memiliki anggota tim tidak dapat dihapus.'; ?>
+                                    <form method="post" action="<?= url('/admin/batch/' . (int) $b['id'] . '/hapus') ?>" data-confirm="<?= e($deletePrompt) ?>">
                                         <?= csrf_field() ?>
                                         <button type="submit" class="btn btn-soft-danger btn-xs">
                                             <?= icon('trash-2', '', 13) ?>

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Models\Application;
 use App\Models\ContactMessage;
 
 /**
@@ -21,21 +20,14 @@ final class AdminMenu
         $path = (string) (parse_url($uri, PHP_URL_PATH) ?? '/admin');
 
         // Lazy badge loaders (safe if models fail or table empty)
-        $newApplicationsCount = 0;
         $unreadMessagesCount = 0;
-        try {
-            $newApplicationsCount = Application::countNew();
-        } catch (\Throwable) {
-            $newApplicationsCount = 0;
-        }
-
         try {
             $unreadMessagesCount = ContactMessage::unreadCount();
         } catch (\Throwable) {
             $unreadMessagesCount = 0;
         }
 
-        $dataBadgeTotal = $newApplicationsCount + $unreadMessagesCount;
+        $dataBadgeTotal = $unreadMessagesCount;
 
         $isActive = static function (string $currentPath, string $route, ?string $currentPage, ?string $pageKey): bool {
             if ($currentPage !== null && $pageKey !== null && $currentPage === $pageKey) {
@@ -99,9 +91,9 @@ final class AdminMenu
                 'items' => [
                     [
                         'id' => 'team-penggerak',
-                        'label' => 'Tim Penggerak',
+                        'label' => 'Core Team',
                         'route' => '/admin/tim/penggerak',
-                        'description' => 'Pengurus dan founder.',
+                        'description' => 'Anggota inti Papua Future Project.',
                         'icon' => 'user-check',
                         'badge' => 0,
                         'is_active' => $isActive($path, '/admin/tim/penggerak', $currentPage, 'team-penggerak'),
@@ -177,20 +169,11 @@ final class AdminMenu
                 'id' => 'data',
                 'label' => 'Data',
                 'icon' => 'inbox',
-                'description' => 'Pendaftar, pesan masuk, dan form pendaftaran.',
-                'route' => '/admin/pendaftar',
+                'description' => 'Pesan yang dikirim melalui halaman kontak.',
+                'route' => '/admin/pesan',
                 'badge' => $dataBadgeTotal,
                 'is_single' => false,
                 'items' => [
-                    [
-                        'id' => 'application',
-                        'label' => 'Pendaftar',
-                        'route' => '/admin/pendaftar',
-                        'description' => 'Tinjau dan ubah status pendaftar.',
-                        'icon' => 'clipboard-list',
-                        'badge' => $newApplicationsCount,
-                        'is_active' => $isActive($path, '/admin/pendaftar', $currentPage, 'application'),
-                    ],
                     [
                         'id' => 'message',
                         'label' => 'Pesan Masuk',
@@ -199,15 +182,6 @@ final class AdminMenu
                         'icon' => 'mail',
                         'badge' => $unreadMessagesCount,
                         'is_active' => $isActive($path, '/admin/pesan', $currentPage, 'message'),
-                    ],
-                    [
-                        'id' => 'application-form',
-                        'label' => 'Form Pendaftaran',
-                        'route' => '/admin/pendaftaran',
-                        'description' => 'Buka atau tutup form dan atur pertanyaan.',
-                        'icon' => 'file-cog',
-                        'badge' => 0,
-                        'is_active' => $isActive($path, '/admin/pendaftaran', $currentPage, 'application-form'),
                     ],
                 ],
             ],

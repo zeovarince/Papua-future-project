@@ -68,7 +68,7 @@ html { scroll-behavior: smooth; }
     /* ── HERO ── */
     .hero-bg {
       background: linear-gradient(180deg, rgba(15,23,42,0.45) 0%, rgba(15,23,42,0.85) 100%),
-                  url('../../img/hero/herobanner.png') center/cover no-repeat;
+                  url('https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/herobanner') center/cover no-repeat;
     }
     .wave-divider { position: absolute; bottom: 0; left: 0; width: 100%;
                     overflow: hidden; line-height: 0; transform: translateY(1px); }
@@ -429,6 +429,9 @@ html { scroll-behavior: smooth; }
     .join-path-status { margin:20px 0 10px; font-weight:600; }
     .join-path-status.is-open { color:#285f46; }
     .join-path-status.is-closed { color:#626e74; }
+    .join-path-button { display:inline-flex; align-items:center; justify-content:center; margin-top:10px; padding:11px 18px; border:1px solid #3770c1; border-radius:4px; background:#3770c1; color:#fff; font-weight:700; text-decoration:none; transition:background-color .2s ease, border-color .2s ease; }
+    .join-path-button:hover { border-color:#28589c; background:#28589c; color:#fff; }
+    .join-path-button:focus-visible { outline:3px solid rgba(64,184,253,.55); outline-offset:3px; }
     .join-batch-list { margin:0; padding-left:18px; color:#39464d; line-height:1.8; }
     .join-path-link { display:inline-flex; align-items:center; justify-content:center; align-self:flex-start; min-height:42px; margin-top:22px; padding:10px 15px; border:1px solid #2b596a; border-radius:3px; background:#2b596a; color:#fff; font-size:14px; font-weight:600; text-decoration:none; }
     .join-path-link:hover { background:#234b58; color:#fff; }
@@ -474,14 +477,12 @@ html { scroll-behavior: smooth; }
       overflow:hidden;
       padding:80px 16px 96px;
       text-align:center;
-      background:linear-gradient(180deg,rgba(15,23,42,.45),rgba(15,23,42,.85)),url('../../img/hero/herobanner.png') center/cover no-repeat;
+      background:linear-gradient(180deg,rgba(15,23,42,.45),rgba(15,23,42,.85)),url('https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/herobanner') center/cover no-repeat;
     }
     .join-hero-copy { width:min(100%,680px); margin:0 auto; }
     .join-hero-eyebrow { margin:0 0 20px; color:rgba(255,255,255,.8); font-size:13px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; }
     .join-hero h1 { margin:0 0 20px; color:#fff; font-size:clamp(38px,6.5vw,68px); font-weight:800; line-height:1.1; }
     .join-hero-copy > p:not(.join-hero-eyebrow) { max-width:520px; margin:0 auto 36px; color:rgba(255,255,255,.86); font-size:17px; line-height:1.75; }
-    .join-hero-cta { display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:13px 30px; border-radius:999px; background:#40b8fd; box-shadow:0 8px 24px rgba(64,184,253,.28); color:#fff; font-size:15px; font-weight:700; text-decoration:none; transition:background .2s ease,transform .2s ease; }
-    .join-hero-cta:hover { background:#fff; color:#3770c1; transform:translateY(-2px); }
     .join-section-heading { max-width:640px; margin:0 auto 48px; text-align:center; }
     .join-section-heading .pfp-divider { margin:14px auto 22px; }
     .join-section-heading .pfp-title { margin:0; }
@@ -493,7 +494,7 @@ html { scroll-behavior: smooth; }
     .join-path-link { min-height:44px; padding:11px 20px; border-radius:4px; border-color:#3770c1; background:#3770c1; }
     .join-path-link:hover { border-color:#40b8fd; background:#40b8fd; }
     .join-path-link.is-disabled { border-color:#cbd1d4; border-radius:4px; background:#eef0f1; }
-    body[data-page="join"] .nav-cta { border-radius:4px; box-shadow:0 4px 12px rgba(0,0,0,.15); }
+    body[data-page="join"] .nav-cta { border-radius:999px; box-shadow:0 4px 12px rgba(0,0,0,.15); }
     @media(max-width:767.98px) {
       .join-hero { min-height:88vh; }
       .join-hero h1 { font-size:clamp(36px,10vw,50px); }
@@ -503,27 +504,32 @@ html { scroll-behavior: smooth; }
       .join-section-heading { margin-bottom:34px; }
     }
 
-    /* Join landing banner: shorter photo panel with a solid overlay. */
+    /* Join landing banner: restore the tall, full-screen photo hero. */
     .join-hero {
       height: auto;
-      min-height: clamp(520px, 72vh, 760px);
-      padding: 138px 20px 112px;
-      background-color: #183b3c;
-      background-image: url('../../img/hero/herobanner.png');
-      background-position: center 42%;
-      background-size: cover;
+      min-height: min(95vh, 900px);
+      padding: 112px 20px 112px;
+      background: #183b3c;
+    }
+    .join-hero-background {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: url('https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/herobanner') center/cover no-repeat;
+      transform: scale(1);
+      transform-origin: center;
     }
     .join-hero::before {
       position: absolute;
       inset: 0;
-      z-index: 0;
-      background: rgba(13, 31, 38, .62);
+      z-index: 1;
+      background: linear-gradient(180deg, rgba(15, 23, 42, .45), rgba(15, 23, 42, .78));
       content: '';
     }
-    .join-hero-copy { z-index: 1; }
+    .join-hero-copy { z-index: 2; }
+    .join-hero .wave-divider { z-index: 3; }
     .join-hero h1 { max-width: 850px; margin-right: auto; margin-left: auto; }
-    .join-hero-cta { border: 1px solid #fff; border-radius: 4px; background: #3770c1; box-shadow: none; }
-    .join-hero-cta:hover { border-color: #fff; background: #fff; }
+    .join-hero-copy > p:not(.join-hero-eyebrow) { margin-bottom: 0; }
     .join-path-card { min-height: 0; border-radius: 8px; box-shadow: none; }
     .join-path-card:hover { box-shadow: 0 8px 24px rgba(15, 23, 42, .08); }
     .join-batch-list { display: grid; gap: 0; margin: 16px 0 0; padding: 0; list-style: none; }
@@ -531,37 +537,35 @@ html { scroll-behavior: smooth; }
     .join-batch-list a { flex: 0 0 auto; padding: 8px 13px; border: 1px solid #3770c1; border-radius: 4px; color: #28589c; font-size: 13px; font-weight: 700; text-decoration: none; }
     .join-batch-list a:hover { background: #3770c1; color: #fff; }
 
-    /* The form page starts on a light surface, so its navigation is solid from load. */
-    body[data-page="join-form"] .navbar {
-      background: #fff;
-      box-shadow: 0 1px 12px rgba(15, 23, 42, .08);
-      padding-top: 9px;
-      padding-bottom: 9px;
+    /* The confirmation page has no hero behind the nav, so use the shared scrolled state. */
+    body[data-page="join-success"] .navbar,
+    body[data-page="join-success"] .navbar.scrolled {
+      background: rgba(255, 255, 255, .96);
+      box-shadow: 0 2px 20px rgba(0, 0, 0, .1);
+      padding-top: 10px;
+      padding-bottom: 10px;
     }
-    body[data-page="join-form"] .navbar .nav-inner {
-      max-width: 1200px;
-      padding: 8px 0;
-      border: 0;
-      border-radius: 0;
+    body[data-page="join-success"] .navbar .nav-inner {
       background: transparent;
+      border-color: transparent;
       box-shadow: none;
       backdrop-filter: none;
     }
-    body[data-page="join-form"] .navbar .nav-link { color: #263447; }
-    body[data-page="join-form"] .navbar .nav-link:hover,
-    body[data-page="join-form"] .navbar .nav-link.active { color: #3770c1; }
-    body[data-page="join-form"] .navbar .nav-link.active::after { background: #3770c1; }
-    body[data-page="join-form"] .navbar .nav-cta { border-radius: 4px; background: #3770c1; color: #fff; box-shadow: none; }
-    body[data-page="join-form"] .navbar .nav-cta:hover { background: #28589c; }
-    body[data-page="join-form"] .navbar .nav-toggle { border-color: #dbe3ed; background: #fff; color: #263447; }
-    body[data-page="join-form"] .navbar .nav-menu .nav-cta { border-radius: 4px; background: #3770c1; color: #fff; }
+    body[data-page="join-success"] .navbar .nav-link,
+    body[data-page="join-success"] .navbar .nav-toggle { color: #1a1f2e; }
+    body[data-page="join-success"] .navbar .nav-link:hover,
+    body[data-page="join-success"] .navbar .nav-link.active { color: #3770c1; }
+    body[data-page="join-success"] .navbar .nav-link.active::after { background: #3770c1; }
+    body[data-page="join-success"] .navbar .nav-cta { background: #3770c1; color: #fff; }
+    body[data-page="join-success"] .navbar .nav-cta:hover { background: #28589c; }
+    body[data-page="join-success"] .navbar .nav-toggle { border-color: #dbe3ed; background: #fff; }
 
     .join-form-intro {
       position: relative;
       overflow: hidden;
       padding: 142px 0 68px;
       border-bottom: 0;
-      background: #193b3d url('../../img/hero/herobanner.png') center 42%/cover no-repeat;
+      background: #193b3d url('https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/herobanner') center 42%/cover no-repeat;
     }
     .join-form-intro::before { position: absolute; inset: 0; background: rgba(13, 31, 38, .66); content: ''; }
     .join-form-intro .pfp-container { position: relative; z-index: 1; }
@@ -570,15 +574,69 @@ html { scroll-behavior: smooth; }
     .join-form-intro .join-eyebrow { color: #f1d98b; }
     .join-form-intro .join-breadcrumb { color: rgba(255,255,255,.72); }
     .join-form-intro .join-breadcrumb a { color: #fff; }
-    .join-selected-batch { margin: 0; padding: 0 0 14px; color: #52616b; font-size: 14px; }
+    .join-honeypot {
+      position: absolute !important;
+      left: -10000px !important;
+      width: 1px !important;
+      height: 1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+    }
+    .join-form-opening {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+      grid-column: 1 / -1;
+    }
+    .join-open-announcement {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: #263a33;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: .025em;
+      line-height: 1.35;
+    }
+    .join-form-opening .application-form-section { margin: 0; }
     .join-field-error[role="alert"] { margin: 0; }
 
-    @media (max-width: 1024px) {
-      body[data-page="join-form"] .navbar .nav-inner { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
-      body[data-page="join-form"] .navbar .nav-menu .nav-cta { border-radius: 4px; }
-    }
     @media(max-width:767.98px) {
-      .join-hero { min-height: 560px; padding: 132px 20px 92px; }
+      .join-hero { min-height: 88vh; padding: 132px 20px 92px; }
       .join-hero h1 { font-size: clamp(36px, 10vw, 50px); }
       .join-form-intro { padding: 126px 0 54px; }
     }
+.join-batch-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 22px;
+}
+
+.join-batch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 16px 0;
+    border-top: 1px solid rgba(18, 40, 64, 0.12);
+}
+
+.join-batch-row h4 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 650;
+}
+
+.join-batch-row .join-path-status {
+    margin: 5px 0 0;
+}
+
+@media (max-width: 480px) {
+    .join-batch-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

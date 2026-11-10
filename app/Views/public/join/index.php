@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 ?>
-<section class="join-hero relative flex flex-col items-center justify-center text-center px-4">
+<section class="join-hero hero-bg relative flex flex-col items-center justify-center text-center px-4">
+    <div class="join-hero-background" aria-hidden="true"></div>
     <div class="join-hero-copy relative z-10">
         <p class="join-hero-eyebrow">Papua Future Project</p>
         <h1>Bergabung dan bergerak bersama anak Papua.</h1>
-        <p>Pilih jalur Internship atau Relawan dan batch yang sedang membuka pendaftaran.</p>
-        <a class="join-hero-cta" href="#join-paths">Lihat kesempatan</a>
+        <p>Pilih jalur Internship atau Relawan untuk melihat formulir pendaftarannya.</p>
     </div>
     <div class="wave-divider" aria-hidden="true">
         <svg preserveAspectRatio="none" viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg">
@@ -61,11 +61,11 @@ declare(strict_types=1);
         <div class="timeline-wrap">
             <article class="timeline-item">
                 <div class="tl-badge step-1" aria-hidden="true">1</div>
-                <div class="tl-content"><h3>Pilih jalur dan batch terbuka</h3><p>Pilih Internship atau Relawan, lalu tentukan batch yang tersedia. Formulir akan langsung terbuka untuk batch tersebut.</p></div>
+                <div class="tl-content"><h3>Pilih jalur pendaftaran</h3><p>Pilih Internship atau Relawan. Formulir masing-masing akan terbuka di tab baru.</p></div>
             </article>
             <article class="timeline-item">
                 <div class="tl-badge step-2" aria-hidden="true">2</div>
-                <div class="tl-content"><h3>Seleksi &amp; wawancara singkat</h3><p>Tim PFP akan menghubungimu dalam 3–5 hari kerja. Prosesnya santai — kami hanya ingin mengenal kamu lebih dalam dan memastikan kita saling cocok.</p><span class="tl-duration">3–5 hari kerja</span></div>
+                <div class="tl-content"><h3>Seleksi &amp; wawancara singkat</h3><p>Tim PFP meninjau pendaftaran dan mengundang kandidat yang sesuai untuk wawancara.</p></div>
             </article>
             <article class="timeline-item">
                 <div class="tl-badge step-3" aria-hidden="true">3</div>
@@ -85,7 +85,7 @@ declare(strict_types=1);
             <span class="pfp-tag">Kesempatan bergabung</span>
             <h2 class="pfp-title" id="join-path-title">Pilih jalur dan batch.</h2>
             <div class="pfp-divider"></div>
-            <p class="join-path-intro">Pendaftaran Internship dan Relawan dikelola terpisah. Pilih batch yang terbuka untuk langsung mengisi formulirnya.</p>
+            <p class="join-path-intro">Pilih batch yang sedang dibuka. Tombol daftar akan membuka formulir pendaftaran untuk batch tersebut.</p>
         </div>
 
         <?php if (!empty($flashError)): ?>
@@ -104,20 +104,26 @@ declare(strict_types=1);
                         <p class="join-path-kicker"><?= e($item['label']) ?></p>
                         <h3><?= $item['type'] === 'INTERN' ? 'Internship' : 'Relawan' ?></h3>
                         <p><?= e($description) ?></p>
-                        <?php if ($item['is_open']): ?>
-                            <p class="join-path-status is-open">Pendaftaran dibuka</p>
-                            <ul class="join-batch-list">
+                        <?php if (!empty($item['batches'])): ?>
+                            <div class="join-batch-list">
                                 <?php foreach ($item['batches'] as $batch): ?>
-                                    <li>
-                                        <span><?= e($batch['name']) ?></span>
-                                        <a href="<?= url('/bergabung/' . $item['slug'] . '/' . (int) $batch['id']) ?>">Daftar</a>
-                                    </li>
+                                    <div class="join-batch-row">
+                                        <div>
+                                            <h4><?= e($batch['name']) ?></h4>
+                                            <?php if (!empty($batch['can_register'])): ?>
+                                                <p class="join-path-status is-open">Pendaftaran dibuka</p>
+                                            <?php else: ?>
+                                                <p class="join-path-status is-closed">Pendaftaran ditutup</p>
+                                            <?php endif; ?>
+                                        </div>
+                                        <?php if (!empty($batch['can_register'])): ?>
+                                            <a class="join-path-button" href="<?= url('/bergabung/' . $item['slug'] . '/' . (int) $batch['id']) ?>" target="_blank" rel="noopener noreferrer">Daftar</a>
+                                        <?php endif; ?>
+                                    </div>
                                 <?php endforeach; ?>
-                            </ul>
-                        <?php elseif (!$item['is_active']): ?>
-                            <p class="join-path-status is-closed">Pendaftaran sedang ditutup.</p>
+                            </div>
                         <?php else: ?>
-                            <p class="join-path-status is-closed">Belum ada batch yang membuka pendaftaran.</p>
+                            <p class="join-path-status is-closed">Belum ada batch pendaftaran.</p>
                         <?php endif; ?>
                     </div>
                 </article>

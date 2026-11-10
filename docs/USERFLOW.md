@@ -15,8 +15,8 @@ Peta halaman dan alur pengguna website Papua Future Project, untuk Public dan Ad
 /program/{slug}        Detail program (kegiatan, mitra, informasi, Dokumentasi)
 /berita                Terbaru, semua berita (filter kategori), Diakui dan Diliput
 /berita/{slug}         Detail berita (isi, bagikan, informasi, Dokumentasi, berita lain)
-/bergabung             Ajakan, manfaat, langkah, form pendaftaran (bila ada batch dibuka)
-/bergabung/berhasil    Konfirmasi setelah mendaftar
+/bergabung             Ajakan, manfaat, langkah, dan daftar jalur/batch terbuka
+Formulir eksternal     Dibuka pada tab baru setelah pengunjung memilih batch
 /kontak                Temukan kami, peta, form pesan, logo mitra, FAQ
 ```
 
@@ -29,17 +29,11 @@ Peta halaman dan alur pengguna website Papua Future Project, untuk Public dan Ad
 /admin/tim/penggerak           Tim Penggerak
 /admin/tim/internship          Intern per batch
 /admin/tim/volunteer           Relawan per batch
-/admin/pendaftaran              Status formulir Internship dan Relawan
-/admin/pendaftaran/internship/pertanyaan
-                               Pertanyaan khusus Internship
-/admin/pendaftaran/relawan/pertanyaan
-                               Pertanyaan khusus Relawan
+/admin/batch                   CRUD batch, link formulir eksternal, buka/tutup pendaftaran per batch
 /admin/program                 Daftar, tambah, ubah (termasuk foto dokumentasi)
 /admin/berita                  Daftar, tambah, ubah (termasuk foto dokumentasi)
 /admin/faq                     Daftar, tambah, ubah
 /admin/batch                   Daftar batch, buat, ubah, buka atau tutup
-/admin/pendaftar               Daftar pendaftar, filter, ekspor
-/admin/pendaftar/{id}          Detail pendaftar
 /admin/pesan                   Pesan masuk dari form kontak
 /admin/pesan/{id}              Detail pesan
 /admin/akun                    Daftar akun admin dan buat admin baru
@@ -68,21 +62,11 @@ Detail program dan berita memuat bagian Dokumentasi dari foto yang diunggah admi
 ```mermaid
 flowchart TD
   A["Buka /bergabung"] --> B["Baca ajakan, manfaat, dan 4 langkah"]
-  B --> C{"Jenis formulir aktif dan batch dibuka?"}
-  C -- "Tidak" --> D["Tampil pesan pendaftaran belum dibuka dan tautan Instagram"]
-  C -- "Ya" --> E["Pilih batch"]
-  E --> F["Buka formulir untuk batch yang dipilih; batch tidak dipilih ulang di dalam form"]
-  F --> F2["Isi pertanyaan aktif yang dikonfigurasi Admin untuk jenis ini"]
-  F2 --> G["Unggah foto/CV jika field file diaktifkan"]
-  G --> H{"Validasi di layar lolos?"}
-  H -- "Tidak" --> F
-  H -- "Ya" --> I["Kirim"]
-  I --> J{"Pemeriksaan di server"}
-  J -- "Formulir atau batch sudah ditutup" --> K["Pesan: pendaftaran jenis/batch ini ditutup. Isian teks tetap ada"]
-  J -- "Email sudah terdaftar di batch ini" --> L["Pesan: email ini sudah mendaftar di batch ini"]
-  J -- "Isian atau file ditolak" --> M["Pesan: jelaskan field atau file mana dan alasannya"]
-  J -- "Lolos" --> N["Simpan data dan file"]
-  N --> O["/bergabung/berhasil"]
+  B --> C{"Ada batch berstatus dibuka dengan link pendaftaran valid?"}
+  C -- "Tidak" --> D["Tampilkan status pendaftaran ditutup"]
+  C -- "Ya" --> E["Pilih batch yang dibuka"]
+  E --> F["Daftar membuka formulir dari link batch itu pada tab baru"]
+  F --> G["Isi, kirim, dan lihat konfirmasi pada layanan tersebut"]
 ```
 
 ## 4. Alur Public 3: mengirim pesan lewat form kontak
@@ -167,60 +151,30 @@ flowchart TD
 
 Program atau berita baru harus disimpan lebih dulu sebelum foto bisa ditambahkan. Form tambah menampilkan catatan tentang hal ini.
 
-## 8. Alur Admin 4: membuka dan menutup pendaftaran
+## 8. Alur Admin 4: mengatur pendaftaran per batch
 
 ```mermaid
 flowchart TD
-  A["Buka /admin/pendaftaran"] --> B{"Pilih jenis pendaftaran"}
-  B -- "Internship" --> C["Aktifkan/nonaktifkan formulir Internship"]
-  B -- "Relawan" --> D["Aktifkan/nonaktifkan formulir Relawan"]
-  C --> E["Atur pertanyaan Internship secara terpisah"]
-  D --> F["Atur pertanyaan Relawan secara terpisah"]
-  E --> G["Buka /admin/batch untuk mengatur batch"]
-  F --> G
-  G --> H{"Batch sudah ada?"}
-  H -- "Belum" --> I["Tambah batch: pilih tipe Intern atau Relawan dan beri nama"]
-  I --> J["Batch dibuat dalam keadaan tertutup"]
-  H -- "Ya" --> K["Buka atau tutup pendaftaran per batch"]
-  J --> K
-  K --> L["/bergabung mengikuti kedua status: formulir jenis dan batch"]
+  A["Buka /admin/batch"] --> B{"Batch sudah ada?"}
+  B -- "Belum" --> C["Tambah batch: pilih Internship atau Relawan"]
+  B -- "Ya" --> D["Pilih Ubah untuk memasukkan atau memperbarui link pendaftaran"]
+  C --> E["Isi nama batch dan link pendaftaran"]
+  D --> F["Simpan perubahan"]
+  E --> F
+  F --> G{"Link HTTP/HTTPS valid dan tersimpan?"}
+  G -- "Tidak" --> H["Pendaftaran tetap tertutup"]
+  G -- "Ya" --> I["Aktifkan toggle pada baris batch"]
+  I --> J["Website menampilkan tombol Daftar pada batch itu"]
+  J --> K["Nonaktifkan toggle untuk menutup pendaftaran di website"]
 ```
 
-Di halaman Bergabung, pengunjung memilih batch melalui tombol pada kartu jalur yang tersedia. Halaman formulir langsung terikat pada batch tersebut, jadi tidak menampilkan dropdown batch lagi.
+Tautan dan status buka/tutup disimpan per batch. Internship dan Relawan dapat dibuka bersamaan, dan setiap batch dapat memakai layanan formulir berbeda. Tombol Daftar hanya tampil jika link valid tersedia dan toggle batch aktif. Menutup batch di website menyembunyikan tombol; Admin juga perlu menutup penerimaan respons di layanan formulir jika form tidak boleh menerima kiriman lagi.
 
-Di halaman Atur Pertanyaan, Admin mengelola pertanyaan bawaan (nama, email, WhatsApp, foto, CV, portofolio, dan isian lainnya) serta pertanyaan tambahan. Untuk setiap jenis, Admin dapat mengubah label, pilihan, urutan, status tampil, dan wajib/opsional. Tipe input field bawaan yang mengisi kolom khusus tidak dapat diganti. Jawaban lama tetap tampil pada detail dan ekspor karena label serta jawaban disalin saat pendaftaran.
+## 9. Data pendaftar
 
-## 9. Alur Admin 5: meninjau pendaftar
+Pendaftaran baru berlangsung di layanan eksternal pada link batch. Daftar jawaban, status seleksi, foto, CV, dan ekspor dikelola dari layanan tersebut; panel admin website tidak menyediakan halaman pendaftar atau ekspor untuk data dari layanan eksternal. Tabel lokal dari formulir website versi terdahulu tetap dipertahankan sebagai arsip dan pengaman relasi batch, tetapi bukan bagian alur admin saat ini.
 
-```mermaid
-flowchart TD
-  A["/admin/pendaftar"] --> B["Filter tipe, batch, status, atau cari nama"]
-  B --> C["Buka detail pendaftar"]
-  C --> D["Lihat data lengkap dan foto inline"]
-  D --> E{"Perlu lihat CV?"}
-  E -- "Lihat CV" --> F["PDF terbuka di tab baru"]
-  E -- "Download CV" --> G["PDF terunduh"]
-  E -- "Tidak" --> H["Ubah status: Baru, Ditinjau, Diterima, Ditolak"]
-  F --> H
-  G --> H
-  H --> I["Simpan status, toast"]
-```
-
-## 10. Alur Admin 6: mengekspor data
-
-```mermaid
-flowchart TD
-  A["/admin/pendaftar"] --> B["Atur filter bila perlu"]
-  B --> C["Menu Ekspor data"]
-  C --> D{"Format"}
-  D -- "Excel atau CSV" --> E["Unduh file dengan semua kolom dan tautan foto serta CV"]
-  D -- "PDF" --> F{"Hasil filter 100 pendaftar atau kurang?"}
-  F -- "Tidak" --> G["Pesan: persempit filter, misalnya per batch"]
-  G --> B
-  F -- "Ya" --> H["Unduh laporan PDF dengan foto inline dan tautan CV"]
-```
-
-## 11. Alur Admin 7: membaca pesan masuk
+## 10. Alur Admin 5: membaca pesan masuk
 
 ```mermaid
 flowchart TD
@@ -236,22 +190,16 @@ flowchart TD
 
 | Situasi | Perilaku yang diharapkan |
 | --- | --- |
-| Tidak ada batch dibuka | `/bergabung` tidak menampilkan form. Tampil pesan, dan bagian ajakan, manfaat, serta langkah tetap terlihat. |
+| Tidak ada batch dibuka | `/bergabung` menampilkan status pendaftaran ditutup. Bagian ajakan, manfaat, dan langkah tetap terlihat. |
 | Lebih dari satu batch dibuka | Pengunjung memilih batch. Tipe (Intern atau Relawan) ditampilkan di samping nama batch. |
-| Batch ditutup saat pengunjung mengisi | Pengiriman ditolak dengan pesan jelas. Isian teks tetap, file perlu dipilih ulang. |
-| Pengunjung menekan kirim dua kali | Tombol nonaktif selama proses. Server tetap menolak duplikat lewat aturan email per batch. |
-| File lebih besar dari batas | Ditolak di server dengan pesan yang menyebut ukuran file dan batasnya. Bila ukuran bisa dibaca di layar, ditolak lebih awal. |
-| File berekstensi PDF tetapi isinya bukan PDF | Ditolak dengan pesan "File CV harus berupa PDF yang valid". |
-| Pendaftar berusia di bawah 17 tahun | Ditolak dengan pesan yang menyebut batas usia. |
-| Pendaftar non-mahasiswa tanpa asal universitas | Diterima. Asal universitas hanya wajib untuk Mahasiswa dan Fresh Graduate. |
+| Link pendaftaran batch belum diisi | Toggle tidak dapat dibuka dan tombol Daftar tidak tampil di website. |
+| Batch ditutup setelah tab formulir dibuka | Website menyembunyikan tautan bagi kunjungan berikutnya. Tab formulir yang sudah terbuka tetap mengikuti status penerimaan respons di layanan tersebut. |
 | Sesi admin habis saat mengisi form | Admin diarahkan ke login. Setelah login, kembali ke halaman yang sama. Isian yang belum disimpan hilang, jadi form panjang menampilkan peringatan sebelum meninggalkan halaman. |
-| Admin menghapus batch yang punya data | Ditolak. Pesan menyebut jumlah pendaftar dan anggota tim, dan menawarkan "Tutup batch". |
-| Admin membuka tautan file dari Excel tanpa login | Diarahkan ke login, lalu kembali ke file setelah masuk. |
+| Admin menghapus batch yang punya anggota tim | Ditolak agar relasi anggota tidak rusak. Arsip pendaftar lokal lama tetap tersimpan dengan `batch_id` kosong bila batch dihapus. |
 | Admin menghapus program atau berita yang punya foto | Dialog konfirmasi menyebut jumlah foto yang ikut terhapus. File fisik ikut dihapus. |
 | Foto galeri melebihi 30 | Unggahan ditolak seluruhnya dengan pesan yang menyebut sisa kuota. |
 | Program atau berita berstatus draf | Tidak tampil di halaman publik, tidak muncul di preview Beranda, dan URL detailnya menjawab 404 untuk pengunjung. |
 | Konten kosong (belum ada program, berita, FAQ, atau tim) | Halaman publik menyembunyikan section yang kosong. Panel admin menampilkan layar kosong yang mengajak menambah. |
 | Kurang dari tiga berita Penghargaan | Section Penghargaan di Beranda menampilkan sebanyak yang ada. Bila nol, section disembunyikan. |
-| Pendaftar belum ada | Daftar pendaftar menampilkan layar kosong. Tombol ekspor nonaktif. |
 | Pengunjung mengirim pesan kontak terlalu sering | Ditolak dengan pesan untuk menunggu. Tidak ada pesan yang disimpan. |
 | Founder belum ditandai | Section profil founder di Beranda disembunyikan. |

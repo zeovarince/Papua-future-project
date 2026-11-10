@@ -2,8 +2,17 @@
 
 declare(strict_types=1);
 
-define('APP_ROOT', __DIR__);
-define('PUBLIC_ROOT', APP_ROOT . '/public');
+if (!defined('APP_ROOT')) {
+    define('APP_ROOT', __DIR__);
+}
+
+if (!defined('PUBLIC_ROOT')) {
+    $configuredPublicRoot = trim((string) (getenv('PUBLIC_DIR') ?: ''));
+    $defaultPublicRoot = $configuredPublicRoot !== '' && is_dir($configuredPublicRoot)
+        ? $configuredPublicRoot
+        : APP_ROOT . '/public';
+    define('PUBLIC_ROOT', $defaultPublicRoot);
+}
 
 $autoload = APP_ROOT . '/vendor/autoload.php';
 if (is_file($autoload)) {

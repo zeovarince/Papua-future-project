@@ -7,6 +7,7 @@ namespace App\Controllers\Admin;
 use App\Core\Flash;
 use App\Core\Request;
 use App\Core\Response;
+use App\Core\SecurityLogger;
 use App\Core\View;
 use App\Models\Batch;
 use App\Validators\BatchValidator;
@@ -21,6 +22,7 @@ final class BatchController
             'page' => 'batch',
             'breadcrumb' => ['Admin', 'Batch'],
             'batches' => Batch::all(),
+            'errors' => Flash::get('errors', []),
         ], 'admin');
     }
 
@@ -42,7 +44,7 @@ final class BatchController
             'page' => 'batch',
             'breadcrumb' => ['Admin', 'Batch', $batch === null ? 'Tambah' : 'Ubah'],
             'batch' => $batch,
-            'values' => Flash::get('old', $batch ?? ['batch_type' => 'INTERN', 'name' => '']),
+            'values' => Flash::get('old', $batch ?? ['batch_type' => 'INTERN', 'name' => '', 'google_form_url' => '']),
             'errors' => Flash::get('errors', []),
         ], 'admin');
     }
@@ -64,8 +66,8 @@ final class BatchController
             return Response::redirect('/admin/batch');
         }
         [$values, $errors] = BatchValidator::validate($request->post());
-        if ($current !== null && $current['batch_type'] !== $values['batch_type'] && ((int) $current['member_count'] > 0 || (int) $current['application_count'] > 0)) {
-            $errors['batch_type'] = 'Jenis batch tidak dapat diubah karena sudah memiliki anggota atau pendaftar.';
+        if ($current !== null && $current['batch_type'] !== $values['batch_type'] && (int) $current['member_count'] > 0) {
+            $errors['batch_type'] = 'Jenis batch tidak dapat diubah karena masih digunakan anggota tim.';
         }
         if ($errors !== []) {
             Flash::set('errors', $errors);
@@ -74,7 +76,7 @@ final class BatchController
             return Response::redirect($id === null ? '/admin/batch/tambah' : '/admin/batch/' . $id . '/ubah');
         }
         try {
-            Batch::save($values['batch_type'], $values['name'], $id);
+            Batch::save($values['batch_type'], $values['name'], $id, $values['google_form_url']);
             Flash::set('success', 'Batch berhasil disimpan.');
             return Response::redirect('/admin/batch');
         } catch (PDOException) {
@@ -87,25 +89,32 @@ final class BatchController
 
     public function toggle(Request $request, int $id): Response
     {
-        if (Batch::toggle($id)) {
-            Flash::set('success', 'Status pendaftaran batch berhasil diubah.');
-        } else {
-            Flash::set('error', 'Batch tidak ditemukan.');
+        $result = Batch::toggle($id);
+        if (!$result['updated']) {
+            Flash::set('error', $result['reason'] === 'missing_form_url'
+                ? 'Isi link pendaftaran melalui Ubah Batch sebelum membuka pendaftaran.'
+                : 'Batch tidak ditemukan.');
+            return Response::redirect('/admin/batch');
         }
+
+        SecurityLogger::record('batch_registration_toggled', $request, $id);
+        Flash::set('success', $result['is_open'] ? 'Pendaftaran batch berhasil dibuka.' : 'Pendaftaran batch berhasil ditutup.');
         return Response::redirect('/admin/batch');
     }
 
     public function destroy(Request $request, int $id): Response
     {
-        $batch = Batch::find($id);
-        if ($batch === null) {
+        $result = Batch::deleteIfNoMembers($id);
+        if (!$result['deleted']) {
+            if ($result['reason'] === 'has_members') {
+                Flash::set('error', 'Batch tidak dapat dihapus karena sudah memiliki ' . $result['member_count'] . ' anggota tim.');
+            } else {
+                Flash::set('error', 'Batch tidak ditemukan atau sudah dihapus.');
+            }
             return Response::redirect('/admin/batch');
         }
-        if ((int) $batch['member_count'] > 0 || (int) $batch['application_count'] > 0) {
-            Flash::set('error', 'Batch tidak dapat dihapus: masih memiliki ' . $batch['member_count'] . ' anggota dan ' . $batch['application_count'] . ' pendaftar. Tutup batch bila pendaftaran selesai.');
-            return Response::redirect('/admin/batch');
-        }
-        Batch::delete($id);
+
+        SecurityLogger::record('batch_deleted', $request, $id);
         Flash::set('success', 'Batch berhasil dihapus.');
         return Response::redirect('/admin/batch');
     }

@@ -1,22 +1,22 @@
 # ARCHITECTURE
 
-Arsitektur teknis website Papua Future Project: **PHP native pola MVC, MySQL, dan deployment lewat cPanel Git**. Kebutuhan produk ada di [PRD.md](PRD.md), tabel di [ERD.md](ERD.md) dan [SCHEMA.md](SCHEMA.md), alur pengguna di [USERFLOW.md](USERFLOW.md), urutan pengerjaan di [STEP.md](STEP.md).
+Arsitektur teknis website Papua Future Project: **PHP native pola MVC, MySQL/MariaDB, dan shared hosting DirectAdmin**. Panduan deploy DirectAdmin tanpa SSH ada di [DEPLOY-DIRECTADMIN.md](DEPLOY-DIRECTADMIN.md); deployment cPanel Git di bagian 13 adalah alternatif. Kebutuhan produk ada di [PRD.md](PRD.md), tabel di [ERD.md](ERD.md) dan [SCHEMA.md](SCHEMA.md), alur pengguna di [USERFLOW.md](USERFLOW.md), urutan pengerjaan di [STEP.md](STEP.md).
 
 ## 1. Stack
 
 | Lapisan | Pilihan | Catatan |
 | --- | --- | --- |
-| Bahasa | PHP 8.4 ke atas, `declare(strict_types=1)` | Pilih versi lewat MultiPHP Manager di cPanel; verifikasi ketersediaannya pada paket hosting. |
+| Bahasa | PHP 8.4 ke atas, `declare(strict_types=1)` | PHP 8.4 sudah dipilih di DirectAdmin; pastikan versi itu diterapkan pada domain/subdomain yang menjalankan PFP. |
 | Pola | MVC buatan sendiri, ditambah lapisan Service | Tanpa framework (Laravel, CodeIgniter, dan sejenisnya). |
 | Basis data | MySQL 8 atau MariaDB 10.6 ke atas lewat PDO | Prepared statement untuk semua query. |
-| Web server | Apache dengan `mod_rewrite` (bawaan cPanel) | Contoh Nginx ada di bagian 14. |
+| Web server | Apache/LiteSpeed dengan aturan rewrite, sesuai yang tersedia pada paket DirectAdmin | Tanyakan ke provider jika `.htaccess` tidak diterapkan; contoh Nginx ada di bagian 14. |
 | Dependensi | Composer: autoload PSR-4, PhpSpreadsheet, Dompdf | Library tambahan hanya dengan alasan tertulis. |
 | Gambar | Ekstensi GD dengan dukungan WebP | Ubah ukuran, konversi, dan buang EXIF. |
 | Tampilan | View PHP dengan layout dan partial | UI statis yang sudah ada dipecah menjadi layout, partial, dan view. |
 | CSS dan JS | CSS dan JS biasa dalam file terpisah (tanpa bundler) | GSAP disajikan dari server sendiri. Lihat [GSAP.md](GSAP.md). |
 | Autentikasi | Sesi PHP dengan cookie aman | Satu peran admin. |
 | Validasi | Kelas `Validator` buatan sendiri di sisi server | Validasi di layar hanya pelengkap. |
-| Hosting | cPanel dengan Git Version Control | Deployment lewat `.cpanel.yml` (bagian 13). |
+| Hosting | DirectAdmin shared hosting (target saat ini) | Deploy manual tanpa SSH lewat File Manager/FTP dan phpMyAdmin; lihat [DEPLOY-DIRECTADMIN.md](DEPLOY-DIRECTADMIN.md). cPanel Git tersedia sebagai alternatif di bagian 13. |
 | Zona waktu | `Asia/Jayapura` (WIT) | Diset di PHP dan di sesi MySQL. |
 
 ## 2. Alur sebuah permintaan
@@ -31,17 +31,17 @@ flowchart LR
   C --> V["Validator"]
   C --> Mo["Model dengan PDO"]
   Mo --> D[("MySQL")]
-  C --> S["Service: upload, gambar, galeri, ekspor"]
+  C --> S["Service: gambar dan galeri"]
   S --> St[("storage dan public/uploads")]
   C --> Vw["View dan layout"]
   Vw --> B
 ```
 
-Satu aplikasi melayani halaman publik, panel admin, penyajian file privat, dan ekspor.
+Satu aplikasi melayani halaman publik dan panel admin. Pengunjung memilih batch; tautan pendaftaran membuka layanan formulir eksternal yang dipilih Admin. Aplikasi tidak menyimpan jawaban atau menyediakan halaman pendaftar dan ekspor.
 
 ## 3. Struktur folder lengkap
 
-Ini struktur target. Step 1 di [STEP.md](STEP.md) membuat seluruh folder dan file kerangka ini. Pohon menunjukkan layout repositori. Di server cPanel, isi `public/` berada di `public_html` dan folder lain berada di `pfp-app` (bagian 13).
+Ini struktur target. Step 1 di [STEP.md](STEP.md) membuat seluruh folder dan file kerangka ini. Pohon menunjukkan layout repositori. Di DirectAdmin, isi `public/` berada di document root dan folder privat berada di `pfp-app` di luar document root; lihat [DEPLOY-DIRECTADMIN.md](DEPLOY-DIRECTADMIN.md). Layout cPanel dijelaskan pada bagian 13.
 
 ```
 pfp/
@@ -123,7 +123,7 @@ pfp/
 │  │  │  ├─ AboutController.php
 │  │  │  ├─ ProgramController.php    index, show
 │  │  │  ├─ PostController.php       index, show
-│  │  │  ├─ JoinController.php       index, store, success
+│  │  │  ├─ JoinController.php       pilihan batch dan redirect ke tautan formulir eksternal
 │  │  │  ├─ ContactController.php    index, store
 │  │  │  └─ ErrorController.php      404 dan 500
 │  │  └─ Admin/
@@ -136,10 +136,7 @@ pfp/
 │  │     ├─ PostController.php
 │  │     ├─ GalleryController.php    foto dokumentasi program dan berita
 │  │     ├─ FaqController.php
-│  │     ├─ ApplicationController.php
 │  │     ├─ MessageController.php
-│  │     ├─ FileController.php       menyajikan foto dan CV pendaftar
-│  │     └─ ExportController.php
 │  │
 │  ├─ Models/
 │  │  ├─ AdminUser.php
@@ -151,7 +148,6 @@ pfp/
 │  │  ├─ Post.php
 │  │  ├─ PostPhoto.php
 │  │  ├─ Faq.php
-│  │  ├─ Application.php
 │  │  ├─ ContactMessage.php
 │  │  └─ RateLimit.php
 │  │
@@ -161,12 +157,6 @@ pfp/
 │  │  ├─ UploadService.php           validasi dan pemindahan file unggahan
 │  │  ├─ ImageService.php            GD: ubah ukuran, WebP, thumbnail, buang EXIF
 │  │  ├─ GalleryService.php          tambah dan hapus foto, batas 30 foto
-│  │  ├─ ApplicationService.php      alur pendaftaran (validasi, file, transaksi)
-│  │  ├─ ExportService.php
-│  │  └─ Export/
-│  │     ├─ CsvExporter.php
-│  │     ├─ XlsxExporter.php
-│  │     └─ PdfExporter.php
 │  │
 │  ├─ Validators/
 │  │  ├─ LoginValidator.php
@@ -177,9 +167,7 @@ pfp/
 │  │  ├─ PostValidator.php
 │  │  ├─ FaqValidator.php
 │  │  ├─ GalleryValidator.php
-│  │  ├─ JoinApplicationValidator.php
 │  │  ├─ ContactValidator.php
-│  │  └─ ApplicationStatusValidator.php
 │  │
 │  └─ Views/
 │     ├─ layouts/
@@ -219,7 +207,7 @@ pfp/
 │     │  │                          team-core, team-batches
 │     │  ├─ program/                 index.php, show.php
 │     │  ├─ post/                    index.php, show.php
-│     │  ├─ join/                    index.php, closed.php, success.php
+│     │  ├─ join/                    index.php (pilihan batch dan link pendaftaran)
 │     │  ├─ contact/
 │     │  │  ├─ index.php
 │     │  │  └─ sections/             channels, location, form, partners, faq
@@ -233,7 +221,6 @@ pfp/
 │        ├─ program/                 index.php, form.php
 │        ├─ post/                    index.php, form.php
 │        ├─ faq/                     index.php, form.php
-│        ├─ application/             index.php, show.php, export-pdf.php
 │        └─ message/                 index.php, show.php
 │
 ├─ public/                           satu-satunya folder yang dilayani web server
@@ -295,7 +282,7 @@ pfp/
 │     └─ team/
 │
 ├─ storage/                          di luar public, tidak masuk Git
-│  ├─ applications/{file_token}/     photo.webp dan cv.pdf
+│  ├─ applications/                  arsip privat versi lama bila masih ada
 │  ├─ logs/                          app.log
 │  └─ cache/
 │
@@ -328,7 +315,7 @@ Arsip HTML lama sudah dihapus setelah migrasi ke PHP MVC. Riwayat file tetap ter
 | `program-bimbel.html`, `program-digital.html`, `program-pojok-baca.html`, `program-kesehatan.html`, `program-pemuda.html` | `/program/{slug}` | `Public\ProgramController@show` | `public/program/show.php` |
 | `berita.html` | `/berita` | `Public\PostController@index` | `public/post/index.php` |
 | `berita-detail.html` | `/berita/{slug}` | `Public\PostController@show` | `public/post/show.php` |
-| `join.html` | `/bergabung` | `Public\JoinController@index` | `public/join/index.php` atau `closed.php` |
+| `join.html` | `/bergabung` | `Public\JoinController@index` | `public/join/index.php` (pilihan jalur dan batch aktif) |
 | `kontak.html` | `/kontak` | `Public\ContactController@index` | `public/contact/index.php` |
 
 Semua tautan internal memakai `url()`. Tidak boleh ada tautan yang berakhiran `.html`.
@@ -342,24 +329,22 @@ Semua tautan internal memakai `url()`. Tidak boleh ada tautan yang berakhiran `.
 | Controller | Menerima `Request`, memanggil Validator, Model, dan Service, lalu memilih View atau redirect. Tipis. | Menulis SQL, mengolah file, atau membangun HTML. |
 | Validator | Memeriksa dan membersihkan masukan, mengembalikan galat per field. | Mengakses database kecuali untuk aturan unik yang dibutuhkan. |
 | Model | Satu kelas per tabel. Semua query PDO ada di sini. | Membaca `$_POST` atau `$_FILES`, atau mengeluarkan HTML. |
-| Service | Logika yang menyentuh lebih dari satu Model atau menyentuh file: upload, gambar, galeri, pendaftaran, ekspor, autentikasi. | Membaca superglobal PHP langsung. |
+| Service | Logika yang menyentuh file atau beberapa Model: gambar, galeri, autentikasi. | Membaca superglobal PHP langsung. |
 | View | Menampilkan data. Boleh memakai `if`, `foreach`, dan helper `e()`. | Menjalankan query atau menghitung aturan bisnis. |
 | Support | Fungsi kecil tanpa keadaan: label, format teks, slug, tanggal. | Mengakses database. |
 
 `$_GET`, `$_POST`, `$_FILES`, `$_SERVER`, dan `$_COOKIE` hanya dibaca oleh kelas `Request`. Kode lain menerima nilai dari `Request`.
 
-Implementasi pengelolaan formulir pendaftaran memakai file berikut:
+Pengaturan pendaftaran baru memakai Batch sebagai satu-satunya panel admin:
 
 | File | Tanggung jawab |
 | --- | --- |
-| `app/Controllers/Admin/ApplicationFormController.php` | Toggle status formulir per jenis dan CRUD pertanyaan admin. |
-| `app/Models/ApplicationFormSetting.php` | Membaca dan mengubah status Internship/Relawan. |
-| `app/Models/ApplicationQuestion.php` | Mengambil dan menyimpan pertanyaan tambahan per jenis. |
-| `app/Validators/ApplicationQuestionValidator.php` | Validasi teks, tipe jawaban, kewajiban, status tampil, dan urutan. |
-| `app/Views/admin/application-form/` | Halaman status formulir, daftar pertanyaan, dan form tambah/ubah. |
-| `app/Models/Application.php` | Menyimpan jawaban dengan snapshot pertanyaan dan menyiapkannya untuk detail/ekspor. |
-| `public/assets/js/pages/join.js` | Menampilkan hanya pertanyaan yang cocok dengan jenis batch terpilih. |
-| `database/migrations/0011_create_application_forms.sql` | Membuat sakelar per jenis formulir, definisi pertanyaan, dan penyimpanan jawaban. |
+| `app/Controllers/Admin/BatchController.php` | CRUD batch dan sakelar buka/tutup per batch. |
+| `app/Models/Batch.php` | Menyimpan `google_form_url` dan `is_open` pada setiap batch. |
+| `app/Validators/BatchValidator.php` | Memvalidasi tautan pendaftaran sebagai URL web absolut HTTP/HTTPS sebelum disimpan atau dibuka. |
+| `app/Views/admin/batch/` | Daftar batch dengan toggle dan formulir edit untuk nama serta URL. |
+| `app/Controllers/Public/JoinController.php` | Menampilkan batch publik dan mengalihkan ke URL batch yang masih terbuka. |
+| `database/pfp.sql` | Menambah URL per batch dan memindahkan URL lama tanpa menghapus data historis. |
 
 Pengelolaan akun admin memakai `app/Controllers/Admin/AdminAccountController.php`, model `app/Models/AdminUser.php`, validator `app/Validators/AdminAccountValidator.php`, dan dua View di `app/Views/admin/accounts/`. Tidak ada perubahan skema; seluruh akun tersimpan di tabel `admin_users`.
 
@@ -378,8 +363,7 @@ Form HTML hanya mengenal GET dan POST, jadi ubah dan hapus memakai POST ke jalur
 | GET | `/berita` | `Public\PostController@index` (filter `?kategori=kegiatan\|update\|media\|penghargaan`) | |
 | GET | `/berita/{slug}` | `Public\PostController@show` | |
 | GET | `/bergabung` | `Public\JoinController@index` | |
-| POST | `/bergabung` | `Public\JoinController@store` | csrf, rate-limit `join` |
-| GET | `/bergabung/berhasil` | `Public\JoinController@success` | |
+| GET | `/bergabung/{internship\|relawan}/{batchId}` | `Public\JoinController@form` (cek status batch lalu alihkan ke tautan pendaftaran) | |
 | GET | `/kontak` | `Public\ContactController@index` | |
 | POST | `/kontak` | `Public\ContactController@store` | csrf, rate-limit `contact` |
 
@@ -395,15 +379,8 @@ Form HTML hanya mengenal GET dan POST, jadi ubah dan hapus memakai POST ke jalur
 | GET/POST | `/admin/akun/password` | `Admin\AdminAccountController@passwordForm/updatePassword` | auth; csrf untuk POST |
 | GET | `/admin/tentang` | `Admin\AboutController@edit` | auth |
 | POST | `/admin/tentang` | `Admin\AboutController@update` | auth, csrf |
+| GET/POST | `/admin/batch`, `/admin/batch/{id}` | `Admin\BatchController` (daftar, tambah, ubah, hapus) | auth; csrf untuk POST |
 | POST | `/admin/batch/{id}/toggle` | `Admin\BatchController@toggle` | auth, csrf |
-| GET | `/admin/pendaftaran` | `Admin\ApplicationFormController@index` | auth |
-| POST | `/admin/pendaftaran/{internship\|relawan}/toggle` | `Admin\ApplicationFormController@toggle` | auth, csrf |
-| GET/POST | `/admin/pendaftaran/{type}/pertanyaan[/{id}/ubah]` | `Admin\ApplicationFormController` CRUD pertanyaan per jenis | auth; csrf untuk POST |
-| GET | `/admin/pendaftar` | `Admin\ApplicationController@index` | auth |
-| GET | `/admin/pendaftar/{id}` | `Admin\ApplicationController@show` | auth |
-| POST | `/admin/pendaftar/{id}/status` | `Admin\ApplicationController@updateStatus` | auth, csrf |
-| GET | `/admin/berkas/{id}/{foto\|cv}` | `Admin\FileController@show` (`?unduh=1` memaksa unduhan) | auth |
-| GET | `/admin/ekspor/{csv\|xlsx\|pdf}` | `Admin\ExportController@download` (filter lewat query string) | auth |
 | GET | `/admin/pesan` | `Admin\MessageController@index` | auth |
 | GET | `/admin/pesan/{id}` | `Admin\MessageController@show` (menandai sudah dibaca) | auth |
 | POST | `/admin/pesan/{id}/hapus` | `Admin\MessageController@destroy` | auth, csrf |
@@ -437,27 +414,18 @@ Semua rute di bawah `/admin` (kecuali login) memakai middleware `auth`, dan semu
 
 ## 7. Alur penting
 
-### 7.1 Pendaftaran dengan unggah file
+### 7.1 Pendaftaran melalui layanan formulir eksternal
 
-1. Browser mengirim POST multipart ke `/bergabung`. Form membawa token CSRF dan satu kolom jebakan (honeypot) yang disembunyikan dengan CSS.
-2. Middleware memeriksa CSRF dan batas laju `join` per IP (usulan: 5 percobaan per jam).
-3. `JoinController@store` membaca masukan lewat `Request`, menolak diam-diam bila honeypot terisi, lalu memanggil `ApplicationService`.
-4. `JoinApplicationValidator` memeriksa semua field teks (PRD bagian 8), memastikan jenis formulir aktif dan `batch_id` sedang dibuka, lalu memvalidasi pertanyaan aktif khusus jenis batch yang dipilih.
-5. `UploadService` memeriksa setiap file: `UPLOAD_ERR_OK`, ukuran (foto 2 MB, CV 5 MB), tipe dari isi file dengan `finfo_file` (bukan dari ekstensi atau `Content-Type` kiriman browser), `getimagesize` untuk foto, dan awalan `%PDF-` untuk CV.
-6. `ImageService` membaca foto dengan GD, mengecilkan sisi terpanjang menjadi maksimal 1200 px, lalu menyimpannya ulang sebagai WebP. Karena foto disimpan ulang dari data piksel, metadata EXIF (termasuk lokasi GPS) hilang.
-7. Server membuat `file_token` acak (32 karakter heksadesimal dari `random_bytes`), lalu menulis `photo.webp` dan `cv.pdf` ke `storage/applications/{file_token}/` dengan izin folder 0750.
-8. Model `Application` membuka transaksi, mengunci status formulir dan batch dengan `SELECT ... FOR UPDATE`, memastikan keduanya aktif, menyimpan pendaftar serta snapshot jawaban tambahan, lalu commit. Bila formulir/batch ditutup atau email sudah terdaftar (galat 1062), transaksi dibatalkan dan folder file dihapus.
-9. Setelah berhasil, redirect ke `/bergabung/berhasil` (pola Post/Redirect/Get). Bila gagal, simpan galat dan isian teks lama di flash session lalu redirect kembali ke `/bergabung#form-daftar`. File yang sudah dipilih harus dipilih ulang karena browser tidak bisa mengisi ulang input file.
+1. Pengunjung membuka `/bergabung` dan melihat batch yang statusnya terbuka.
+2. Tombol Daftar tampil jika URL pendaftaran tersimpan dan batch terkait terbuka.
+3. Klik Daftar membuka URL yang dipilih Admin pada tab baru. Pertanyaan, unggahan, validasi, penyimpanan jawaban, dan halaman konfirmasi ditangani oleh layanan pada tautan tersebut.
+4. Rute `/bergabung/{internship|relawan}/{batchId}` memeriksa status dan URL batch sebelum mengarahkan pengunjung. Rute formulir lokal dan halaman konfirmasi lama tidak tersedia.
 
-Status formulir Internship dan Relawan berada di `application_form_settings` dan dapat diubah terpisah. Status batch tetap dikelola sendiri di `batches.is_open`. Pertanyaan tambahan disimpan per jenis di `application_questions`; jawaban bersama salinan teks pertanyaan disimpan di `application_answers` agar riwayat tetap terbaca.
+Admin menyimpan URL di kolom kompatibilitas `batches.google_form_url` dan membuka/menutupnya melalui `batches.is_open`. URL dari domain mana pun diterima selama berupa URL absolut yang valid dengan skema `http` atau `https`, tanpa kredensial username/password. Link kosong menutup batch. Setiap batch berdiri sendiri, sehingga beberapa batch Internship dan Relawan dapat dibuka bersamaan.
 
-### 7.2 Admin membuka file pendaftar
+### 7.2 Data formulir website versi lama
 
-1. `AuthMiddleware` memastikan sesi admin sah. Tanpa sesi, arahkan ke `/admin/login` dan simpan tujuan awal agar admin kembali ke file itu setelah masuk.
-2. `FileController@show` mencari `Application` dari `id`, lalu membentuk jalur dari `file_token` di database, tidak dari input pengguna.
-3. Controller memastikan `realpath` file berada di bawah `STORAGE_DIR`. Bila tidak, jawab 404.
-4. Respons membawa `Content-Type` sesuai file, `X-Content-Type-Options: nosniff`, dan `Cache-Control: private, no-store`. Tanpa `?unduh=1`, `Content-Disposition` bernilai `inline`. Dengan parameter itu, bernilai `attachment`. Nama file di header dibuat dari slug ASCII nama pendaftar, bukan nama asli unggahan.
-5. File dikirim dengan `readfile`.
+Pendaftaran website versi lama sudah dinonaktifkan. Halaman admin untuk melihat data pendaftar, file foto/CV, dan ekspor tidak tersedia. Tabel `applications`, `application_answers`, `application_questions`, dan `application_form_settings` dipertahankan sebagai arsip skema agar pembaruan `database/pfp.sql` tidak menghapus data lama. Pendaftaran baru, file, dan ekspor dikelola di layanan formulir yang ditautkan.
 
 ### 7.3 Unggah foto dokumentasi (galeri)
 
@@ -476,15 +444,9 @@ Status formulir Internship dan Relawan berada di `application_form_settings` dan
 3. Model `ContactMessage` menyimpan pesan dengan `is_read = 0`.
 4. Controller menyimpan pesan sukses di flash dan redirect ke `/kontak#kirim-pesan`. Bila gagal, galat dan isian lama dikirim lewat flash.
 
-### 7.5 Ekspor
+### 7.5 Ekspor jawaban pendaftaran
 
-1. `ExportController@download` memeriksa sesi dan membaca filter (tipe, batch, status, pencarian) dari query string lewat `Request`.
-2. **XLSX** (format utama): PhpSpreadsheet. Kolom tautan foto dan CV berisi hyperlink sel ke URL absolut dari `APP_URL` ke `/admin/berkas/{id}/foto` dan `/cv`. Kolom motivasi dan keahlian khusus diberi pembungkus teks. Larik bidang kontribusi digabung dengan koma.
-3. **CSV**: ditulis dengan `fputcsv` ke `php://output`, diawali BOM UTF-8 agar huruf Indonesia terbaca benar di Excel. Pemisah kolom memakai titik koma, karena Excel dengan pengaturan regional Indonesia memakai titik koma sebagai pemisah daftar. Tautan di CSV berupa URL teks biasa.
-4. **PDF**: Dompdf dari satu template View (`admin/application/export-pdf.php`). Tiap pendaftar mendapat satu blok berisi data teks, jawaban pertanyaan tambahan, foto kecil (maksimal 160 px, dibuat dengan GD dan disisipkan sebagai data URI), dan tautan CV yang bisa diklik. Pengambilan sumber dari URL luar dimatikan.
-5. Dompdf boros memori. Batasi satu PDF maksimal 100 pendaftar. Bila hasil filter lebih besar, tampilkan pesan agar admin mempersempit filter, misalnya per batch.
-
-Tautan di file ekspor tetap meminta login admin saat dibuka. Ini disengaja, karena file ekspor bisa berpindah tangan.
+Ekspor jawaban pendaftaran tidak dibuat oleh aplikasi PFP. Admin menggunakan fitur ekspor dari layanan formulir yang ditautkan; kode dan rute ekspor pendaftar versi lama tidak menjadi bagian fitur aktif.
 
 ## 8. Data statis (`config/site.php`)
 
@@ -517,11 +479,11 @@ Teks yang panjang dan khas satu halaman (Sekilas tentang, Perjalanan kami, manfa
 | Injeksi SQL | Semua query lewat prepared statement PDO dengan `ATTR_EMULATE_PREPARES` dimatikan dan `ERRMODE_EXCEPTION`. Nama kolom untuk `ORDER BY` diambil dari daftar putih, tidak dari input. |
 | XSS | Semua output di View melewati `e()`. Isi berita dan program disimpan sebagai teks dan dirender oleh `Text::render()`, yang meng-escape lebih dulu lalu hanya mengubah paragraf dan `**tebal**`. Tidak ada HTML dari admin. |
 | CSRF | Token acak per sesi di setiap form POST, diperiksa dengan `hash_equals`. Cookie sesi `SameSite=Lax`. |
-| Unggahan berbahaya | Periksa isi file (`finfo`, `getimagesize`, awalan `%PDF-`), batasi ukuran, nama file dibuat sistem, gambar disimpan ulang lewat GD, file pendaftar di luar `public/`. |
-| Eksekusi file unggahan | `public/uploads/` memblokir eksekusi PHP (bagian 14). File pendaftar tidak ada di folder yang dilayani web server. |
-| Spam form | Batas laju per IP dan kolom honeypot di form pendaftaran dan form kontak. Tambahkan captcha hanya bila spam tetap masuk. |
-| Kebocoran data pribadi | File privat, `no-store`, EXIF dibuang, IP disimpan sebagai hash di `rate_limits`, log tidak memuat data pendaftar atau isi pesan. |
-| Path traversal | Jalur file dibentuk dari `file_token` di database dan diperiksa dengan `realpath`. |
+| Unggahan berbahaya | Periksa isi dan ukuran foto galeri, nama file dibuat sistem, gambar disimpan ulang lewat GD. Form pendaftaran dan berkasnya dikelola layanan eksternal. |
+| Eksekusi file unggahan | `public/uploads/` memblokir eksekusi PHP (bagian 14). Arsip foto/CV lokal lama tetap di luar folder yang dilayani web server. |
+| Spam form | Batas laju per IP pada form kontak. Pembatasan pendaftaran ditangani layanan formulir eksternal. |
+| Kebocoran data pribadi | Arsip lokal lama tetap privat; EXIF dibuang pada foto publik; IP disimpan sebagai hash di `rate_limits`; log tidak memuat data pribadi atau isi pesan. |
+| Path traversal | File galeri dibentuk dari jalur yang dikelola aplikasi. Arsip file pendaftar lama tidak memiliki endpoint penyajian. |
 | Kebocoran konfigurasi | `.env` berada di luar `public/`. `display_errors` mati di produksi. Galat dicatat ke `storage/logs`. |
 | Header | `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: SAMEORIGIN`, dan `Content-Security-Policy` (di bawah). |
 
@@ -535,7 +497,7 @@ Fase migrasi UI mempertahankan Tailwind Play CDN dari HTML lama untuk menjaga ut
 
 ## 11. Data segar dan cache
 
-Model menggunakan cache data publik selama 60 detik. APCu dipakai bila tersedia; bila tidak, cache memakai file di `storage/cache/`, sehingga tetap bekerja pada shared hosting tanpa Redis atau ekstensi tambahan. Cache hanya mencakup konten publik (Tentang Kami, tim yang dipublikasikan, batch publik, program, berita, foto dokumentasi, dan FAQ). Data login, pendaftar, pesan kontak, dan seluruh halaman admin tidak disimpan dalam cache.
+Model menggunakan cache data publik selama 60 detik. APCu dipakai bila tersedia; bila tidak, cache memakai file di `storage/cache/`, sehingga tetap bekerja pada shared hosting tanpa Redis atau ekstensi tambahan. Cache hanya mencakup konten publik (Tentang Kami, tim yang dipublikasikan, batch publik, program, berita, foto dokumentasi, dan FAQ). Data login, pesan kontak, dan seluruh halaman admin tidak disimpan dalam cache.
 
 Perubahan konten melalui panel admin membersihkan cache publik setelah berhasil disimpan. Perubahan langsung di phpMyAdmin akan terlihat setelah cache berakhir, paling lama 60 detik. `storage/.htaccess` menutup akses web ke file cache.
 
@@ -550,7 +512,7 @@ Dibaca dari satu file `.env` di akar proyek lewat kelas `Environment`. File `.en
 | `APP_NAME` | Nama aplikasi yang ditampilkan. |
 | `APP_ENV` | `local` atau `production`. Menentukan tampilan galat. |
 | `APP_DEBUG` | `true` hanya untuk pengembangan lokal; gunakan `false` di production. |
-| `APP_URL` | URL dasar situs, dipakai untuk tautan di file ekspor. |
+| `APP_URL` | URL dasar situs, dipakai untuk tautan internal dan metadata situs. |
 | `APP_KEY` | 32 byte acak heksadesimal untuk HMAC identifier pembatas laju dan hash IP log keamanan. |
 | `ADMIN_PATH` | Jalur acak panel admin; wajib di production, diabaikan di local. |
 | `APP_TIMEZONE` | Bawaan `Asia/Jayapura`. |
@@ -561,6 +523,8 @@ Dibaca dari satu file `.env` di akar proyek lewat kelas `Environment`. File `.en
 | `SEED_ADMIN_PASSWORD` | Kata sandi admin awal. Ganti setelah login pertama. |
 
 ## 13. Deployment di cPanel dengan Git
+
+Bagian ini adalah alternatif untuk akun cPanel yang memiliki Git Version Control dan terminal. Target akun hosting saat ini adalah DirectAdmin; ikuti [DEPLOY-DIRECTADMIN.md](DEPLOY-DIRECTADMIN.md) untuk langkah yang sesuai dengan kondisi saat ini (tanpa SSH). Jangan jalankan prosedur `.cpanel.yml` pada DirectAdmin.
 
 Tujuan: `git push` ke repositori lalu klik "Deploy HEAD Commit" di cPanel memperbarui situs tanpa menyalin file manual.
 
@@ -623,9 +587,8 @@ deployment:
   tasks:
     - export APP_DIR=/home/USERNAME/pfp-app
     - export WEB_DIR=/home/USERNAME/public_html
-    - /bin/mkdir -p $APP_DIR/storage/logs $APP_DIR/storage/applications $APP_DIR/storage/sessions $APP_DIR/storage/cache
+    - /bin/mkdir -p $APP_DIR/storage/logs $APP_DIR/storage/sessions $APP_DIR/storage/cache
     - /bin/cp storage/.htaccess $APP_DIR/storage/.htaccess
-    - /bin/cp storage/applications/.htaccess $APP_DIR/storage/applications/.htaccess
     - /usr/bin/rsync -a --delete app/ $APP_DIR/app/
     - /usr/bin/rsync -a --delete config/ $APP_DIR/config/
     - /usr/bin/rsync -a --delete database/ $APP_DIR/database/
@@ -654,7 +617,7 @@ Penjelasan:
 ### 13.5 Cadangan
 
 - Cadangkan database dengan `mysqldump` harian (cron atau fitur backup cPanel).
-- Cadangkan folder `pfp-app/storage/` dan `public_html/uploads/` karena berisi file pendaftar dan foto galeri.
+- Cadangkan folder `pfp-app/storage/` dan `public_html/uploads/` karena berisi log/cache aplikasi dan foto galeri. Bila arsip pendaftar lama masih ada, lindungi dan cadangkan secara terpisah.
 - Uji pemulihan sebelum peluncuran.
 - Pantau ruang disk akun hosting, karena unggahan terus bertambah.
 
@@ -742,9 +705,8 @@ php -S localhost:8000 -t public public/index.php
 | Keputusan | Alasan | Konsekuensi |
 | --- | --- | --- |
 | PHP native dengan MVC buatan sendiri | Pilihan pemilik proyek. | Perlindungan yang biasanya disediakan framework (CSRF, validasi, escaping, sesi aman) harus dibuat dan dijaga sendiri. Aturannya ditulis eksplisit di [RULES.md](RULES.md). |
-| Lapisan Service di atas MVC | Upload, gambar, galeri, dan ekspor menyentuh file dan banyak Model. | Controller tetap tipis dan mudah diuji. |
+| Lapisan Service di atas MVC | Gambar dan galeri menyentuh file serta beberapa Model. | Controller tetap tipis dan mudah diuji. |
 | Konten statis di `config/site.php` dan View | Tidak ada di daftar fitur admin yang disepakati. | Mengubah teks hero atau angka impact butuh perubahan kode. Bisa dibuatkan halaman admin di fase lanjut. |
-| File pendaftar di luar `public/`, foto galeri di `public/uploads/` | Data pendaftar bersifat pribadi, foto galeri memang untuk publik. | Dua lokasi yang dicadangkan. |
-| `file_token` acak untuk folder file pendaftar | Jalur tidak bisa ditebak dan tidak bergantung pada `id` yang baru ada setelah `INSERT`. | Satu folder acak per pendaftar. |
+| Jawaban pendaftaran dikelola layanan eksternal | PFP tidak mengumpulkan jawaban atau file pendaftar di aplikasi. | Tautan dan status pendaftaran diatur per batch; arsip lokal lama tetap privat. |
 | Cache data publik 60 detik dengan APCu atau file | Mengurangi pembacaan database di halaman publik tanpa memerlukan Redis. | Perubahan dari admin menghapus cache; perubahan manual di database menunggu TTL paling lama 60 detik. |
-| Layout server terpisah (`public_html` dan `pfp-app`) | Hosting cPanel umumnya mengunci document root. | `index.php` mencari akar aplikasi di dua tempat. |
+| Layout server terpisah (document root dan `pfp-app`) | File aplikasi dan rahasia tidak boleh dapat diakses publik. | Sesuaikan lokasi document root dengan DirectAdmin; cPanel tersedia sebagai alternatif. |

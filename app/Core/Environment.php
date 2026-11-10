@@ -8,7 +8,9 @@ final class Environment
 {
     public static function load(string $path): void
     {
-        if (!is_file($path) || !is_readable($path)) {
+        // On Windows, is_readable() can return false for ACL-backed files even
+        // when file() can read them. Let file() report the actual read failure.
+        if (!is_file($path)) {
             return;
         }
 
@@ -26,7 +28,9 @@ final class Environment
             [$name, $value] = explode('=', $line, 2);
             $name = trim($name);
             $value = trim($value);
-            if (!preg_match('/^[A-Z][A-Z0-9_]*$/', $name) || getenv($name) !== false) {
+            $existingValue = getenv($name);
+            if (!preg_match('/^[A-Z][A-Z0-9_]*$/', $name)
+                || ($existingValue !== false && $existingValue !== '')) {
                 continue;
             }
 

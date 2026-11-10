@@ -26,7 +26,7 @@ final class TeamMember
         return Cache::remember('team:group:' . $group, 60, static function () use ($group): array {
             $statement = Database::connection()->prepare(
                 'SELECT tm.id, tm.member_group, tm.batch_id, tm.name, tm.role, tm.university, tm.bio, '
-                . 'tm.photo_path, tm.is_founder, tm.sort_order, b.name AS batch_name, b.batch_type, b.is_open '
+                . 'tm.photo_path, tm.is_founder, tm.sort_order, b.name AS batch_name, b.batch_type '
                 . 'FROM team_members tm LEFT JOIN batches b ON b.id = tm.batch_id '
                 . 'WHERE tm.member_group = :member_group AND tm.is_published = 1 '
                 . 'ORDER BY tm.batch_id ASC, tm.sort_order ASC, tm.name ASC'
@@ -67,13 +67,13 @@ final class TeamMember
 
             if ($id === null) {
                 $statement = $pdo->prepare(
-                    'INSERT INTO team_members (member_group, batch_id, name, role, university, bio, long_bio, photo_path, is_founder, sort_order, is_published) '
-                    . 'VALUES (:member_group, :batch_id, :name, :role, :university, :bio, :long_bio, :photo_path, :is_founder, :sort_order, :is_published)'
+                    'INSERT INTO team_members (member_group, batch_id, name, role, university, bio, long_bio, photo_path, home_photo_path, is_founder, sort_order, is_published) '
+                    . 'VALUES (:member_group, :batch_id, :name, :role, :university, :bio, :long_bio, :photo_path, :home_photo_path, :is_founder, :sort_order, :is_published)'
                 );
             } else {
                 $statement = $pdo->prepare(
                     'UPDATE team_members SET member_group = :member_group, batch_id = :batch_id, name = :name, role = :role, '
-                    . 'university = :university, bio = :bio, long_bio = :long_bio, photo_path = :photo_path, '
+                    . 'university = :university, bio = :bio, long_bio = :long_bio, photo_path = :photo_path, home_photo_path = :home_photo_path, '
                     . 'is_founder = :is_founder, sort_order = :sort_order, is_published = :is_published WHERE id = :id'
                 );
             }
@@ -87,6 +87,7 @@ final class TeamMember
                 'bio' => $values['bio'],
                 'long_bio' => $values['long_bio'],
                 'photo_path' => $values['photo_path'],
+                'home_photo_path' => $values['home_photo_path'] ?? null,
                 'is_founder' => $values['is_founder'] ? 1 : 0,
                 'sort_order' => $values['sort_order'],
                 'is_published' => $values['is_published'] ? 1 : 0,

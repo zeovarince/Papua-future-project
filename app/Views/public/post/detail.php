@@ -31,7 +31,7 @@ $paragraphs = preg_split('/\R\s*\R/', trim((string) ($post['content'] ?? ''))) ?
                 <?php if (!empty($post['cover_image'])): ?>
                     <img class="article-detail-cover" src="<?= e(url('/uploads/' . ltrim($post['cover_image'], '/'))) ?>" alt="<?= e($post['title']) ?>" fetchpriority="high">
                 <?php endif; ?>
-                <p class="article-detail-excerpt"><?= e($post['excerpt']) ?></p>
+                <?php if (trim((string) ($post['excerpt'] ?? '')) !== ''): ?><p class="article-detail-excerpt"><?= e($post['excerpt']) ?></p><?php endif; ?>
                 <div class="article-detail-copy">
                     <?php foreach ($paragraphs as $paragraph): ?>
                         <?php if (trim($paragraph) !== ''): ?><p><?= nl2br(e(trim($paragraph))) ?></p><?php endif; ?>
@@ -40,7 +40,7 @@ $paragraphs = preg_split('/\R\s*\R/', trim((string) ($post['content'] ?? ''))) ?
 
                 <?php if (!empty($post['meta_label'])): ?><p class="article-detail-label"><strong><?= e($post['meta_label']) ?></strong></p><?php endif; ?>
                 <?php if ($post['category'] === 'MEDIA' && !empty($post['source_url'])): ?>
-                    <p><strong>Sumber:</strong> <a href="<?= e($post['source_url']) ?>" target="_blank" rel="noopener noreferrer"><?= e($post['source_name'] ?: 'Baca sumber berita') ?></a></p>
+                    <p><strong>Sumber:</strong> <a href="<?= e($post['source_url']) ?>" target="_blank" rel="noopener noreferrer"><?= e(trim((string) ($post['source_name'] ?? '')) !== '' ? $post['source_name'] : 'Baca sumber') ?></a></p>
                 <?php endif; ?>
 
                 <?php if ($photos !== []): ?>
@@ -112,7 +112,7 @@ $paragraphs = preg_split('/\R\s*\R/', trim((string) ($post['content'] ?? ''))) ?
                 <?php foreach ($related as $item): ?>
                     <article class="news-card">
                         <a class="news-card-link" href="<?= url('/berita/' . rawurlencode($item['slug'])) ?>">
-                            <div class="news-img news-img-placeholder dynamic-news-photo">
+                            <div class="news-img news-img-placeholder dynamic-news-photo<?= empty($item['cover_image']) ? ' is-empty' : '' ?>">
                                 <?php if (!empty($item['cover_image'])): ?><img src="<?= e(url('/uploads/' . ltrim($item['cover_image'], '/'))) ?>" alt="" loading="lazy"><?php endif; ?>
                                 <span class="badge <?= e($categoryBadge[$item['category']] ?? 'badge-lapangan') ?>"><?= e($categoryLabels[$item['category']] ?? 'Berita') ?></span>
                             </div>

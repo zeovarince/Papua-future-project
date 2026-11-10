@@ -64,7 +64,7 @@ Panduan urutan kerja AI agent dan developer dari UI statis sampai situs dinamis 
 4. Implementasikan CRUD daftar intern/relawan per batch dan validasi kecocokan jenis anggota dengan jenis batch.
 5. Render halaman Tentang Kami dari database: cerita, visi-misi, Tim Penggerak, internship per batch, dan volunteer per batch.
 
-**Kriteria selesai:** perubahan konten tampil publik tanpa deploy ulang; batch/anggota tersusun sesuai urutan; batch dengan anggota atau pendaftar tidak dapat dihapus jika melanggar aturan relasi.
+**Kriteria selesai:** perubahan konten tampil publik tanpa deploy ulang; batch/anggota tersusun sesuai urutan; batch yang masih memiliki anggota tidak dapat dihapus.
 
 ### Step 5 — Program, detail, dan foto dokumentasi
 
@@ -95,35 +95,33 @@ Panduan urutan kerja AI agent dan developer dari UI statis sampai situs dinamis 
 
 **Kriteria selesai:** FAQ yang aktif tampil publik; pesan tersimpan dan dapat dibaca admin; spam dasar dibatasi; konten statis konsisten dengan aset yang disetujui.
 
-## Fase 3 — Pendaftaran dan ekspor
+## Fase 3 — Batch dan tautan pendaftaran eksternal
 
 ### Step 8 — Direktori batch dan halaman Bergabung
 
 1. Tampilkan batch intern dan relawan terpisah di halaman Tentang Kami sesuai urutan batch.
 2. Buat halaman Bergabung yang menampilkan pilihan hanya untuk batch terbuka.
-3. Tampilkan keadaan yang jelas ketika semua batch ditutup; jangan tampilkan form yang tidak dapat dikirim.
+3. Tampilkan keadaan yang jelas ketika semua batch ditutup; tombol Daftar membuka tautan pendaftaran batch pada tab baru.
 
-**Kriteria selesai:** toggle admin langsung tercermin di pilihan publik; tipe pendaftaran mengikuti batch; jalur intern dan relawan jelas.
+**Kriteria selesai:** toggle admin langsung tercermin di halaman publik; setiap batch memiliki link sendiri; beberapa batch dapat dibuka bersamaan.
 
-### Step 9 — Form pendaftaran dan unggahan privat
+### Step 9 — Pengaturan link dan status batch
 
-1. Buat form pendaftaran sesuai kolom PRD: identitas, email, WhatsApp, universitas sesuai aturan, batch, motivasi, foto, dan CV PDF.
-2. Validasi sisi server untuk tipe, ukuran, isi file, aturan umur/pendidikan, dan email unik per batch.
-3. Simpan foto dan CV dengan nama acak di luar web root; lakukan operasi database/file dengan kompensasi bila salah satu gagal.
-4. Buat halaman berhasil dan pesan validasi yang tidak membocorkan data sensitif.
-5. Lindungi jalur penyajian foto/CV melalui controller admin yang memeriksa sesi dan tipe file.
+1. Simpan URL layanan formulir apa pun pada batch yang dipilih; validasi menerima URL absolut valid dengan skema `http` atau `https`.
+2. Sediakan sakelar buka/tutup pada daftar Batch. Pembukaan ditolak jika URL belum tersimpan.
+3. Saat pengunjung memilih batch terbuka, arahkan ke link pendaftaran pada tab baru.
+4. Jika tidak ada batch terbuka, tampilkan status pendaftaran ditutup.
 
-**Kriteria selesai:** batch tertutup tidak menerima POST meski request dibuat manual; file privat tidak dapat dibuka dengan URL langsung; admin dapat melihat foto inline serta membuka/mengunduh CV.
+**Kriteria selesai:** URL dan sakelar diatur per batch; hanya batch terbuka dengan URL valid menampilkan tombol Daftar; Internship dan Relawan dapat aktif bersamaan.
 
-### Step 10 — Panel pendaftar, status, dan ekspor
+### Step 10 — Menonaktifkan alur formulir lokal lama
 
-1. Buat tabel pendaftar dengan filter tipe/batch/status, pencarian, dan pagination.
-2. Buat halaman detail pendaftar dan pengelolaan status sesuai pilihan di PRD.
-3. Buat ekspor CSV dan XLSX dengan seluruh kolom teks serta URL file yang hanya dapat diakses admin.
-4. Buat laporan PDF dengan data rapi, foto inline, dan akses CV yang tersedia.
-5. Terapkan batas ukuran dataset dan praktik streaming/pekerjaan sederhana yang sesuai kemampuan shared hosting; jangan mengandalkan antrean proses yang menetap.
+1. Hapus route, menu, controller, model, validator, dan tampilan admin untuk pertanyaan serta pendaftar dari formulir lokal lama.
+2. Pertahankan tabel dan arsip lama dalam database; jangan menghapus jawaban atau file historis sebagai bagian dari perubahan ini.
+3. Pastikan Ringkasan tidak menampilkan grafik, jumlah, atau riwayat pendaftar lokal.
+4. Pastikan halaman Batch menjadi satu-satunya tempat untuk mengatur URL GForm dan buka/tutup pendaftaran.
 
-**Kriteria selesai:** data ekspor mengikuti filter yang dipilih/dijelaskan; karakter CSV dibuka dengan benar di spreadsheet; PDF menampilkan foto dan tautan CV; endpoint ekspor dilindungi autentikasi dan otorisasi.
+**Kriteria selesai:** aplikasi tidak menyediakan formulir, daftar pendaftar, pertanyaan, atau ekspor lokal; data lama tetap utuh; pengaturan link pendaftaran terpusat di Batch.
 
 ## Fase 4 — Poles, rilis, dan operasi
 
@@ -154,7 +152,7 @@ Implementasi saat ini memakai GSAP 3.15.0 dan ScrollTrigger lokal, modul dinamis
 - `tests/Unit` dan `tests/E2E` masih berisi placeholder; PHPUnit belum terpasang.
 - Pada audit awal, Content Security Policy belum diterapkan. CSP kompatibilitas kemudian dipasang; rincian sumber yang diizinkan dan batasannya ada di pembaruan audit terbaru.
 
-**Status:** Step 12 masih berlangsung. Ulangi pemeriksaan halaman publik dan alur CRUD/form/unggah/ekspor setelah MySQL dan ekstensi yang dibutuhkan aktif. Uji CSP pada semua halaman publik dan admin, lalu hapus izin kompatibilitas setelah Tailwind dan gaya inline diganti.
+**Status:** Step 12 masih berlangsung. Ulangi pemeriksaan halaman publik dan alur CRUD/link GForm setelah MySQL tersedia. Uji CSP pada semua halaman publik dan admin, lalu hapus izin kompatibilitas setelah Tailwind dan gaya inline diganti.
 
 **Pembaruan audit lokal — 19 Oktober 2026:** lint PHP lolos untuk 134 file, pemeriksaan sintaks JavaScript lolos untuk 18 file, dan `composer validate --no-check-publish` menyatakan `composer.json` valid (dengan peringatan metadata lisensi belum diisi). Smoke test setelah CSP dipasang memberi `200` untuk `/admin/login` dan aset CSS/JS admin, serta mengonfirmasi header CSP terkirim. Halaman `/` dan `/bergabung` tetap `500`; pengujian koneksi database sebelumnya menemukan ketidakcocokan port dan autentikasi. Percobaan ulang `php bin/migrate.php` gagal karena koneksi ditolak; tidak ada migrasi yang diterapkan.
 
@@ -164,7 +162,7 @@ Implementasi saat ini memakai GSAP 3.15.0 dan ScrollTrigger lokal, modul dinamis
 
 Smoke test ulang: `/`, `/tentang`, `/program`, `/program/bimbel-literasi`, `/berita`, `/berita/imunisasi-dan-edukasi-kesehatan`, `/bergabung`, dan `/kontak` memberi `200`; `/admin/login` memberi `200`; route admin tanpa sesi memberi `303`; route tidak dikenal memberi `404`; CSS/JS memberi `200`. `php -l` lolos untuk 134 file PHP, `node --check` lolos untuk 18 file JavaScript, dan `php bin/integrity-check.php --scan` selesai bersih. `composer validate --no-check-publish` valid dengan peringatan metadata lisensi.
 
-**Status Step 12:** masih berlangsung. Dengan akun admin sementara, login/CSRF, halaman admin baca-saja, toggle Internship dan Volunteer secara terpisah, serta CRUD dan pemisahan pertanyaan tiap jenis sudah diuji end-to-end dan lolos. Akun serta pertanyaan uji dihapus, dan kedua formulir dikembalikan ke nonaktif. Pengiriman formulir lengkap, unggahan privat, pembukaan/unduhan file, ekspor CSV/XLSX/PDF, dan audit visual/konsol browser masih perlu diperiksa. Folder `tests/Unit` dan `tests/E2E` masih placeholder. `composer audit` belum memperoleh hasil karena koneksi ke Packagist ditolak. CSP sudah terkirim, tetapi tetap mengizinkan `unsafe-eval` untuk Tailwind CDN dan `unsafe-inline` untuk gaya lama/runtime; izin ini perlu dihilangkan sebelum menyebut CSP ketat.
+**Catatan audit lama:** bagian audit 19 Oktober di atas mencatat pengujian formulir lokal dan ekspor yang dilakukan sebelum keputusan memakai tautan layanan formulir eksternal. Hasil tersebut adalah riwayat, bukan daftar fitur aktif atau kriteria rilis saat ini. Pendaftaran baru dan jawaban dikelola layanan yang ditautkan; aplikasi hanya menguji link serta status per batch.
 
 **Pembaruan Redesain Admin — November 2026:** Seluruh UI panel admin (/admin/*) telah diperbarui total sesuai dokumen `docs/DESIGN-ADMIN.md`.
 - Navigasi memakai rail ikon 64 px dengan flyout 280 px (desktop) dan drawer mobile dengan akordeon (< 768 px).
@@ -175,14 +173,14 @@ Smoke test ulang: `/`, `/tentang`, `/program`, `/program/bimbel-literasi`, `/ber
 - Mengonversi seluruh inline event handler (`onchange`, `oninput`) ke event listener generik di `admin-ui.js` yang mematuhi CSP `script-src-attr 'none'`.
 - Seluruh 14 modul dan form admin lolos pengujian render tanpa error sintaks maupun runtime.
 
-### Step 13 — Siapkan dan deploy ke shared hosting cPanel
+### Step 13 — Siapkan dan deploy ke shared hosting DirectAdmin
 
 1. Pastikan paket provider menyediakan PHP 8.4+, ekstensi wajib, MySQL/MariaDB, HTTPS, dan batas resource/unggah memadai. Verifikasi di paket akun yang benar karena fasilitas dapat berbeda antar paket.
 2. Buat database, user, folder aplikasi privat, `.env` production, dan direktori penyimpanan; set permission minimum yang diperlukan.
-3. Konfigurasikan document root atau layout `public_html` sesuai [ARCHITECTURE.md bagian 13](ARCHITECTURE.md#13-deployment-di-cpanel-dengan-git).
+3. Ikuti panduan [DEPLOY-DIRECTADMIN.md](DEPLOY-DIRECTADMIN.md) untuk menempatkan aplikasi privat di luar `public_html` dan isi `public/` di document root.
 4. Pasang dependency production, jalankan migrasi melalui CLI yang tersedia, lalu buat akun admin eksplisit dengan `bin/create-admin.php` dan password kuat dari environment. Seed konten hanya ditambahkan bila tahap terkait memerlukannya.
-5. Jalankan deployment dari Git/cPanel. Pastikan berkas upload dan penyimpanan privat tidak tersentuh oleh sinkronisasi kode.
-6. Periksa HTTPS, beranda, route detail, login, satu alur form, unggahan, ekspor, log, backup, dan cron cleanup.
+5. Unggah/sinkronkan kode ke DirectAdmin. Pastikan foto galeri dan arsip privat lama tidak terhapus oleh pembaruan kode.
+6. Periksa HTTPS, beranda, route detail, login, link pendaftaran dan toggle batch, pesan masuk, log, backup, dan cron cleanup.
 
 **Kriteria selesai:** rilis bisa dipulihkan dari cadangan; `.env` dan dokumen pendaftar tidak dapat diakses publik; halaman utama dan alur admin kritis berfungsi pada hosting target.
 
@@ -192,5 +190,5 @@ Smoke test ulang: `/`, `/tentang`, `/program`, `/program/bimbel-literasi`, `/ber
 | --- | --- | --- |
 | 1 | 1–2 | Migrasi UI statis ke MVC dan pemisahan aset CSS/JS. |
 | 2 | 3–7 | Fondasi admin, autentikasi, konten, program, berita, FAQ, dan kontak. |
-| 3 | 8–10 | Batch, pendaftaran intern/relawan, peninjauan data, dan ekspor. |
+| 3 | 8–10 | Satu pengelolaan pendaftaran di Batch: URL formulir eksternal dan toggle buka/tutup per batch. Form lokal lama tidak lagi aktif. |
 | 4 | 11–13 | Animasi, pemeriksaan penerimaan, keamanan, deployment dan operasi. |

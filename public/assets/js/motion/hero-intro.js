@@ -3,8 +3,21 @@ import { MOTION, motionDistance } from './tokens.js';
 export function initHeroIntro({ gsap, page }) {
   const cleanupTargets = [];
   const context = gsap.context(() => {
-    const hero = document.querySelector('.hero-bg, [data-home-hero]');
+    const hero = document.querySelector('.hero-bg, [data-home-hero], .join-hero');
     const content = hero?.querySelector('.home-hero-content, .relative.z-10') ?? hero?.firstElementChild;
+
+    const joinBackground = hero?.querySelector('.join-hero-background');
+    if (joinBackground) {
+      cleanupTargets.push(joinBackground);
+      joinBackground.style.willChange = 'transform';
+      gsap.fromTo(joinBackground, { scale: 1.08 }, {
+        scale: 1,
+        duration: 4.2,
+        ease: MOTION.ease.out,
+        overwrite: 'auto',
+        onComplete: () => gsap.set(joinBackground, { clearProps: 'transform,willChange' }),
+      });
+    }
 
     if (content) {
       const paragraphs = [...content.querySelectorAll('p')];

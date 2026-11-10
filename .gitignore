@@ -1,4 +1,6 @@
 .env
+.env.prod
+.env.local
 /vendor/
 /storage/logs/*
 !/storage/logs/.gitkeep

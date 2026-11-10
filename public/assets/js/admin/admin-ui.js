@@ -360,6 +360,26 @@
   // ==========================================================================
   // 6. Generic Table Search, Filter & Auto-Submit (CSP Compliant)
   // ==========================================================================
+  const founderToggle = document.querySelector('[data-founder-toggle]');
+  const founderBioField = document.querySelector('[data-founder-bio-field]');
+  const founderBioInput = founderBioField?.querySelector('textarea[name="long_bio"]');
+  const founderPhotoField = document.querySelector('[data-founder-photo-field]');
+  const founderPhotoInput = founderPhotoField?.querySelector('input[name="home_photo"]');
+  if (founderToggle) {
+    const syncFounderBio = () => {
+      if (founderBioField && founderBioInput) {
+        founderBioField.hidden = !founderToggle.checked;
+        founderBioInput.disabled = !founderToggle.checked;
+      }
+      if (founderPhotoField && founderPhotoInput) {
+        founderPhotoField.hidden = !founderToggle.checked;
+        founderPhotoInput.disabled = !founderToggle.checked;
+      }
+    };
+    founderToggle.addEventListener('change', syncFounderBio);
+    syncFounderBio();
+  }
+
   // Auto-submit inputs & filter selects
   document.addEventListener('change', (e) => {
     if (e.target && e.target.matches('[data-auto-submit]')) {

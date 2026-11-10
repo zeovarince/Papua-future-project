@@ -44,22 +44,20 @@ $programStats = [
                 <?php foreach ($row as $program): ?>
                     <article class="prog-card">
                         <a class="program-card-link" href="<?= url('/program/' . rawurlencode($program['slug'])) ?>" aria-label="Lihat detail <?= e($program['title']) ?>">
-                            <div class="prog-img program-photo">
+                            <div class="prog-img program-photo<?= empty($program['cover_image']) ? ' is-empty' : '' ?>">
                                 <?php if (!empty($program['cover_image'])): ?>
                                     <img src="<?= e(url('/uploads/' . ltrim($program['cover_image'], '/'))) ?>" alt="Dokumentasi <?= e($program['title']) ?>" loading="lazy">
-                                <?php else: ?>
-                                    <span class="program-card-placeholder">Foto belum diunggah</span>
                                 <?php endif; ?>
                                 <span class="prog-badge"><?= e($program['category_label']) ?></span>
                             </div>
                             <div class="prog-body">
                                 <h3><?= e($program['title']) ?></h3>
-                                <p><?= e($program['summary']) ?></p>
+                                <?php if (trim((string) ($program['summary'] ?? '')) !== ''): ?><p><?= e($program['summary']) ?></p><?php endif; ?>
                                 <?php if (!empty($program['stat1_value']) || !empty($program['stat2_value'])): ?>
                                     <div class="stat-chips">
                                         <?php foreach (['1', '2'] as $statIndex): ?>
                                             <?php if (!empty($program['stat' . $statIndex . '_value'])): ?>
-                                                <span class="stat-chip"><?= e($program['stat' . $statIndex . '_value']) ?> <?= e($program['stat' . $statIndex . '_label'] ?? '') ?></span>
+                                                <span class="stat-chip"><?= e($program['stat' . $statIndex . '_value']) ?><?php if (trim((string) ($program['stat' . $statIndex . '_label'] ?? '')) !== ''): ?> <?= e($program['stat' . $statIndex . '_label']) ?><?php endif; ?></span>
                                             <?php endif; ?>
                                         <?php endforeach; ?>
                                     </div>
@@ -73,9 +71,6 @@ $programStats = [
             </div>
         <?php endforeach; ?>
 
-        <?php if ($programs === []): ?>
-            <p>Informasi program akan segera tersedia.</p>
-        <?php endif; ?>
     </div>
 </section>
 
@@ -94,7 +89,7 @@ $programStats = [
                             <img src="<?= e(url('/uploads/' . ltrim($photo['file_path'], '/'))) ?>" alt="<?= e($photo['caption'] ?: 'Dokumentasi ' . $photo['program_title']) ?>" loading="lazy">
                         </div>
                         <span class="masonry-overlay" aria-hidden="true"><span class="masonry-overlay-icon">⌕</span></span>
-                        <span class="masonry-caption"><?= e($photo['caption'] ?: $photo['program_title']) ?></span>
+                        <?php if (trim((string) ($photo['caption'] ?? '')) !== ''): ?><span class="masonry-caption"><?= e($photo['caption']) ?></span><?php endif; ?>
                     </a>
                 <?php endforeach; ?>
             </div>

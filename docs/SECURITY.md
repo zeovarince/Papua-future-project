@@ -1,17 +1,19 @@
 # SECURITY
 
-Panduan keamanan website Papua Future Project (PHP native MVC, MySQL, hosting cPanel dengan Git). Dokumen ini menjadi acuan saat menulis kode, menyiapkan server, dan merespons insiden. Bila aturan di sini bertabrakan dengan kenyamanan, aturan ini yang dipakai.
+Panduan keamanan website Papua Future Project (PHP native MVC, MySQL/MariaDB, shared hosting DirectAdmin). Dokumen ini menjadi acuan saat menulis kode, menyiapkan server, dan merespons insiden. Bila aturan di sini bertabrakan dengan kenyamanan, aturan ini yang dipakai. Untuk langkah deployment akun saat ini, lihat [DEPLOY-DIRECTADMIN.md](DEPLOY-DIRECTADMIN.md); langkah khusus cPanel di bawah berlaku hanya sebagai alternatif.
 
 Dokumen terkait: [PRD.md](PRD.md), [ARCHITECTURE.md](ARCHITECTURE.md) bagian 9, 10, dan 13, [RULES.md](RULES.md) bagian 5, [STEP.md](STEP.md), [SCHEMA.md](SCHEMA.md).
+
+**Cakupan pendaftaran saat ini:** setiap batch menyimpan URL layanan formulir pilihan Admin dan status buka/tutup. Jawaban serta berkas pendaftar baru diproses oleh layanan eksternal tersebut; website tidak memiliki form lokal, daftar pendaftar, endpoint berkas, atau ekspor jawaban. Data dan berkas dari versi lama yang masih tersimpan tetap merupakan arsip pribadi dan harus dilindungi.
 
 ## 1. Apa yang dilindungi dan dari siapa
 
 | Aset | Contoh | Ancaman utama |
 | --- | --- | --- |
-| Data pribadi pendaftar | Nama, tanggal lahir, WhatsApp, email, domisili, foto, CV | Kebocoran lewat celah kode, file yang bisa ditebak, ekspor yang dikirim sembarangan |
+| Arsip data pendaftar lama | Data formulir website versi sebelumnya, bila masih tersimpan | Kebocoran lewat salinan database atau berkas privat |
 | Akun admin | Login panel | Tebak sandi, sandi bocor, sesi dicuri |
 | Isi situs | Program, berita, FAQ, halaman publik | Judol dan konten spam yang disisipkan, defacement |
-| File unggahan | Foto galeri, foto dan CV pendaftar | Unggahan berbahaya (webshell), pemindaian jalur file |
+| File unggahan | Foto galeri; arsip foto/CV pendaftar versi lama bila ada | Unggahan berbahaya, akses ke arsip privat |
 | Akun di luar kode | cPanel, registrar domain, FTP, SSH, MySQL | Pengambilalihan akun atau domain |
 | Ketersediaan | Situs bisa dibuka | Banjir kiriman form, unggahan raksasa, hosting kehabisan memori |
 
@@ -185,10 +187,10 @@ function csrf_check(?string $token): bool
 ### 3.5 Otorisasi, IDOR, dan mass assignment
 
 1. Semua rute admin (kecuali login) memakai `AuthMiddleware`. Controller admin tidak boleh mengandalkan "halaman ini tidak ditautkan dari mana pun".
-2. ID berurutan (`/pendaftar/12`) aman selama rute dilindungi sesi. File pendaftar memakai `file_token` acak sehingga jalurnya tidak bisa ditebak.
-3. Parameter `{group}`, `{kind}`, dan `{format}` di URL divalidasi ke daftar putih (`penggerak|internship|volunteer`, `foto|cv`, `csv|xlsx|pdf`). Nilai lain menjawab 404.
+2. Aplikasi saat ini tidak menyediakan halaman detail pendaftar, endpoint berkas pendaftar, atau ekspor jawaban. Jangan membuat kembali endpoint tersebut tanpa kebutuhan dan tinjauan keamanan baru.
+3. Parameter `{group}` pada halaman publik/admin divalidasi ke daftar yang diizinkan. URL pendaftaran hanya menerima URL absolut yang valid dengan skema `http` atau `https`, tanpa username/password; domain bebas sesuai kebutuhan Admin.
 4. Validator menetapkan field yang boleh masuk. Field lain diabaikan.
-5. Aturan yang tidak bisa dijaga MySQL (kecocokan `member_group` dengan `batch_type`, hanya satu founder, batch terbuka saat mendaftar) dijaga di Validator dan Model, lihat [SCHEMA.md](SCHEMA.md) bagian 5.
+5. Aturan yang tidak bisa dijaga MySQL (kecocokan `member_group` dengan `batch_type`, hanya satu founder, dan status buka batch) dijaga di Validator dan Model, lihat [SCHEMA.md](SCHEMA.md) bagian 5.
 
 ### 3.6 Unggah file
 
@@ -216,16 +218,6 @@ function validate_image(string $tmpPath, int $size, int $maxBytes): ?string
     return null;
 }
 
-function looks_like_pdf(string $tmpPath): bool
-{
-    $head = file_get_contents($tmpPath, false, null, 0, 5);
-
-    return $head === '%PDF-'
-        && (new finfo(FILEINFO_MIME_TYPE))->file($tmpPath) === 'application/pdf';
-}
-```
-
-```php
 function reencode_to_webp(string $tmpPath, string $destPath, int $maxSide): bool
 {
     $data = file_get_contents($tmpPath);
@@ -257,64 +249,18 @@ Aturan:
 
 1. Foto selalu disimpan ulang lewat GD. Ini membuang metadata EXIF dan lokasi GPS, dan menggagalkan file yang menyamar sebagai gambar.
 2. Untuk foto galeri admin, baca orientasi EXIF dan putar gambar lebih dulu bila ekstensi `exif` ada, karena orientasi hilang setelah disimpan ulang.
-3. Nama file di disk dibuat sistem: `bin2hex(random_bytes(16))` atau `file_token`. Nama asli dari pengguna tidak dipakai di jalur mana pun.
+3. Nama file di disk dibuat sistem. Nama asli dari pengguna tidak dipakai di jalur mana pun.
 4. File dipindahkan dengan `move_uploaded_file()`. Folder tujuan dibuat dengan izin 0750.
-5. Batas: foto pendaftar 2 MB, CV 5 MB (PDF), foto galeri 8 MB sebelum diproses, maksimal 30 foto per item, 20 file per kali unggah.
+5. Batas upload aktif: foto galeri 8 MB sebelum diproses, maksimal 30 foto per item, 20 file per kali unggah. Pendaftar mengunggah dokumen melalui layanan pada tautan pendaftaran.
 6. `public/uploads/` memblokir eksekusi PHP (`.htaccess` di [ARCHITECTURE.md](ARCHITECTURE.md) bagian 14). Folder itu hanya boleh berisi gambar.
-7. CV dan foto pendaftar berada di `STORAGE_DIR` di luar `public_html`.
-8. CV adalah PDF dari orang tak dikenal. Sajikan dengan `nosniff`, buka di browser yang selalu diperbarui, dan pertimbangkan pemindaian ClamAV bila hosting menyediakannya.
 
-### 3.7 Menyajikan file privat
+### 3.7 Arsip berkas privat versi lama
 
-```php
-function serve_private_file(
-    string $storageDir,
-    string $relativePath,
-    string $mime,
-    string $asciiDownloadName,
-    bool $download
-): never {
-    $base = realpath($storageDir);
-    $full = realpath($storageDir . '/' . $relativePath);
+Versi sebelumnya mungkin masih memiliki foto atau CV pendaftar di `STORAGE_DIR/applications/`. Folder tersebut adalah arsip; aplikasi aktif tidak memiliki route untuk melihat, mengunduh, atau mengekspor isinya. Pertahankan folder di luar `public_html`, batasi izin akses, dan jangan salin ke folder publik saat deploy. Jika arsip tidak lagi diperlukan, sepakati penghapusannya dengan pengurus dan buat cadangan sebelum menghapus.
 
-    if ($base === false || $full === false
-        || !str_starts_with($full, $base . DIRECTORY_SEPARATOR)
-        || !is_file($full)) {
-        http_response_code(404);
-        exit;
-    }
+### 3.8 Ekspor jawaban
 
-    header('Content-Type: ' . $mime);
-    header('Content-Length: ' . (string) filesize($full));
-    header('X-Content-Type-Options: nosniff');
-    header('Cache-Control: private, no-store');
-    header('Content-Disposition: ' . ($download ? 'attachment' : 'inline')
-        . '; filename="' . $asciiDownloadName . '"');
-
-    readfile($full);
-    exit;
-}
-```
-
-1. Cek sesi admin lebih dulu (`AuthMiddleware`), lalu cari `Application` dari `id` dan bentuk jalur dari `file_token` di database.
-2. `$asciiDownloadName` dibuat dari slug ASCII (huruf, angka, tanda hubung), tidak pernah dari nama file unggahan.
-3. Jawaban 404, bukan 403, untuk file yang tidak ada atau tidak boleh diakses.
-
-### 3.8 Ekspor dan PDF
-
-Nama, domisili, dan motivasi pendaftar yang diawali `=`, `+`, `-`, atau `@` bisa dijalankan sebagai rumus saat admin membuka file di Excel (injeksi rumus).
-
-```php
-function safe_cell(string $value): string
-{
-    return preg_match('/^[=+\-@\t\r]/', $value) === 1 ? "'" . $value : $value;
-}
-```
-
-1. Semua kolom teks dari pengguna di CSV dan XLSX melewati `safe_cell()`. Di PhpSpreadsheet, tulis sebagai string dengan `setCellValueExplicit($cell, $value, DataType::TYPE_STRING)`.
-2. Dompdf: `isRemoteEnabled` dimatikan. Foto disisipkan sebagai data URI dari thumbnail lokal.
-3. Satu PDF maksimal 100 pendaftar, dan `memory_limit` cukup (256M).
-4. File ekspor berisi data pribadi. Jangan dikirim lewat chat atau email tanpa perlindungan, dan hapus dari perangkat setelah dipakai.
+Jawaban pendaftar baru dikumpulkan dan diekspor melalui layanan eksternal pada tautan yang dipilih Admin. Aplikasi PFP tidak membuat CSV, Excel, atau PDF pendaftar. File ekspor atau cadangan dari sistem lama tetap berisi data pribadi; simpan dengan akses terbatas dan hapus sesuai kebijakan yang disetujui pengurus.
 
 ### 3.9 Pembatas laju dan spam
 
@@ -344,7 +290,6 @@ $identifier = RateLimiter::identifier($ip . '|' . $extra);
 | Bucket | Batas (usulan) | Identifier |
 | --- | --- | --- |
 | `login` | 5 gagal per 15 menit | IP dan email |
-| `join` | 5 per jam | IP |
 | `contact` | 5 per jam | IP |
 
 1. Identifier berupa HMAC dengan `APP_KEY`, bukan IP mentah. Tambahkan `APP_KEY` (32 byte heksadesimal acak) ke `.env`.
@@ -370,8 +315,8 @@ header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
 ### 3.11 Galat dan log
 
 1. `display_errors` mati di produksi. Pasang `set_exception_handler` yang menulis ke `storage/logs/app.log` dan menampilkan halaman 500 yang ramah, tanpa jalur server, query, atau isi konfigurasi.
-2. Catat ke `storage/logs/security.log`: login berhasil dan gagal (IP sebagai hash), penghapusan data, ekspor, dan ubah status pendaftar. Satu baris per kejadian, berisi waktu, jenis, `admin_id`, dan id objek.
-3. Jangan catat: sandi, token CSRF atau sesi, isi pesan kontak, data pendaftar, dan isi `$_POST`.
+2. Catat ke `storage/logs/security.log`: login berhasil/gagal, perubahan status batch, CRUD konten, dan penghapusan. Satu baris per kejadian, berisi waktu, jenis, `admin_id`, dan id objek.
+3. Jangan catat: sandi, token CSRF atau sesi, isi pesan kontak, URL rahasia, data pribadi, dan isi `$_POST`.
 4. Folder `storage/logs/` tidak berada di `public_html`.
 
 ## 4. Alamat panel admin rahasia
@@ -393,7 +338,7 @@ php -r "echo 'panel-' . bin2hex(random_bytes(6));"
 
 ### 5.1 Cara masuknya yang paling umum
 
-1. Sandi cPanel, FTP, SSH, atau admin yang bocor atau ditebak. Ini penyebab paling sering.
+1. Sandi DirectAdmin, FTP, SSH, atau admin yang bocor atau ditebak. Ini penyebab paling sering.
 2. Celah di kode: unggahan yang bisa dieksekusi, SQL injection, `include` dari input pengguna.
 3. Aplikasi atau skrip lain di akun hosting yang sama.
 4. Admin diambil alih, lalu menulis "berita" spam lewat CRUD biasa.
@@ -401,7 +346,7 @@ php -r "echo 'panel-' . bin2hex(random_bytes(6));"
 
 ### 5.2 Pencegahan
 
-1. **Kunci akses akun.** 2FA di cPanel dan registrar domain. Sandi unik di setiap akun. Hapus akun FTP yang tidak dipakai. Bila deployment lewat Git, matikan FTP, atau pakai SFTP dengan kunci SSH. Periksa cron job dan `authorized_keys` sekali di awal.
+1. **Kunci akses akun.** Gunakan 2FA di hosting dan registrar domain bila tersedia. Sandi harus unik. Hapus akun FTP yang tidak dipakai. Bila deployment lewat Git, matikan FTP, atau pakai SFTP dengan kunci SSH. Periksa cron job dan `authorized_keys` sekali di awal.
 2. **Kode tidak bisa ditulis oleh web.** Kode aplikasi berada di `pfp-app` di luar `public_html`. Di `public_html` hanya ada `index.php` dan aset. Hanya `storage/` dan `public/uploads/` yang perlu bisa ditulis.
 3. **Folder unggahan hanya untuk gambar.** Eksekusi PHP diblokir. File selain gambar di `uploads/` adalah tanda bahaya.
 4. **Larang pola berbahaya di kode.** Tidak ada `eval`, `unserialize` atas input pengguna, `extract($_POST)`, atau `include` dengan jalur dari input. Di `php.ini` set `allow_url_include=Off` dan, bila hosting mengizinkan, `disable_functions=exec,shell_exec,system,passthru,proc_open,popen`.
@@ -411,7 +356,7 @@ php -r "echo 'panel-' . bin2hex(random_bytes(6));"
     - /usr/bin/rsync -a --delete --include='uploads/.htaccess' --exclude='uploads/*' --exclude='.well-known/' --exclude='cgi-bin/' --exclude='error_log' public/ $WEB_DIR/
 ```
 
-6. **Jaga akun admin.** Pakai sandi panjang dari pengelola sandi, pembatas laju login, dan alamat panel rahasia. Peristiwa login, ekspor, perubahan status, dan penghapusan dicatat tanpa menyimpan data pribadi. Aktifkan 2FA pada cPanel dan registrar.
+6. **Jaga akun admin.** Pakai sandi panjang dari pengelola sandi, pembatas laju login, dan alamat panel rahasia. Peristiwa login, perubahan status batch, dan penghapusan dicatat tanpa menyimpan data pribadi. Aktifkan 2FA pada hosting dan registrar bila tersedia.
 7. **Jangan biarkan konten spam masuk indeks.**
    - Halaman yang tidak ada menjawab status 404 sungguhan.
    - Parameter query tidak pernah ditampilkan ulang.
@@ -428,7 +373,7 @@ php -r "echo 'panel-' . bin2hex(random_bytes(6));"
 
 ### 5.3 Deteksi dini
 
-1. **Pemeriksa integritas.** `bin/integrity-check.php` membandingkan hash file dengan kondisi bersih, mencari file bukan gambar di `uploads/`, dan memindai pola kode berbahaya serta kata kunci judol. Mode pemindaian dan pemeriksaan rutin tidak mencetak apa pun bila bersih, jadi cron cPanel hanya mengirim email saat ada masalah. Mode `--init` mencetak konfirmasi setelah membuat acuan.
+1. **Pemeriksa integritas.** `bin/integrity-check.php` membandingkan hash file dengan kondisi bersih, mencari file bukan gambar di `uploads/`, dan memindai pola kode berbahaya serta kata kunci judol. Mode pemindaian dan pemeriksaan rutin tidak mencetak apa pun bila bersih, jadi cron hosting hanya mengirim email saat ada masalah. Mode `--init` mencetak konfirmasi setelah membuat acuan.
 
 ```
 php bin/integrity-check.php --scan   # pemindaian awal tanpa membuat acuan
@@ -438,13 +383,13 @@ php bin/integrity-check.php          # periksa terhadap acuan
 
    Jangan jalankan `--init` di working tree yang belum diperiksa. Skrip menolak membuat acuan bila menemukan pola mencurigakan, tautan simbolik, atau berkas non-gambar di uploads. Sesudah deploy resmi, tinjau perubahan dan perbarui acuan secara sengaja.
 
-   Cron di cPanel (jalur PHP CLI berbeda antar hosting, cek dengan `which ea-php84`):
+   Cron di hosting (jalur PHP CLI berbeda antar provider; tanyakan ke penyedia bila tidak tersedia terminal):
 
 ```
 0 */6 * * * /usr/local/bin/ea-php84 /home/USERNAME/pfp-app/bin/integrity-check.php
 ```
 
-   Tambahkan `cd $APP_DIR && /usr/local/bin/ea-php84 bin/integrity-check.php --init` sebagai tugas terakhir di `.cpanel.yml` hanya jika pipeline deploy tersebut memang dipercaya dan deployment telah ditinjau. Batasan: acuan disimpan di server yang sama, jadi penyerang dengan akses penuh bisa menimpanya. Ini pendeteksi dini, bukan pengganti sandi kuat dan 2FA.
+   Untuk deployment cPanel Git alternatif, tambahkan `cd $APP_DIR && /usr/local/bin/ea-php84 bin/integrity-check.php --init` sebagai tugas terakhir di `.cpanel.yml` hanya bila pipeline tersebut dipercaya dan deployment telah ditinjau. Batasan: acuan disimpan di server yang sama, jadi penyerang dengan akses penuh bisa menimpanya. Ini pendeteksi dini, bukan pengganti sandi kuat dan 2FA.
 
 2. **Periksa database.** Jalankan sesekali di phpMyAdmin:
 
@@ -471,35 +416,34 @@ curl -s -A "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.h
 
 ## 6. Data pribadi pendaftar
 
-Data pendaftar mencakup tanggal lahir, WhatsApp, email, domisili, foto, dan CV. Ini data pribadi yang harus diperlakukan hati-hati. Bagian ini berisi usulan teknis. **Saya bukan penasihat hukum.** Konfirmasi kewajiban sesuai UU Pelindungan Data Pribadi (UU No. 27 Tahun 2022) ke pihak yang memahaminya sebelum peluncuran.
+Informasi pendaftaran relawan/intern adalah data pribadi dan saat ini dikumpulkan melalui layanan eksternal yang ditautkan, bukan disimpan dalam aplikasi PFP. Arsip pendaftar dari formulir website versi lama juga tetap data pribadi. **Saya bukan penasihat hukum.** Konfirmasi kewajiban sesuai UU Pelindungan Data Pribadi (UU No. 27 Tahun 2022) kepada pihak yang memahaminya sebelum peluncuran.
 
 Usulan yang perlu disetujui pengurus PFP dan dimasukkan ke [PRD.md](PRD.md):
 
-1. **Kotak persetujuan** di form pendaftaran dan form kontak, dengan kalimat singkat tentang apa yang dikumpulkan, untuk apa, siapa yang bisa melihat, dan berapa lama disimpan.
-2. **Halaman Kebijakan Privasi** (`/kebijakan-privasi`) berisi hal yang sama, dengan kontak untuk meminta akses atau penghapusan data.
-3. **Kumpulkan seperlunya.** Tinjau lagi apakah setiap field memang dipakai. Tanggal lahir dipakai untuk batas usia.
-4. **Aturan retensi** (usulan, tetapkan bersama pengurus): data dan file pendaftar berstatus Ditolak dihapus 6 bulan setelah batch ditutup. Pendaftar Diterima disimpan selama kegiatan dan 12 bulan sesudahnya. Pesan kontak dihapus setelah 12 bulan. Buat `bin/purge-expired.php` yang dijalankan lewat cron.
-5. **Akses terbatas.** Hanya admin. Jangan membagikan akun admin dan jangan mengirim ekspor lewat grup chat.
-6. **Cadangan berisi data pribadi.** Simpan di luar server, batasi aksesnya, dan hapus cadangan lama.
-7. **Foto anak.** Foto anak di galeri hanya dengan izin orang tua atau pendamping, tanpa nama lengkap dan titik lokasi rumah (lihat [RULES.md](RULES.md) bagian 2).
-8. **Bila terjadi kebocoran,** catat kapan, data apa, dan berapa orang, lalu beri tahu pihak terdampak dan pengurus PFP secepatnya.
+1. **Tentukan kebijakan layanan formulir.** Pengurus menetapkan informasi yang diminta, tujuan penggunaan, siapa yang dapat membuka tanggapan, dan masa retensi sesuai kebutuhan organisasi.
+2. **Tinjau minimisasi data.** Minta hanya informasi yang memang diperlukan untuk seleksi Internship atau Relawan.
+3. **Akses terbatas.** Batasi akses formulir dan tanggapannya kepada pengurus yang menangani seleksi. Jangan membagikan tautan respons atau ekspor tanpa perlindungan.
+4. **Arsip lokal lama.** Data dan berkas yang tersimpan dari formulir website lama tetap data pribadi. Simpan dengan akses terbatas; sepakati jadwal retensi dan penghapusan arsip dengan pengurus sebelum menghapus.
+5. **Cadangan berisi data pribadi.** Simpan di lokasi terbatas dan hapus cadangan lama sesuai kebijakan yang ditetapkan.
+6. **Foto anak.** Foto anak di galeri hanya dengan izin orang tua atau pendamping, tanpa nama lengkap dan titik lokasi rumah (lihat [RULES.md](RULES.md) bagian 2).
+7. **Bila terjadi kebocoran,** catat kapan, data apa, dan berapa orang, lalu beri tahu pihak terdampak dan pengurus PFP secepatnya.
 
 ## 7. Akun dan infrastruktur
 
 | Area | Aturan |
 | --- | --- |
 | Registrar domain | 2FA aktif, kunci transfer domain aktif, email pemulihan milik organisasi yang dikelola lebih dari satu orang tepercaya. |
-| cPanel dan hosting | 2FA aktif, sandi unik, hapus akun yang tidak dipakai, aktifkan AutoSSL. |
+| DirectAdmin dan hosting | 2FA aktif bila tersedia, sandi unik, hapus akun yang tidak dipakai, aktifkan SSL/AutoSSL. |
 | FTP dan SSH | Matikan FTP bila deployment lewat Git. Pakai SFTP atau SSH dengan kunci. |
 | MySQL | Satu pengguna khusus untuk database ini. Jangan memakai pengguna dan sandi cPanel. |
 | Repositori Git | Repositori privat, deploy key SSH khusus baca, tidak ada rahasia di riwayat commit. |
-| PHP | Gunakan PHP 8.4 atau lebih baru sesuai `composer.json` dan [ARCHITECTURE.md](ARCHITECTURE.md). Periksa ketersediaan versi yang sama untuk situs dan cron cPanel. |
+| PHP | Gunakan PHP 8.4 atau lebih baru sesuai `composer.json` dan [ARCHITECTURE.md](ARCHITECTURE.md). Periksa ketersediaan versi yang sama untuk situs dan cron hosting. |
 | `php.ini` | `display_errors=Off`, `expose_php=Off`, `allow_url_include=Off`, `session.cookie_httponly=1`, `session.cookie_secure=1`, `upload_max_filesize=8M`, `post_max_size=32M`, `memory_limit=256M`. |
-| Izin file | `public_html`: folder 755, file 644 (bawaan cPanel). `pfp-app`: folder 750, file 640, `.env` 600. Tidak ada 777. |
+| Izin file | `public_html`: folder 755, file 644. `pfp-app`: folder 750, file 640, `.env` 600. Tidak ada 777. |
 | HTTPS | Paksa HTTPS di `.htaccess`, tambahkan HSTS setelah stabil. |
 | Cadangan | Cadangan database harian dan folder `storage/` serta `public/uploads/`, disimpan di luar server, uji pemulihan sebelum peluncuran. |
 | Dependensi | Pasang hanya yang perlu. Commit `composer.lock`. Jalankan `composer audit` sebelum rilis. Unduh GSAP dari sumber resmi dan catat versinya. |
-| Pemantauan | Baca `security.log` dan log galat cPanel secara berkala. Aktifkan notifikasi email cron untuk `integrity-check.php`. |
+| Pemantauan | Baca `security.log` dan log galat DirectAdmin secara berkala. Aktifkan notifikasi email cron untuk `integrity-check.php`. |
 
 Perintah izin file (ganti `USERNAME`):
 
@@ -524,18 +468,18 @@ Jalankan sebelum peluncuran dan setelah perubahan besar. Semua harus lolos.
 | Uji | Yang diharapkan |
 | --- | --- |
 | Di production, buka `/admin` dan `/wp-admin` | 404. Jalur `ADMIN_PATH` yang benar menampilkan login. |
-| Buka URL panel atau URL file pendaftar tanpa login | Diarahkan ke login, tidak ada file terkirim. |
+| Buka `STORAGE_DIR/applications/` melalui web | Tidak ada file arsip yang dapat diakses publik. |
 | Kirim form POST tanpa token CSRF | Ditolak. |
 | Ketik `' OR 1=1 --` dan `"><script>alert(1)</script>` di kolom pencarian dan form | Tidak ada galat SQL, skrip tidak berjalan, teks tampil apa adanya. |
 | Unggah file `.php` yang diganti namanya menjadi `.jpg` sebagai foto | Ditolak. |
 | Unggah gambar berukuran piksel sangat besar | Ditolak sebelum diproses, server tidak kehabisan memori. |
-| Unggah PDF palsu (teks biasa bernama `.pdf`) sebagai CV | Ditolak. |
+| Buka halaman Bergabung saat semua batch tertutup atau URL kosong | Tidak ada tombol daftar yang mengarah ke formulir. |
+| Buka halaman Bergabung saat satu atau lebih batch aktif dengan URL valid | Tautan membuka layanan formulir dari batch yang dipilih. |
 | Buka `https://domain/uploads/` dan jalur skrip di dalamnya | Tidak ada daftar folder, skrip tidak dieksekusi. |
 | Buka `https://domain/.env` dan `https://domain/error_log` | 403 atau 404. |
-| Isi nama pendaftar dengan `=HYPERLINK("http://contoh.com")`, lalu ekspor XLSX dan CSV | Tampil sebagai teks, bukan rumus. |
 | Login salah 6 kali berturut-turut | Percobaan ke-6 ditolak sementara. |
 | Login lalu logout, tekan tombol Kembali | Tidak bisa mengakses halaman panel tanpa login ulang. |
-| Ubah parameter `{group}` atau `{kind}` menjadi nilai aneh | 404. |
+| Ubah parameter `{group}` menjadi nilai aneh | 404. |
 | Parameter redirect login diisi `https://contoh.com` | Diabaikan, kembali ke panel. |
 | `curl` dengan User-Agent Googlebot | Isi halaman sama dengan pengunjung biasa. |
 
@@ -548,7 +492,7 @@ Pemeriksaan otomatis yang dianjurkan: `composer audit`, PHPStan, PHP_CodeSniffer
 3. **Cari pintu masuknya** lewat log akses mentah di cPanel: tanggal file pertama yang berubah, lalu permintaan di sekitar waktu itu. Menambal tanpa tahu pintunya berarti kena lagi.
 4. **Bersihkan.** Hapus isi `public_html` dan deploy ulang dari Git. Periksa `.htaccess`, `.user.ini`, folder `uploads/`, cron job, akun FTP, kunci SSH, record DNS, dan tabel `admin_users`. Jalankan kueri di bagian 5.3.
 5. **Pulihkan reputasi.** Di Search Console, ajukan peninjauan ulang dan minta penghapusan URL spam dari indeks. Periksa daftar pemilik.
-6. **Bila data pendaftar mungkin terbuka,** ikuti butir 8 di bagian 6.
+6. **Bila data pribadi pendaftar dari layanan eksternal atau arsip lama mungkin terbuka,** segera batasi akses, catat dampak, dan beri tahu pengurus PFP.
 7. **Catat kejadiannya:** waktu, dampak, penyebab, dan perbaikan. Perbarui dokumen ini bila ada pelajaran baru.
 
 ## 11. Kapan tiap bagian dikerjakan
@@ -560,8 +504,8 @@ Urutan kerja rinci ada di [STEP.md](STEP.md). Pemetaan ke langkahnya:
 | 1 dan 2 | Semua tautan memakai `url()`, tidak ada inline `style` dan `script` (syarat CSP), semua output lewat `e()`. |
 | 3 | PDO aman, sesi aman, login, `password_hash`, CSRF, `AuthMiddleware`, `ADMIN_PATH`, pembatas laju, `security.log`. |
 | 4 sampai 8 | Validator per form, whitelist field, `safe_external_url()`, validasi parameter rute. |
-| 9 | Unggah file aman (bagian 3.6), file privat (3.7), pendaftaran dengan transaksi, kotak persetujuan. |
-| 10 | Ekspor aman (3.8). |
+| 9 | Unggah foto galeri aman (bagian 3.6), jaga arsip lama tetap privat, dan validasi URL/status pendaftaran per batch. |
+| 10 | Pastikan tidak ada route, menu, atau ekspor jawaban pendaftar lokal yang aktif. |
 | 12 | Header keamanan dan CSP, daftar uji manual (bagian 9), `composer audit`, `integrity-check.php`, kebijakan privasi dan retensi. |
 | 13 | 2FA akun hosting dan registrar, izin file, `.cpanel.yml` dengan `--delete`, cron, cadangan dan uji pemulihan, Search Console. |
 
@@ -570,13 +514,13 @@ Urutan kerja rinci ada di [STEP.md](STEP.md). Pemetaan ke langkahnya:
 Kontrol aplikasi yang sudah diterapkan pada kode:
 
 1. HMAC identifier rate limit dengan `APP_KEY`, jalur admin rahasia di production, header anti-cache dan noindex untuk panel, `Permissions-Policy`, serta HSTS hanya saat production menerima koneksi HTTPS.
-2. Log keamanan untuk login berhasil/gagal, perubahan status pendaftar dan formulir, ekspor, serta CRUD pertanyaan pendaftaran. Log tidak menyimpan email, sandi, token, isi jawaban, atau data pendaftar.
+2. Log keamanan untuk login, perubahan status batch, perubahan akun, CRUD konten, dan penghapusan. Log tidak menyimpan sandi, token, URL rahasia, atau data pribadi.
 3. Pemeriksa integritas CLI, pemblokiran berkas sensitif di `public/.htaccess`, dan pemeriksaan ukuran piksel sebelum foto diproses. Foto tim diperkecil dan dikonversi ke WebP agar metadata EXIF tidak ikut tersimpan.
 4. `APP_KEY` dan `ADMIN_PATH` sudah dijelaskan di [ARCHITECTURE.md](ARCHITECTURE.md); README memuat cara menyiapkan kunci serta memulai pemeriksaan integritas.
 
 Hal yang belum diterapkan karena memerlukan konfigurasi hosting atau keputusan pengurus:
 
-1. Aktifkan `ADMIN_PATH` acak di `.env` production dan atur `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://...`, HTTPS, serta izin berkas pada cPanel.
+1. Aktifkan `ADMIN_PATH` acak di `.env` production dan atur `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://...`, HTTPS, serta izin berkas pada DirectAdmin.
 2. CSP ditunda sampai semua style/script inline dan dependensi CDN dibersihkan; CSP ketat sekarang akan merusak halaman.
 3. Kebijakan privasi, persetujuan pengumpulan data, dan jadwal retensi memerlukan persetujuan pengurus PFP sebelum penghapusan otomatis dibuat.
-4. 2FA cPanel/registrar, pemeriksaan cron/backup, serta uji keamanan manual harus dilakukan di akun hosting dan lingkungan staging.
+4. 2FA hosting/registrar, pemeriksaan cron/backup, serta uji keamanan manual harus dilakukan di akun hosting dan lingkungan staging.

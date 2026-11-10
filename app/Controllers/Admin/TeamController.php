@@ -58,7 +58,8 @@ final class TeamController
         $old = Flash::get('old');
         $values = is_array($old) ? $old : ($member ?? [
             'name' => '', 'role' => '', 'university' => '', 'bio' => '', 'long_bio' => '',
-            'batch_id' => '', 'photo_path' => null, 'is_founder' => 0, 'is_published' => 1, 'sort_order' => 0,
+            'batch_id' => '', 'photo_path' => null, 'home_photo_path' => null,
+            'is_founder' => 0, 'is_published' => 1, 'sort_order' => 0,
         ]);
         $batchType = self::GROUPS[$group] === 'INTERN' ? 'INTERN' : (self::GROUPS[$group] === 'VOLUNTEER' ? 'VOLUNTEER' : null);
         return View::render('admin/team/form', [
@@ -96,14 +97,29 @@ final class TeamController
         [$values, $errors] = TeamMemberValidator::validate($request->post(), $group);
         $photos = new TeamPhotoService();
         $newPhoto = null;
+        $newHomePhoto = null;
+        $failedPhotoField = 'photo';
         try {
             if ($errors === []) {
                 $newPhoto = $photos->store($request->file('photo'));
             }
+            if ($errors === [] && $values['is_founder']) {
+                $failedPhotoField = 'home_photo';
+                $newHomePhoto = $photos->store($request->file('home_photo'));
+            }
         } catch (RuntimeException $exception) {
-            $errors['photo'] = $exception->getMessage();
+            if ($newPhoto !== null) {
+                $photos->delete($newPhoto);
+                $newPhoto = null;
+            }
+            if ($newHomePhoto !== null) {
+                $photos->delete($newHomePhoto);
+                $newHomePhoto = null;
+            }
+            $errors[$failedPhotoField] = $exception->getMessage();
         }
         $values['photo_path'] = $newPhoto ?? ($current['photo_path'] ?? null);
+        $values['home_photo_path'] = $newHomePhoto ?? ($current['home_photo_path'] ?? null);
 
         if ($errors !== []) {
             Flash::set('errors', $errors);
@@ -117,11 +133,17 @@ final class TeamController
             if ($newPhoto !== null && $current !== null) {
                 $photos->delete($current['photo_path']);
             }
+            if ($newHomePhoto !== null && $current !== null) {
+                $photos->delete($current['home_photo_path'] ?? null);
+            }
             Flash::set('success', 'Data anggota berhasil disimpan.');
             return Response::redirect('/admin/tim/' . rawurlencode($group));
         } catch (PDOException) {
             if ($newPhoto !== null) {
                 $photos->delete($newPhoto);
+            }
+            if ($newHomePhoto !== null) {
+                $photos->delete($newHomePhoto);
             }
             Flash::set('error', 'Data anggota gagal disimpan. Periksa pilihan batch dan coba lagi.');
             Flash::set('old', $values);
@@ -138,6 +160,7 @@ final class TeamController
         if ($member !== null && $member['member_group'] === self::GROUPS[$group]) {
             TeamMember::delete($id);
             (new TeamPhotoService())->delete($member['photo_path']);
+            (new TeamPhotoService())->delete($member['home_photo_path'] ?? null);
             SecurityLogger::record('team_member_deleted', $request, $id);
             Flash::set('success', 'Anggota berhasil dihapus.');
         }
@@ -146,6 +169,6 @@ final class TeamController
 
     private static function title(string $group): string
     {
-        return ['penggerak' => 'Tim Penggerak', 'internship' => 'Internship', 'volunteer' => 'Volunteer'][$group] ?? 'Tim';
+        return ['penggerak' => 'Core Team', 'internship' => 'Internship', 'volunteer' => 'Volunteer'][$group] ?? 'Tim';
     }
 }

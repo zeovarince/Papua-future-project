@@ -3,7 +3,7 @@ html { scroll-behavior: smooth; }
     /* ── HERO — sama persis dengan index.html ── */
     .hero-bg {
       background: linear-gradient(180deg, rgba(15,23,42,0.45) 0%, rgba(15,23,42,0.85) 100%),
-                  url('../../img/hero/herobanner.png');
+                  url('https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/herobanner');
       background-size: cover;
       background-position: center;
     }
@@ -243,6 +243,7 @@ html { scroll-behavior: smooth; }
       .masonry-grid   { column-count: 1; }
     }
     .program-photo { overflow:hidden; }
+    .program-photo.is-empty { background:transparent; }
     .program-photo img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
     .program-photo .prog-badge { z-index:1; }
     .program-detail-content { max-width:920px; }
@@ -265,7 +266,6 @@ html { scroll-behavior: smooth; }
     .program-impact-section .stats-grid { margin:0 auto; }
     .program-archive-intro { max-width:620px; }
     .program-card-link { display:block; height:100%; color:inherit; text-decoration:none; }
-    .program-card-placeholder { color:rgba(255,255,255,.75); font-weight:800; letter-spacing:.12em; }
     .program-gallery-heading { text-align:center; }
     .program-gallery-heading .pfp-divider { margin-left:auto; margin-right:auto; }
     .program-masonry-media { overflow:hidden; }
@@ -288,7 +288,7 @@ html { scroll-behavior: smooth; }
 
     /* Foto dokumentasi menjadi elemen utama; gunakan bidang datar saat foto belum diunggah. */
     .hero-bg {
-      background-image:url('../../img/hero/herobanner.png');
+      background-image:url('https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/herobanner');
       background-color:#26323b;
       background-size:cover;
       background-position:center;
@@ -307,7 +307,7 @@ html { scroll-behavior: smooth; }
       isolation:isolate;
       overflow:hidden;
       padding:112px 0 70px;
-      background-image:url('../../img/hero/herobanner.png');
+      background-image:url('https://res.cloudinary.com/crvzukvh/image/upload/f_auto,q_auto/herobanner');
       background-color:#26323b;
       background-size:cover;
       background-position:center;
@@ -320,7 +320,7 @@ html { scroll-behavior: smooth; }
     .prog-card { border-radius:4px; box-shadow:none; transition:border-color .18s ease; }
     .prog-card:hover { transform:none; box-shadow:none; border-color:#7d8992; }
     .prog-img { height:auto; aspect-ratio:1 / 1; background:#e9edef; }
-    .program-card-placeholder { position:absolute; inset:0; display:grid; place-items:center; color:#697781; font-size:13px; font-weight:500; letter-spacing:0; }
+    .prog-img.is-empty { background:transparent; }
     .prog-badge { top:10px; left:10px; padding:4px 7px; background:rgba(255,255,255,.94); color:#24313a; }
     .stat-chip { border-radius:3px; background:#edf0f2; color:#35434d; }
     .program-detail-cover { border-radius:4px; }

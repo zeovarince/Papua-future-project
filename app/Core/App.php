@@ -51,8 +51,9 @@ final class App
             . "frame-ancestors 'self'; form-action 'self'; "
             . "script-src 'self' https://cdn.tailwindcss.com 'unsafe-eval'; script-src-attr 'none'; "
             . "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-            . "font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; "
-            . "connect-src 'self'; frame-src 'self' https://www.openstreetmap.org"
+            . "font-src 'self' https://fonts.gstatic.com data:; "
+            . "img-src 'self' data: blob: https://res.cloudinary.com; connect-src 'self'; "
+            . "frame-src 'self' https://www.openstreetmap.org"
         );
 
         if (getenv('APP_ENV') === 'production' && $request->isSecure()) {

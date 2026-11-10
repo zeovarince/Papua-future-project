@@ -8,19 +8,12 @@ use App\Core\Response;
 use App\Core\Seo;
 use App\Models\Post;
 use App\Models\Program;
-use App\Models\Batch;
 
 final class SeoController
 {
     public function sitemap(): Response
     {
         $paths = ['/', '/tentang', '/program', '/berita', '/bergabung', '/kontak'];
-        if (Batch::openByType('INTERN') !== []) {
-            $paths[] = '/bergabung/internship';
-        }
-        if (Batch::openByType('VOLUNTEER') !== []) {
-            $paths[] = '/bergabung/relawan';
-        }
         foreach (Program::publicList() as $program) {
             $paths[] = '/program/' . rawurlencode((string) $program['slug']);
         }
